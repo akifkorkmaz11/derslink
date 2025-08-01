@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Derslink - Online Eğitim Platformu</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="images/logo3.png" alt="Derslink Logo" class="nav-logo-img"/>
+                <span>Derslink</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#home" class="nav-link">Ana Sayfa</a>
+                <a href="#programs" class="nav-link">Programlar</a>
+                <a href="#advantages" class="nav-link">Avantajlar</a>
+                <a href="#contact" class="nav-link">İletişim</a>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="gradient-text">Online Eğitimde</span>
+                    <br>Yeni Dönem Başlıyor!
+                </h1>
+                <p class="hero-subtitle">
+                    LGS, YKS, KPSS ve Lise Takviye için uzman eğitmenlerle 4-5 kişilik butik sınıflarda canlı eğitim
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="scrollToSection('programs')">
+                        <i class="fas fa-rocket"></i>
+                        Programları Keşfet
+                    </button>
+                    <button class="btn btn-secondary" onclick="scrollToSection('contact')">
+                        <i class="fas fa-phone"></i>
+                        Hemen Başla
+                    </button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="floating-cards">
+                    <div class="card card-1">
+                        <i class="fas fa-users"></i>
+                        <span>4-5 Kişilik Sınıflar</span>
+                    </div>
+                    <div class="card card-2">
+                        <i class="fas fa-laptop"></i>
+                        <span>Canlı Dersler</span>
+                    </div>
+                    <div class="card card-3">
+                        <i class="fas fa-star"></i>
+                        <span>Uzman Kadro</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+    </section>
+
+    <!-- Programs Section -->
+    <section id="programs" class="programs">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Eğitim Programlarımız</h2>
+                <p class="section-subtitle">Her seviyeye uygun özel programlar</p>
+            </div>
+            
+            <div class="programs-grid">
+                <!-- LGS Program -->
+                <div class="program-card lgs-card">
+                    <div class="program-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3 class="program-title">📘 LGS Hazırlık</h3>
+                    <h4 class="program-subtitle">Hayalindeki Liseye, Kaliteli Eğitimle Birlikte Ulaş!</h4>
+                    <ul class="program-features">
+                        <li><i class="fas fa-check"></i> LGS'ye hazırlıkta başarı, doğru rehberlik ve sistemli çalışmayla mümkündür</li>
+                        <li><i class="fas fa-check"></i> LGS öğrencilerine özel olarak hazırlanmış online sınıflarda eğitim</li>
+                        <li><i class="fas fa-check"></i> Canlı derslerle öğretmenle birebir iletişimde kalırsın</li>
+                        <li><i class="fas fa-check"></i> Sadece 4-5 kişilik sınıflar</li>
+                        <li><i class="fas fa-check"></i> Ortaokul destek grupları (5, 6, 7. sınıf)</li>
+                    </ul>
+                </div>
+
+                <!-- YKS Program -->
+                <div class="program-card yks-card">
+                    <div class="program-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h3 class="program-title">🎓 YKS – TYT – AYT</h3>
+                    <h4 class="program-subtitle">Hedefin Üniversiteyse, Yol Arkadaşın Ders Link!</h4>
+                    <ul class="program-features">
+                        <li><i class="fas fa-check"></i> TYT ve AYT hazırlık sürecinde bireysel farklılıklara göre planlanan programlar</li>
+                        <li><i class="fas fa-check"></i> Uzman branş öğretmenlerinden canlı dersler</li>
+                        <li><i class="fas fa-check"></i> Deneme analizleri ve bireysel takip sistemi</li>
+                        <li><i class="fas fa-check"></i> Sadece 4-5 kişilik butik sınıflar</li>
+                        <li><i class="fas fa-check"></i> Evinden çıkmadan kaliteli ders imkânı</li>
+                    </ul>
+                </div>
+
+                <!-- Lise Takviye -->
+                <div class="program-card lise-card">
+                    <div class="program-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <h3 class="program-title">🎯 Lise Takviye</h3>
+                    <h4 class="program-subtitle">Her Sınıf Seviyesi İçin Akademik Destek Burada!</h4>
+                    <ul class="program-features">
+                        <li><i class="fas fa-check"></i> 9, 10 ve 11. sınıf öğrencilerine özel destek programları</li>
+                        <li><i class="fas fa-check"></i> Sınavlara ve okul derslerine hazırlık</li>
+                        <li><i class="fas fa-check"></i> Rahat ve güvenli sınıf ortamı</li>
+                        <li><i class="fas fa-check"></i> Eksik konular tespit edilip, öğrenciye özel stratejilerle kapatılıyor</li>
+                        <li><i class="fas fa-check"></i> Online ve birebir ilgi temelli yapı</li>
+                    </ul>
+                </div>
+
+                <!-- KPSS Program -->
+                <div class="program-card kpss-card">
+                    <div class="program-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3 class="program-title">🏛 KPSS Hazırlık</h3>
+                    <h4 class="program-subtitle">Kamuya Açılan Kapı, Bilinçli ve Etkili Hazırlıkla Açılır!</h4>
+                    <ul class="program-features">
+                        <li><i class="fas fa-check"></i> KPSS Lise, Önlisans ve Lisans düzeylerine özel sınıflar</li>
+                        <li><i class="fas fa-check"></i> Üniversite hocaları ve deneyimli KPSS uzmanları</li>
+                        <li><i class="fas fa-check"></i> Genel yetenek-genel kültür ve alan bilgisi düzeyinde çalışmalar</li>
+                        <li><i class="fas fa-check"></i> 4-5 kişilik özel gruplarla verimli dersler</li>
+                        <li><i class="fas fa-check"></i> Her yerden erişim imkânı</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advantages Section -->
+    <section id="advantages" class="advantages">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title"> Derslink'in Avantajlarıyla Tanışın</h2>
+                <p class="section-subtitle">Neden bizi tercih etmelisiniz?</p>
+            </div>
+            
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Zamandan Tasarruf</h3>
+                    <p>Trafikte vakit kaybetmeden, dersine hemen başla.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3>Her Yer Sınıfın</h3>
+                    <p>Şehir fark etmeksizin evinden eğitim al.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Az Kişilik Sınıflar</h3>
+                    <p>4-5 kişilik gruplarla daha etkin ve kaliteli öğrenme.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Uzman Eğitmenler</h3>
+                    <p>Alanında tecrübeli, sınav odaklı çalışan kadro.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-mouse-pointer"></i>
+                    </div>
+                    <h3>Sade Arayüz</h3>
+                    <p>Tek tıkla canlı dersteyiz, kolay erişim.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <h3>Mevsim Şartları Engel Değil</h3>
+                    <p>Soğuk, sıcak, yağmur, kar… eğitim her yerde!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h2>Hemen İletişime Geçin!</h2>
+                    <p>Hayalinizdeki başarıya ulaşmak için bizimle iletişime geçin. Uzman ekibimiz size en uygun programı önerecektir.</p>
+                    
+                    <div class="contact-methods">
+                        <div class="contact-method">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <h4>Telefon</h4>
+                                <p>+90 (XXX) XXX XX XX</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>E-posta</h4>
+                                <p>derslinknet@gmail.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <i class="fab fa-whatsapp"></i>
+                            <div>
+                                <h4>WhatsApp</h4>
+                                <p>+90 (XXX) XXX XX XX</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form">
+                    <form action="https://formsubmit.co/derslinknet@gmail.com" method="POST">
+                        <div class="form-group">
+                            <input type="text" name="name" placeholder="Adınız Soyadınız" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" name="email" placeholder="E-posta Adresiniz" required>
+                        </div>
+                        <div class="form-group">
+                            <select name="program" required>
+                                <option value="">Program Seçiniz</option>
+                                <option value="LGS Hazırlık">LGS Hazırlık</option>
+                                <option value="YKS - TYT - AYT">YKS - TYT - AYT</option>
+                                <option value="Lise Takviye">Lise Takviye</option>
+                                <option value="KPSS Hazırlık">KPSS Hazırlık</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <textarea name="message" placeholder="Mesajınız (Opsiyonel)" rows="4"></textarea>
+                        </div>
+                        <input type="hidden" name="_subject" value="Ders Link - Yeni İletişim Formu">
+                        <input type="hidden" name="_template" value="table">
+                        <input type="hidden" name="_captcha" value="false">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Bilgi Al
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <!-- <img src="images/logo3.png" alt="Derslink Logo" class="nav-logo-img" /> -->
+                    <span>Derslink</span>
+                </div>
+                <p>&copy; 2025 Derslink. Tüm hakları saklıdır.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 
