@@ -10,11 +10,10 @@ const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
 // CORS ve middleware
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['https://your-vercel-domain.vercel.app'],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['https://derslink-dc4fxrsx0-akif-korkmazs-projects.vercel.app'],
     credentials: true
 }));
 app.use(express.json());
@@ -95,7 +94,7 @@ app.post('/api/payment/initialize', async (req, res) => {
             currency: Iyzipay.CURRENCY.TRY,
             basketId: 'B' + Date.now(),
             paymentGroup: Iyzipay.PAYMENT_GROUP.PRODUCT,
-            callbackUrl: process.env.CALLBACK_URL || 'https://your-domain.vercel.app/api/payment/success',
+            callbackUrl: process.env.CALLBACK_URL || 'https://derslink-dc4fxrsx0-akif-korkmazs-projects.vercel.app/api/payment/success',
             enabledInstallments: [1],
             buyer: {
                 id: 'BY' + Date.now(),
@@ -226,9 +225,5 @@ app.post('/api/payment/success', async (req, res) => {
     }
 });
 
-// Server başlat
-app.listen(PORT, () => {
-    console.log(`🚀 Server ${PORT} portunda çalışıyor`);
-});
-
+// Vercel için sadece app export et
 module.exports = app;
