@@ -290,6 +290,30 @@
         </div>
     </div>
 
+    <!-- Authentication Check Script -->
+    <script>
+        // Admin paneli authentication kontrolü
+        (function() {
+            // Session storage'dan admin authentication kontrolü
+            const isAdminAuthenticated = sessionStorage.getItem('adminAuthenticated');
+            const adminToken = sessionStorage.getItem('adminToken');
+            
+            console.log('🔐 Admin authentication kontrolü...');
+            console.log('Admin authenticated:', isAdminAuthenticated);
+            console.log('Admin token:', adminToken);
+            
+            // Eğer admin authentication yoksa ana sayfaya yönlendir
+            if (!isAdminAuthenticated || !adminToken) {
+                console.log('❌ Admin authentication bulunamadı, ana sayfaya yönlendiriliyor...');
+                alert('Admin paneline erişim için giriş yapmanız gerekiyor.');
+                window.location.href = '/';
+                return;
+            }
+            
+            console.log('✅ Admin authentication başarılı');
+        })();
+    </script>
+    
     <!-- Scripts -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="/js/supabase-config.js"></script>
