@@ -4,27 +4,47 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/css/(.*)",
-      "dest": "/server.js"
+      "dest": "/public/css/$1"
     },
     {
       "src": "/js/(.*)",
-      "dest": "/server.js"
+      "dest": "/public/js/$1"
     },
     {
       "src": "/images/(.*)",
-      "dest": "/server.js"
+      "dest": "/public/images/$1"
+    },
+    {
+      "src": "/admin",
+      "dest": "/public/admin.html"
+    },
+    {
+      "src": "/admin-lgs",
+      "dest": "/public/admin-lgs.html"
+    },
+    {
+      "src": "/admin-yks",
+      "dest": "/public/admin-yks.html"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/public/dashboard.html"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
     },
     {
       "src": "/api/(.*)",
-      "dest": "/server.js"
-    },
-    {
-      "src": "/(.*)",
       "dest": "/server.js"
     }
   ]
