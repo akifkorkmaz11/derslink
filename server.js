@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const Iyzipay = require('iyzipay');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -30,6 +31,32 @@ console.log('✅ Iyzico SDK hazırlandı');
 // Test endpoint
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Server çalışıyor!' });
+});
+
+// Static files serve
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
+app.use('/js', express.static(path.join(__dirname, 'public/js')));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
+
+// HTML dosyaları için public klasörü
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/admin.html'));
+});
+
+app.get('/admin-lgs', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/admin-lgs.html'));
+});
+
+app.get('/admin-yks', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/admin-yks.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/dashboard.html'));
 });
 
 // Kullanıcının program bilgisini güncelle
