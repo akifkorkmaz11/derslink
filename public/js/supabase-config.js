@@ -262,14 +262,29 @@ const UserService = {
                 .from('classes')
                 .select('*')
                 .eq('program_type', mainProgram)
-                .eq('schedule_type', scheduleType)
                 .lt('current_enrollment', 'max_capacity')
                 .eq('status', 'active');
             
-            // YKS için alan filtresi ekle
+            // Schedule type'ı düzelt (YKS için farklı format)
+            let correctedScheduleType = scheduleType;
+            if (mainProgram === 'YKS') {
+                if (scheduleType === 'WEEKDAY') correctedScheduleType = 'hafta_ici';
+                else if (scheduleType === 'WEEKEND') correctedScheduleType = 'hafta_sonu';
+                else if (scheduleType === 'MIXED') correctedScheduleType = 'karma';
+            }
+            
+            query = query.eq('schedule_type', correctedScheduleType);
+            console.log('🔍 Schedule type düzeltildi:', { original: scheduleType, corrected: correctedScheduleType });
+            
+            // YKS için alan filtresi ekle (program_type sütunu kullan)
             if (mainProgram === 'YKS' && yksField) {
-                query = query.eq('yks_field', yksField);
-                console.log('🔍 YKS alan filtresi eklendi:', yksField);
+                let correctedYksField = yksField;
+                if (yksField === 'sayisal') correctedYksField = 'Sayısal';
+                else if (yksField === 'sozel') correctedYksField = 'Sözel';
+                else if (yksField === 'esit-agirlik') correctedYksField = 'Eşit Ağırlık';
+                
+                query = query.eq('program_type', correctedYksField);
+                console.log('🔍 YKS alan filtresi eklendi:', { original: yksField, corrected: correctedYksField });
             }
             
             query = query.order('current_enrollment', { ascending: true }).limit(1);
@@ -291,15 +306,28 @@ const UserService = {
                 console.log('⚠️ Uygun sınıf bulunamadı, yeni sınıf oluşturuluyor...');
                 
                 // Yeni sınıf oluştur
+                let correctedScheduleType = scheduleType;
+                if (mainProgram === 'YKS') {
+                    if (scheduleType === 'WEEKDAY') correctedScheduleType = 'hafta_ici';
+                    else if (scheduleType === 'WEEKEND') correctedScheduleType = 'hafta_sonu';
+                    else if (scheduleType === 'MIXED') correctedScheduleType = 'karma';
+                }
+                
+                let correctedYksField = null;
+                if (mainProgram === 'YKS' && yksField) {
+                    if (yksField === 'sayisal') correctedYksField = 'Sayısal';
+                    else if (yksField === 'sozel') correctedYksField = 'Sözel';
+                    else if (yksField === 'esit-agirlik') correctedYksField = 'Eşit Ağırlık';
+                }
+                
                 const newClassName = mainProgram === 'YKS' 
-                    ? `${mainProgram}-${yksField}-${scheduleType}-${Date.now().toString().slice(-4)}`
-                    : `${mainProgram}-${scheduleType}-${Date.now().toString().slice(-4)}`;
+                    ? `${mainProgram}-${correctedYksField}-${correctedScheduleType}-${Date.now().toString().slice(-4)}`
+                    : `${mainProgram}-${correctedScheduleType}-${Date.now().toString().slice(-4)}`;
                 
                 const newClassData = {
                     class_name: newClassName,
-                    program_type: mainProgram,
-                    schedule_type: scheduleType,
-                    yks_field: mainProgram === 'YKS' ? yksField : null,
+                    program_type: mainProgram === 'YKS' ? correctedYksField : mainProgram,
+                    schedule_type: correctedScheduleType,
                     max_capacity: 5,
                     current_enrollment: 1,
                     status: 'active'
