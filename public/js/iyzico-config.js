@@ -475,24 +475,18 @@ window.IyzicoPaymentService = {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    cardNumber: cardNumber,
+                    cardHolder: cardHolder,
+                    cardExpiry: cardExpiry,
+                    cardCvv: cardCvv,
                     amount: paymentData.amount,
-                    customerInfo: {
-                        firstName: paymentData.firstName,
-                        lastName: paymentData.lastName,
-                        email: paymentData.email,
-                        phone: paymentData.phone
-                    },
-                    programInfo: {
-                        title: paymentData.selectedProgram.title,
-                        price: paymentData.selectedProgram.price,
-                        mainProgram: paymentData.mainProgram
-                    },
-                    cardInfo: {
-                        cardNumber: cardNumber,
-                        cardHolder: cardHolder,
-                        expiry: cardExpiry,
-                        cvv: cardCvv
-                    }
+                    firstName: paymentData.firstName,
+                    lastName: paymentData.lastName,
+                    email: paymentData.email,
+                    phone: paymentData.phone,
+                    mainProgram: paymentData.mainProgram,
+                    subProgram: paymentData.subProgram,
+                    programTitle: paymentData.programTitle
                 })
             });
             

@@ -255,5 +255,72 @@ app.get('/api/admin/teacher-schedules', async (req, res) => {
     }
 });
 
+// Ödeme işleme endpoint'i
+app.post('/api/payment/process-card', async (req, res) => {
+    try {
+        console.log('💳 Ödeme işlemi başlatılıyor...');
+        console.log('📝 Ödeme verileri:', req.body);
+        
+        const { 
+            cardNumber, 
+            cardHolder, 
+            cardExpiry, 
+            cardCvv, 
+            amount,
+            firstName,
+            lastName,
+            email,
+            phone,
+            mainProgram,
+            subProgram,
+            programTitle
+        } = req.body;
+        
+        // Validasyon
+        if (!cardNumber || !cardHolder || !cardExpiry || !cardCvv || !amount) {
+            return res.status(400).json({
+                success: false,
+                error: 'Eksik kart bilgileri'
+            });
+        }
+        
+        // Test kartı kontrolü (sadece test amaçlı)
+        if (cardNumber.replace(/\s/g, '') === '5528790000000008' && cardCvv === '973') {
+            console.log('✅ Test kartı ile ödeme başarılı');
+            
+            // Başarılı ödeme sonucu
+            return res.json({
+                success: true,
+                message: 'Ödeme başarıyla tamamlandı',
+                paymentId: 'test_' + Date.now(),
+                conversationId: 'conv_' + Date.now(),
+                amount: amount,
+                userData: {
+                    firstName,
+                    lastName,
+                    email,
+                    phone,
+                    mainProgram,
+                    subProgram,
+                    programTitle
+                }
+            });
+        } else {
+            console.log('❌ Geçersiz kart bilgileri');
+            return res.status(400).json({
+                success: false,
+                error: 'Geçersiz kart bilgileri. Test kartı kullanın: 5528 7900 0000 0008 / 973'
+            });
+        }
+        
+    } catch (error) {
+        console.error('❌ Ödeme işlemi hatası:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Ödeme işlemi sırasında hata oluştu'
+        });
+    }
+});
+
 // Vercel için export
 module.exports = app;
