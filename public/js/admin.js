@@ -1590,21 +1590,10 @@ async function assignToClass(userId) {
     try {
         const adminService = new AdminService();
         
-        // Hangi sayfada olduğumuzu kontrol et
-        const currentPage = window.location.pathname;
-        const currentUrl = window.location.href;
-        let programFilter = null;
+        // LGS admin paneli için sabit filtreleme
+        const programFilter = 'LGS';
         
-        console.log('Current page:', currentPage);
-        console.log('Current URL:', currentUrl);
-        
-        if (currentPage.includes('admin-lgs.html') || currentUrl.includes('admin-lgs.html')) {
-            programFilter = 'LGS';
-        } else if (currentPage.includes('admin-yks.html') || currentUrl.includes('admin-yks.html')) {
-            programFilter = 'YKS';
-        }
-        
-        console.log('Program filtresi:', programFilter);
+        console.log('LGS Program filtresi:', programFilter);
         
         const userResult = await adminService.getAllUsers(programFilter);
         const classResult = await adminService.getAllClasses(programFilter);

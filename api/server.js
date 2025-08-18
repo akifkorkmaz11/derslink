@@ -56,10 +56,23 @@ app.get('/api/admin/users', async (req, res) => {
         const { program } = req.query;
         console.log('Program filtresi:', program);
         
-        // Basit query ile başla
+        // Kullanıcıları ve sınıf kayıtlarını birlikte getir
         let query = supabase
             .from('users')
-            .select('*')
+            .select(`
+                *,
+                class_enrollments (
+                    id,
+                    enrollment_date,
+                    status,
+                    classes (
+                        id,
+                        class_name,
+                        program_type,
+                        schedule_type
+                    )
+                )
+            `)
             .order('created_at', { ascending: false });
         
         // Program bazlı filtreleme
