@@ -64,3 +64,4 @@ logs
 *.tmp
 *.temp
 
+.vercel
