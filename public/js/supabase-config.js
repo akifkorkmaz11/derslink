@@ -261,7 +261,6 @@ const UserService = {
             let query = supabase
                 .from('classes')
                 .select('*')
-                .eq('program_type', mainProgram)
                 .lt('current_enrollment', 'max_capacity')
                 .eq('status', 'active');
             
@@ -285,6 +284,9 @@ const UserService = {
                 
                 query = query.eq('program_type', correctedYksField);
                 console.log('🔍 YKS alan filtresi eklendi:', { original: yksField, corrected: correctedYksField });
+            } else {
+                // LGS için program_type filtresi
+                query = query.eq('program_type', mainProgram);
             }
             
             query = query.order('current_enrollment', { ascending: true }).limit(1);
@@ -328,6 +330,7 @@ const UserService = {
                     class_name: newClassName,
                     program_type: mainProgram === 'YKS' ? correctedYksField : mainProgram,
                     schedule_type: correctedScheduleType,
+                    program: mainProgram, // YKS sınıfları için program sütunu
                     max_capacity: 5,
                     current_enrollment: 1,
                     status: 'active'
