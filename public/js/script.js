@@ -435,6 +435,7 @@ function updateSubPrograms() {
     
     if (mainProgram && programData[mainProgram]) {
         subProgramGroup.style.display = 'block';
+        subProgramSelect.required = true;
         subProgramSelect.innerHTML = '<option value="">Program türü seçiniz</option>';
         
         Object.keys(programData[mainProgram].programs).forEach(key => {
@@ -449,6 +450,8 @@ function updateSubPrograms() {
         subProgramSelect.onchange = updateProgramDetails;
     } else {
         subProgramGroup.style.display = 'none';
+        subProgramSelect.required = false;
+        subProgramSelect.value = '';
         programDetails.style.display = 'none';
     }
 }
@@ -1141,6 +1144,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (registerForm) {
         registerForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Form submit öncesi gizli alanların required özelliğini kaldır
+            const subProgramSelect = document.getElementById('registerSubProgram');
+            const yksFieldSelect = document.getElementById('registerYKSField');
+            
+            // Gizli alanların required özelliğini geçici olarak kaldır
+            if (subProgramSelect && subProgramSelect.style.display === 'none') {
+                subProgramSelect.required = false;
+            }
+            if (yksFieldSelect && yksFieldSelect.style.display === 'none') {
+                yksFieldSelect.required = false;
+            }
             
             const firstName = document.getElementById('registerFirstName').value;
             const lastName = document.getElementById('registerLastName').value;
