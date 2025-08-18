@@ -64,9 +64,9 @@ app.get('/api/admin/users', async (req, res) => {
         
         // Program bazlı filtreleme
         if (program) {
-            // enrolled_program veya selected_program alanına göre filtrele
-            query = query.or(`enrolled_program.eq.${program},selected_program.eq.${program}`);
-            console.log(`🎯 ${program} programı için kullanıcılar filtreleniyor (enrolled_program = ${program} OR selected_program = ${program})`);
+            // Sadece enrolled_program alanına göre filtrele (selected_program sütunu yok)
+            query = query.eq('enrolled_program', program);
+            console.log(`🎯 ${program} programı için kullanıcılar filtreleniyor (enrolled_program = ${program})`);
         }
         
         console.log('Query çalıştırılıyor...');
