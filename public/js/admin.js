@@ -1592,11 +1592,15 @@ async function assignToClass(userId) {
         
         // Hangi sayfada olduğumuzu kontrol et
         const currentPage = window.location.pathname;
+        const currentUrl = window.location.href;
         let programFilter = null;
         
-        if (currentPage.includes('admin-lgs.html')) {
+        console.log('Current page:', currentPage);
+        console.log('Current URL:', currentUrl);
+        
+        if (currentPage.includes('admin-lgs.html') || currentUrl.includes('admin-lgs.html')) {
             programFilter = 'LGS';
-        } else if (currentPage.includes('admin-yks.html')) {
+        } else if (currentPage.includes('admin-yks.html') || currentUrl.includes('admin-yks.html')) {
             programFilter = 'YKS';
         }
         
