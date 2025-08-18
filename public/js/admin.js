@@ -1096,17 +1096,10 @@ async function loadUserList(adminService) {
 // Öğretmen programlarını yükle
 async function loadTeacherSchedules(adminService) {
     try {
-        console.log('Öğretmen programları yükleniyor...');
+        console.log('LGS Öğretmen programları yükleniyor...');
         
-        // Hangi sayfada olduğumuzu kontrol et
-        const currentPage = window.location.pathname;
-        let programFilter = null;
-        
-        if (currentPage.includes('admin-lgs.html')) {
-            programFilter = 'LGS';
-        } else if (currentPage.includes('admin-yks.html')) {
-            programFilter = 'YKS';
-        }
+        // LGS programı için filtreleme
+        const programFilter = 'LGS';
         
         // Önce tüm öğretmenleri al
         const teachersResult = await adminService.getAllTeachers();
@@ -1116,18 +1109,9 @@ async function loadTeacherSchedules(adminService) {
         }
         
         // Sonra programları al
-        const schedulesResult = await adminService.getTeacherSchedule();
+        const schedulesResult = await adminService.getTeacherSchedule(programFilter);
         
-        console.log('Tüm programlar:', schedulesResult.schedules?.length || 0);
-        
-        // Program bazlı filtreleme
-        if (schedulesResult.success && schedulesResult.schedules && programFilter) {
-            const originalCount = schedulesResult.schedules.length;
-            schedulesResult.schedules = schedulesResult.schedules.filter(schedule => 
-                schedule.program === programFilter
-            );
-            console.log(`${programFilter} programları filtrelendi: ${originalCount} → ${schedulesResult.schedules.length}`);
-        }
+        console.log('LGS programları:', schedulesResult.schedules?.length || 0);
         
         const teacherScheduleGrid = document.getElementById('teacherScheduleGrid');
         if (!teacherScheduleGrid) {
@@ -1184,10 +1168,10 @@ async function loadTeacherSchedules(adminService) {
         
         teacherScheduleGrid.innerHTML = teacherCards.join('');
         
-        console.log('Öğretmen programları yüklendi');
+        console.log('LGS Öğretmen programları yüklendi');
     } catch (error) {
-        console.error('Öğretmen programları yükleme hatasi:', error);
-        showNotification('Öğretmen programları yüklenirken hata oluştu', 'error');
+        console.error('LGS Öğretmen programları yükleme hatasi:', error);
+        showNotification('LGS Öğretmen programları yüklenirken hata oluştu', 'error');
     }
 }
 
