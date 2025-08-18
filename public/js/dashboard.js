@@ -587,9 +587,7 @@ async function loadClassSchedule() {
 function updateProgramInfo(program) {
     const programNames = {
         'LGS': 'LGS Hazırlık Programı',
-        'YKS': 'YKS - TYT - AYT Programı',
-        'LISE': 'Lise Takviye Programı',
-        'KPSS': 'KPSS Hazırlık Programı'
+        'YKS': 'YKS - TYT - AYT Programı'
     };
     
     document.getElementById('userProgramDisplay').innerHTML = `

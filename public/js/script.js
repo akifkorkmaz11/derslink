@@ -417,48 +417,6 @@ const programData = {
                 }
             }
         }
-    },
-    LISE: {
-        name: "🎯 Lise Takviye",
-        programs: {
-            "hafta-ici": {
-                title: "🎯 Hafta İçi Takviye Programı",
-                days: "Pazartesi, Çarşamba, Cuma (her gün 2h)",
-                time: "17:20",
-                hours: "6 saat/hafta",
-                price: "₺5,000/ay",
-                description: "9, 10 ve 11. sınıf öğrencilerine özel destek programları."
-            },
-            "hafta-sonu": {
-                title: "🎯 Hafta Sonu Takviye Programı",
-                days: "Cumartesi (4h), Pazar (4h)",
-                time: "09:30",
-                hours: "8 saat/hafta",
-                price: "₺5,000/ay",
-                description: "Sınavlara ve okul derslerine hazırlık için hafta sonu programı."
-            }
-        }
-    },
-    KPSS: {
-        name: "🏛 KPSS Hazırlık",
-        programs: {
-            "hafta-ici": {
-                title: "🏛 Hafta İçi KPSS Programı",
-                days: "Salı, Perşembe (her gün 3h)",
-                time: "18:00",
-                hours: "6 saat/hafta",
-                price: "₺5,000/ay",
-                description: "Kamuya açılan kapı, bilinçli ve etkili hazırlıkla açılır!"
-            },
-            "hafta-sonu": {
-                title: "🏛 Hafta Sonu KPSS Programı",
-                days: "Cumartesi (5h), Pazar (5h)",
-                time: "09:30",
-                hours: "10 saat/hafta",
-                price: "₺5,000/ay",
-                description: "Yoğun KPSS hazırlık süreci için hafta sonu programı."
-            }
-        }
     }
 };
 
