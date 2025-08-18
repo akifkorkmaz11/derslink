@@ -1181,11 +1181,23 @@ async function loadLGSStatistics(adminService) {
 async function loadClassList(adminService) {
     try {
         console.log('Sınıf listesi yükleniyor...');
+        
+        // Hangi sayfada olduğumuzu kontrol et
+        const currentPage = window.location.pathname;
+        let programFilter = null;
+        
+        if (currentPage.includes('admin-lgs.html')) {
+            programFilter = 'LGS';
+        } else if (currentPage.includes('admin-yks.html')) {
+            programFilter = 'YKS';
+        }
+        
         const result = await adminService.getAllClasses();
         
-        // LGS sınıflarını filtrele
-        if (result.success && result.classes) {
-            result.classes = result.classes.filter(cls => cls.program === 'LGS');
+        // Program bazlı sınıfları filtrele
+        if (result.success && result.classes && programFilter) {
+            result.classes = result.classes.filter(cls => cls.program === programFilter);
+            console.log(`${programFilter} sınıfları filtrelendi: ${result.classes.length} sınıf`);
         }
 
         console.log('Sınıf sonucu:', result);
@@ -1202,7 +1214,10 @@ async function loadClassList(adminService) {
                         classListContainer.appendChild(classCard);
                     });
                 } else {
-                    classListContainer.innerHTML = '<p style="text-align: center; color: #6b7280;">Henüz sınıf bulunmuyor</p>';
+                    const noClassesMessage = programFilter 
+                        ? `<p style="text-align: center; color: #6b7280;">Bu programda henüz sınıf bulunmuyor</p>`
+                        : `<p style="text-align: center; color: #6b7280;">Henüz sınıf bulunmuyor</p>`;
+                    classListContainer.innerHTML = noClassesMessage;
                 }
             }
             
@@ -1279,67 +1294,65 @@ async function loadUserList(adminService) {
 
 // Öğretmen programlarını yükle
 async function loadTeacherSchedules(adminService) {
-            try {
-                console.log('Öğretmen programları yükleniyor...');
-                
-                // Önce tüm öğretmenleri al
-                const teachersResult = await adminService.getAllTeachers();
-                if (!teachersResult.success) {
-                    console.error('Öğretmenler alınamadı:', teachersResult.error);
-                    return;
-                }
-                
-                // Sonra programları al
-                const schedulesResult = await adminService.getTeacherSchedule();
-                
-                console.log('Tüm programlar:', schedulesResult.schedules?.length || 0);
-                console.log('Program dağılımı:', schedulesResult.schedules?.reduce((acc, schedule) => {
-                    acc[schedule.program] = (acc[schedule.program] || 0) + 1;
-                    return acc;
-                }, {}) || {});
-                
-                // LGS programlarını filtrele
-                if (schedulesResult.success && schedulesResult.schedules) {
-                    const originalCount = schedulesResult.schedules.length;
-                    const lgsSchedules = schedulesResult.schedules.filter(schedule => schedule.program === 'LGS');
-                    const yksSchedules = schedulesResult.schedules.filter(schedule => schedule.program === 'YKS');
-                    const nullSchedules = schedulesResult.schedules.filter(schedule => !schedule.program);
-                    
-                    console.log(`Program dağılımı: LGS=${lgsSchedules.length}, YKS=${yksSchedules.length}, NULL=${nullSchedules.length}`);
-                    
-                    // LGS programlarını göster, NULL programları da dahil et (eski veriler için)
-                    schedulesResult.schedules = schedulesResult.schedules.filter(schedule => 
-                        schedule.program === 'LGS' || !schedule.program
-                    );
-                    
-                    console.log(`LGS programları filtrelendi: ${originalCount} → ${schedulesResult.schedules.length}`);
-                }
+    try {
+        console.log('Öğretmen programları yükleniyor...');
         
-        const teacherScheduleGrid = document.getElementById('teacherScheduleGrid');
-        if (!teacherScheduleGrid) {
-            console.error('teacherScheduleGrid elementi bulunamadı');
+        // Hangi sayfada olduğumuzu kontrol et
+        const currentPage = window.location.pathname;
+        let programFilter = null;
+        
+        if (currentPage.includes('admin-lgs.html')) {
+            programFilter = 'LGS';
+        } else if (currentPage.includes('admin-yks.html')) {
+            programFilter = 'YKS';
+        }
+        
+        // Önce tüm öğretmenleri al
+        const teachersResult = await adminService.getAllTeachers();
+        if (!teachersResult.success) {
+            console.error('Öğretmenler alınamadı:', teachersResult.error);
             return;
         }
         
-                        // Aktif öğretmenleri filtrele (LGS öğretmenleri)
-                const allActiveTeachers = teachersResult.teachers.filter(teacher => teacher.status === 'active');
-                console.log('Tüm aktif öğretmenler:', allActiveTeachers.length);
-                
-                const activeTeachers = allActiveTeachers.filter(teacher => 
-                    (teacher.specialties?.toLowerCase().includes('lgs') || 
-                     teacher.branch?.toLowerCase().includes('lgs')) &&
-                    !teacher.branch?.toLowerCase().includes('tyt') &&
-                    !teacher.branch?.toLowerCase().includes('ayt')
-                );
-                
-                console.log('LGS öğretmenleri:', activeTeachers.length);
-                console.log('LGS öğretmen listesi:', activeTeachers.map(t => t.name));
-                
-                // Eğer LGS öğretmeni yoksa, tüm aktif öğretmenleri göster (geçici)
-                if (activeTeachers.length === 0) {
-                    console.log('LGS öğretmeni bulunamadı, tüm aktif öğretmenler gösteriliyor');
-                    activeTeachers = allActiveTeachers;
-                }
+        // Sonra programları al
+        const schedulesResult = await adminService.getTeacherSchedule();
+        
+        console.log('Tüm programlar:', schedulesResult.schedules?.length || 0);
+        
+        // Program bazlı filtreleme
+        if (schedulesResult.success && schedulesResult.schedules && programFilter) {
+            const originalCount = schedulesResult.schedules.length;
+            schedulesResult.schedules = schedulesResult.schedules.filter(schedule => 
+                schedule.program === programFilter
+            );
+            console.log(`${programFilter} programları filtrelendi: ${originalCount} → ${schedulesResult.schedules.length}`);
+        }
+        
+        const teacherScheduleGrid = document.getElementById('teacherScheduleGrid');
+        if (!teacherScheduleGrid) {
+            console.error('teacherScheduleGrid elementi bulunamadi');
+            return;
+        }
+        
+        // Aktif öğretmenleri filtrele (LGS öğretmenleri)
+        const allActiveTeachers = teachersResult.teachers.filter(teacher => teacher.status === 'active');
+        console.log('Tüm aktif öğretmenler:', allActiveTeachers.length);
+        
+        const activeTeachers = allActiveTeachers.filter(teacher => 
+            (teacher.specialties?.toLowerCase().includes('lgs') || 
+             teacher.branch?.toLowerCase().includes('lgs')) &&
+            !teacher.branch?.toLowerCase().includes('tyt') &&
+            !teacher.branch?.toLowerCase().includes('ayt')
+        );
+        
+        console.log('LGS öğretmenleri:', activeTeachers.length);
+        console.log('LGS öğretmen listesi:', activeTeachers.map(t => t.name));
+        
+        // Eğer LGS öğretmeni yoksa, tüm aktif öğretmenleri göster (geçici)
+        if (activeTeachers.length === 0) {
+            console.log('LGS öğretmeni bulunamadı, tüm aktif öğretmenler gösteriliyor');
+            activeTeachers = allActiveTeachers;
+        }
         
         if (activeTeachers.length === 0) {
             teacherScheduleGrid.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">Henüz öğretmen bulunmuyor</div>';
