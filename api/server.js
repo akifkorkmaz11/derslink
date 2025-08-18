@@ -170,25 +170,24 @@ app.get('/api/admin/teachers', async (req, res) => {
     }
 });
 
-// Öğretmen programlarını getir (program bazlı filtreleme ile)
+// Öğretmen programlarını getir (class_schedules üzerinden)
 app.get('/api/admin/teacher-schedules', async (req, res) => {
     try {
         console.log('📅 Admin öğretmen programları isteği:', req.query);
-        
+
         const { program } = req.query;
         let query = supabase
-            .from('teacher_schedules')
+            .from('class_schedules')
             .select('*')
             .order('teacher_name');
-        
-        // Program bazlı filtreleme
+
         if (program) {
             query = query.eq('program', program);
             console.log(`🎯 ${program} programı için öğretmen programları filtreleniyor`);
         }
-        
+
         const { data: schedules, error } = await query;
-        
+
         if (error) {
             console.error('❌ Öğretmen programları alınamadı:', error);
             return res.status(500).json({
@@ -196,7 +195,7 @@ app.get('/api/admin/teacher-schedules', async (req, res) => {
                 error: error.message
             });
         }
-        
+
         console.log(`✅ ${schedules?.length || 0} öğretmen programı alındı`);
         res.json({
             success: true,

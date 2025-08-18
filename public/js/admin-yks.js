@@ -943,7 +943,7 @@ async function loadStatistics(adminService) {
             programFilter = 'YKS';
         }
         
-        const classesResult = await adminService.getAllClasses();
+        const classesResult = await adminService.getAllClasses(programFilter);
         const usersResult = await adminService.getAllUsers(programFilter);
         const teachersResult = await adminService.getAllTeachers();
         
@@ -1027,11 +1027,11 @@ async function loadLGSStatistics(adminService) {
 async function loadClassList(adminService) {
     try {
         console.log('Sınıf listesi yükleniyor...');
-        const result = await adminService.getAllClasses();
+        const result = await adminService.getAllClasses('YKS');
         
         // YKS sınıflarını filtrele
         if (result.success && result.classes) {
-            result.classes = result.classes.filter(cls => cls.program === 'YKS');
+            // Backend'de zaten filtrelenmiş, ek filtreleme gerekmez
         }
 
         console.log('Sınıf sonucu:', result);
@@ -1136,7 +1136,7 @@ async function loadTeacherSchedules(adminService) {
                 }
                 
                 // Sonra programları al
-                const schedulesResult = await adminService.getTeacherSchedule();
+                const schedulesResult = await adminService.getTeacherSchedule('YKS');
                 
                 console.log('Tüm programlar:', schedulesResult.schedules?.length || 0);
                 console.log('Program dağılımı:', schedulesResult.schedules?.reduce((acc, schedule) => {

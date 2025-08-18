@@ -945,7 +945,7 @@ async function loadStatistics(adminService) {
             programFilter = 'YKS';
         }
         
-        const classesResult = await adminService.getAllClasses();
+        const classesResult = await adminService.getAllClasses(programFilter);
         const usersResult = await adminService.getAllUsers(programFilter);
         
         console.log('Sınıf sonucu:', classesResult);
