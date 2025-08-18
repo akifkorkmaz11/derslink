@@ -360,10 +360,7 @@ window.IyzicoPaymentService = {
                 <form class="card-form" id="customCardForm">
                     <div class="form-group">
                         <label class="form-label">Kart Numarası</label>
-                        <input type="text" class="form-input" id="cardNumber" placeholder="5528 7900 0000 0008" maxlength="19" required>
-                        <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
-                            💡 Test kartı: 5528790000000008 (Mastercard)
-                        </small>
+                        <input type="text" class="form-input" id="cardNumber" placeholder="Kart numaranızı girin" maxlength="19" required>
                     </div>
                     
                     <div class="form-group">
@@ -378,10 +375,7 @@ window.IyzicoPaymentService = {
                         </div>
                         <div class="form-group">
                             <label class="form-label">CVV</label>
-                            <input type="text" class="form-input" id="cardCvv" placeholder="973" maxlength="4" required>
-                            <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
-                                💡 Test CVV: 973
-                            </small>
+                            <input type="text" class="form-input" id="cardCvv" placeholder="CVV" maxlength="4" required>
                         </div>
                     </div>
                     
