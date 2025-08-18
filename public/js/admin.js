@@ -2064,6 +2064,9 @@ function openClassAssignmentModal(user, classes) {
     console.log(`Filtrelenmiş sınıflar (${programFilter}):`, filteredClasses);
     
     // Kullanıcının mevcut sınıfını bul
+    console.log('Kullanıcı verisi:', user);
+    console.log('Kullanıcının class_enrollments:', user.class_enrollments);
+    
     const currentEnrollment = user.class_enrollments?.find(e => e.status === 'active');
     console.log('Kullanıcının mevcut kayıtları:', user.class_enrollments);
     console.log('Aktif kayıt:', currentEnrollment);
