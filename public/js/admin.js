@@ -22,49 +22,93 @@ class AdminService {
         this.supabase = window.supabase;
     }
 
-    // Tum siniflari getir
-    async getAllClasses() {
+    // Tüm sınıfları getir (program bazlı filtreleme ile)
+    async getAllClasses(program = null) {
         try {
-            console.log('Tum siniflar getiriliyor...');
+            console.log('Sınıflar getiriliyor...', { program });
             
-            if (!this.supabase) {
-                console.error('Supabase client bulunamadi');
-                return { success: false, error: 'Supabase client bulunamadi' };
+            // API endpoint'ini kullan
+            const url = program ? `/api/admin/classes?program=${program}` : '/api/admin/classes';
+            const response = await fetch(url);
+            const result = await response.json();
+            
+            if (!result.success) {
+                console.error('Sınıflar alınamadı:', result.error);
+                return { success: false, error: result.error };
             }
             
-            const { data, error } = await this.supabase
-                .from('classes')
-                .select(`
-                    *,
-                    class_schedules (
-                        id,
-                        day_of_week,
-                        start_time,
-                        end_time,
-                        subject,
-                        teacher_name
-                    ),
-                    class_enrollments (
-                        user_id,
-                        enrollment_date,
-                        status,
-                        users (
-                            name,
-                            email
-                        )
-                    )
-                `)
-                .order('class_name');
-
-            if (error) {
-                console.error('Siniflar alinamadi:', error);
-                return { success: false, error: error.message };
-            }
-
-            console.log('Siniflar alindi:', data);
-            return { success: true, classes: data || [] };
+            console.log('Sınıflar alındı:', result.classes?.length || 0);
+            return { success: true, classes: result.classes || [] };
         } catch (error) {
-            console.error('Sinif listesi hatasi:', error);
+            console.error('Sınıf listesi hatası:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Tüm kullanıcıları getir (program bazlı filtreleme ile)
+    async getAllUsers(program = null) {
+        try {
+            console.log('Kullanıcılar getiriliyor...', { program });
+            
+            // API endpoint'ini kullan
+            const url = program ? `/api/admin/users?program=${program}` : '/api/admin/users';
+            const response = await fetch(url);
+            const result = await response.json();
+            
+            if (!result.success) {
+                console.error('Kullanıcılar alınamadı:', result.error);
+                return { success: false, error: result.error };
+            }
+            
+            console.log('Kullanıcılar alındı:', result.users?.length || 0);
+            return { success: true, users: result.users || [] };
+        } catch (error) {
+            console.error('Kullanıcı listesi hatası:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Tüm öğretmenleri getir
+    async getAllTeachers() {
+        try {
+            console.log('Öğretmenler getiriliyor...');
+            
+            // API endpoint'ini kullan
+            const response = await fetch('/api/admin/teachers');
+            const result = await response.json();
+            
+            if (!result.success) {
+                console.error('Öğretmenler alınamadı:', result.error);
+                return { success: false, error: result.error };
+            }
+            
+            console.log('Öğretmenler alındı:', result.teachers?.length || 0);
+            return { success: true, teachers: result.teachers || [] };
+        } catch (error) {
+            console.error('Öğretmen listesi hatası:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Öğretmen programlarını getir (program bazlı filtreleme ile)
+    async getTeacherSchedule(program = null) {
+        try {
+            console.log('Öğretmen programları getiriliyor...', { program });
+            
+            // API endpoint'ini kullan
+            const url = program ? `/api/admin/teacher-schedules?program=${program}` : '/api/admin/teacher-schedules';
+            const response = await fetch(url);
+            const result = await response.json();
+            
+            if (!result.success) {
+                console.error('Öğretmen programları alınamadı:', result.error);
+                return { success: false, error: result.error };
+            }
+            
+            console.log('Öğretmen programları alındı:', result.schedules?.length || 0);
+            return { success: true, schedules: result.schedules || [] };
+        } catch (error) {
+            console.error('Öğretmen programları hatası:', error);
             return { success: false, error: error.message };
         }
     }
@@ -443,154 +487,6 @@ class AdminService {
         }
     }
 
-    // Tum kullaniciları getir
-    async getAllUsers(programFilter = null) {
-        try {
-            console.log('Kullanicilar getiriliyor...', { programFilter });
-            
-            if (!this.supabase) {
-                console.error('Supabase client bulunamadi');
-                return { success: false, error: 'Supabase client bulunamadi' };
-            }
-            
-            // Debug: Payments tablosunu kontrol et
-            if (programFilter) {
-                console.log('Payments tablosu kontrol ediliyor...');
-                const { data: paymentsData, error: paymentsError } = await this.supabase
-                    .from('payments')
-                    .select('*')
-                    .eq('payment_status', 'success');
-                
-                if (paymentsError) {
-                    console.error('Payments tablosu kontrol hatasi:', paymentsError);
-                } else {
-                    console.log('Payments verileri:', paymentsData);
-                }
-            }
-            
-            let query = this.supabase
-                .from('users')
-                .select('*')
-                .order('name');
-            
-            // Program filtresi uygula (eğer enrolled_program sütunu varsa)
-            if (programFilter) {
-                try {
-                    // Program filtresi uygula, NULL degerleri de dahil et
-                    query = query.or(`enrolled_program.eq.${programFilter},enrolled_program.is.null`);
-                    console.log('Program filtresi uygulandi:', programFilter);
-                } catch (filterError) {
-                    console.warn('enrolled_program sütunu bulunamadi, filtreleme atlaniyor:', filterError);
-                    // Filtreleme olmadan devam et
-                }
-            }
-            
-            const { data, error } = await query;
-
-            if (error) {
-                // Eger enrolled_program sütunu yoksa, filtreleme olmadan tekrar deneniyor...
-                if (error.message && error.message.includes('enrolled_program')) {
-                    console.warn('enrolled_program sütunu bulunamadi, filtreleme olmadan tekrar deneniyor...');
-                    
-                    const { data: allData, error: allError } = await this.supabase
-                        .from('users')
-                        .select('*')
-                        .order('name');
-                    
-                    if (allError) {
-                        console.error('Kullanicilar alinamadi:', allError);
-                        return { success: false, error: allError.message };
-                    }
-                    
-                    console.log('Tum kullanicilar alindi (filtreleme olmadan):', allData);
-                    return { success: true, users: allData || [] };
-                }
-                
-                console.error('Kullanicilar alinamadi:', error);
-                console.error('Hata detaylari:', {
-                    message: error.message,
-                    details: error.details,
-                    hint: error.hint,
-                    code: error.code
-                });
-                return { success: false, error: error.message };
-            }
-
-            // Her kullanici icin payments tablosundan program bilgisini al
-            const usersWithPrograms = await Promise.all(
-                data.map(async (user) => {
-                    try {
-                        const { data: paymentData, error: paymentError } = await this.supabase
-                            .from('payments')
-                            .select('program, payment_status')
-                            .eq('user_id', user.id)
-                            .eq('payment_status', 'success')
-                            .order('created_at', { ascending: false })
-                            .limit(1);
-
-                        if (paymentError) {
-                            console.warn(`Kullanici ${user.email} için odeme bilgisi alinamadi:`, paymentError);
-                        }
-
-                        return {
-                            ...user,
-                            selected_program: paymentData && paymentData.length > 0 ? paymentData[0].program : null
-                        };
-                    } catch (error) {
-                        console.warn(`Kullanici ${user.email} için program bilgisi alinirken hata:`, error);
-                        return {
-                            ...user,
-                            selected_program: null
-                        };
-                    }
-                })
-            );
-
-            // Her kullanici icin sinif kayitlarini al
-            const usersWithEnrollments = await Promise.all(
-                usersWithPrograms.map(async (user) => {
-                    try {
-                        const { data: enrollmentData, error: enrollmentError } = await this.supabase
-                            .from('class_enrollments')
-                            .select(`
-                                class_id,
-                                enrollment_date,
-                                status,
-                                classes (
-                                    class_name,
-                                    program_type,
-                                    schedule_type,
-                                    program
-                                )
-                            `)
-                            .eq('user_id', user.id);
-
-                        if (enrollmentError) {
-                            console.warn(`Kullanici ${user.email} için sinif kayitlarini alinamadi:`, enrollmentError);
-                        }
-
-                        return {
-                            ...user,
-                            class_enrollments: enrollmentData || []
-                        };
-                    } catch (error) {
-                        console.warn(`Kullanici ${user.email} için sinif kayitlarini alinirken hata:`, error);
-                        return {
-                            ...user,
-                            class_enrollments: []
-                        };
-                    }
-                })
-            );
-
-            console.log('Kullanicilar alindi:', usersWithEnrollments);
-            return { success: true, users: usersWithEnrollments || [] };
-        } catch (error) {
-            console.error('Kullanici listesi hatasi:', error);
-            return { success: false, error: error.message };
-        }
-    }
-
     // Ders programı degisikligi olustur
     async createScheduleChange(changeData) {
         try {
@@ -647,66 +543,6 @@ class AdminService {
             return { success: true, class: data };
         } catch (error) {
             console.error('Kullanici sinifi getirme hatasi:', error);
-            return { success: false, error: error.message };
-        }
-    }
-
-    // Ogretmen programını getir
-    async getTeacherSchedule(teacherName) {
-        try {
-            console.log('Ogretmen programı getiriliyor:', teacherName);
-            
-            let query = this.supabase
-                .from('class_schedules')
-                .select(`
-                    *,
-                    classes (
-                        class_name,
-                        program_type,
-                        schedule_type
-                    )
-                `)
-                .order('day_of_week')
-                .order('start_time');
-
-            if (teacherName) {
-                query = query.eq('teacher_name', teacherName);
-            }
-
-            const { data, error } = await query;
-
-            if (error) {
-                console.error('Ogretmen programı alinamadi:', error);
-                return { success: false, error: error.message };
-            }
-
-            console.log('Ogretmen programı alindi:', data);
-            return { success: true, schedules: data || [] };
-        } catch (error) {
-            console.error('Ogretmen programı hatasi:', error);
-            return { success: false, error: error.message };
-        }
-    }
-
-    // Tum ogretmenleri getir
-    async getAllTeachers() {
-        try {
-            console.log('Tum ogretmenler getiriliyor...');
-            
-            const { data, error } = await this.supabase
-                .from('teachers')
-                .select('*')
-                .order('name');
-
-            if (error) {
-                console.error('Ogretmenler alinamadi:', error);
-                return { success: false, error: error.message };
-            }
-
-            console.log('Ogretmenler alindi:', data);
-            return { success: true, teachers: data || [] };
-        } catch (error) {
-            console.error('Ogretmen listesi hatasi:', error);
             return { success: false, error: error.message };
         }
     }
@@ -1192,14 +1028,8 @@ async function loadClassList(adminService) {
             programFilter = 'YKS';
         }
         
-        const result = await adminService.getAllClasses();
+        const result = await adminService.getAllClasses(programFilter);
         
-        // Program bazlı sınıfları filtrele
-        if (result.success && result.classes && programFilter) {
-            result.classes = result.classes.filter(cls => cls.program === programFilter);
-            console.log(`${programFilter} sınıfları filtrelendi: ${result.classes.length} sınıf`);
-        }
-
         console.log('Sınıf sonucu:', result);
         
         if (result.success) {
@@ -1223,14 +1053,14 @@ async function loadClassList(adminService) {
             
             console.log('Sınıf listesi yüklendi');
         } else {
-            console.error('Sınıf listesi alinamadi:', result.error);
+            console.error('Sınıf listesi alınamadı:', result.error);
             const classListContainer = document.getElementById('classList');
             if (classListContainer) {
                 classListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Sınıf listesi yüklenemedi: ' + result.error + '</p>';
             }
         }
     } catch (error) {
-        console.error('Sınıf listesi yükleme hatasi:', error);
+        console.error('Sınıf listesi yükleme hatası:', error);
         const classListContainer = document.getElementById('classList');
         if (classListContainer) {
             classListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Sınıf listesi yüklenirken hata oluştu</p>';
