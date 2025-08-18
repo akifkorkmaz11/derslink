@@ -1617,12 +1617,18 @@ async function deleteUser(userId, userName) {
 
 // Kullanıcıyı sınıfa ata
 async function assignToClass(userId) {
-    console.log('Kullanıcı sınıfa atanıyor:', userId);
+    console.log('YKS Kullanıcı sınıfa atanıyor:', userId);
     
     try {
         const adminService = new AdminService();
-        const userResult = await adminService.getAllUsers();
-        const classResult = await adminService.getAllClasses();
+        
+        // YKS programı için filtreleme
+        const programFilter = 'YKS';
+        
+        console.log('Program filtresi:', programFilter);
+        
+        const userResult = await adminService.getAllUsers(programFilter);
+        const classResult = await adminService.getAllClasses(programFilter);
         
         if (!userResult.success || !classResult.success) {
             showNotification('Kullanıcı veya sınıf bilgileri alınamadı', 'error');
@@ -1635,9 +1641,10 @@ async function assignToClass(userId) {
             return;
         }
         
+        console.log(`${programFilter} sınıfları:`, classResult.classes);
         openClassAssignmentModal(user, classResult.classes);
     } catch (error) {
-        console.error('Sınıf atama hatasi:', error);
+        console.error('YKS Sınıf atama hatasi:', error);
         showNotification('Sınıf atama açılırken hata oluştu', 'error');
     }
 }

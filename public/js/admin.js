@@ -1589,8 +1589,21 @@ async function assignToClass(userId) {
     
     try {
         const adminService = new AdminService();
-        const userResult = await adminService.getAllUsers();
-        const classResult = await adminService.getAllClasses();
+        
+        // Hangi sayfada olduğumuzu kontrol et
+        const currentPage = window.location.pathname;
+        let programFilter = null;
+        
+        if (currentPage.includes('admin-lgs.html')) {
+            programFilter = 'LGS';
+        } else if (currentPage.includes('admin-yks.html')) {
+            programFilter = 'YKS';
+        }
+        
+        console.log('Program filtresi:', programFilter);
+        
+        const userResult = await adminService.getAllUsers(programFilter);
+        const classResult = await adminService.getAllClasses(programFilter);
         
         if (!userResult.success || !classResult.success) {
             showNotification('Kullanıcı veya sınıf bilgileri alınamadı', 'error');
@@ -1603,6 +1616,7 @@ async function assignToClass(userId) {
             return;
         }
         
+        console.log(`${programFilter} sınıfları:`, classResult.classes);
         openClassAssignmentModal(user, classResult.classes);
     } catch (error) {
         console.error('Sınıf atama hatasi:', error);
