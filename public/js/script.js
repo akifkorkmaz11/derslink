@@ -1710,9 +1710,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 showNotification('Admin girişi başarılı!', 'success');
                 closeAdminModal();
                 
-                // Redirect to admin panel
+                // Redirect to admin panel - DÜZELTME: admin-lgs -> admin
                 setTimeout(() => {
-                    window.location.href = 'admin-lgs';
+                    window.location.href = 'admin';
                 }, 1000);
             } else {
                 showNotification('Hatalı e-posta veya şifre!', 'error');
