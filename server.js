@@ -33,6 +33,40 @@ app.get('/api/test', (req, res) => {
     res.json({ message: 'Server çalışıyor!' });
 });
 
+// Admin test endpoint
+app.get('/api/admin/test', async (req, res) => {
+    try {
+        console.log('🧪 Admin test endpoint çağrıldı');
+        
+        // Supabase bağlantısını test et
+        const { data, error } = await supabase
+            .from('users')
+            .select('count')
+            .limit(1);
+        
+        if (error) {
+            console.error('❌ Supabase bağlantı hatası:', error);
+            return res.status(500).json({
+                success: false,
+                error: 'Supabase bağlantı hatası: ' + error.message
+            });
+        }
+        
+        console.log('✅ Supabase bağlantısı başarılı');
+        res.json({
+            success: true,
+            message: 'Admin API çalışıyor',
+            supabaseConnected: true
+        });
+    } catch (error) {
+        console.error('❌ Admin test hatası:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Test hatası: ' + error.message
+        });
+    }
+});
+
 // Static files serve
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
@@ -238,17 +272,12 @@ app.get('/api/admin/users', async (req, res) => {
         console.log('👥 Admin kullanıcı listesi isteği:', req.query);
         
         const { program } = req.query;
+        console.log('Program filtresi:', program);
+        
+        // Basit query ile başla
         let query = supabase
             .from('users')
-            .select(`
-                *,
-                class_enrollments (
-                    id,
-                    enrollment_date,
-                    status,
-                    class_id
-                )
-            `)
+            .select('*')
             .order('created_at', { ascending: false });
         
         // Program bazlı filtreleme
@@ -257,6 +286,7 @@ app.get('/api/admin/users', async (req, res) => {
             console.log(`🎯 ${program} programı için kullanıcılar filtreleniyor`);
         }
         
+        console.log('Query çalıştırılıyor...');
         const { data: users, error } = await query;
         
         if (error) {
@@ -276,7 +306,7 @@ app.get('/api/admin/users', async (req, res) => {
         console.error('❌ Kullanıcı listesi hatası:', error);
         res.status(500).json({
             success: false,
-            error: 'Sunucu hatası'
+            error: 'Sunucu hatası: ' + error.message
         });
     }
 });
@@ -287,28 +317,12 @@ app.get('/api/admin/classes', async (req, res) => {
         console.log('🏫 Admin sınıf listesi isteği:', req.query);
         
         const { program } = req.query;
+        console.log('Program filtresi:', program);
+        
+        // Basit query ile başla
         let query = supabase
             .from('classes')
-            .select(`
-                *,
-                class_schedules (
-                    id,
-                    day_of_week,
-                    start_time,
-                    end_time,
-                    subject,
-                    teacher_name
-                ),
-                class_enrollments (
-                    user_id,
-                    enrollment_date,
-                    status,
-                    users (
-                        name,
-                        email
-                    )
-                )
-            `)
+            .select('*')
             .order('class_name');
         
         // Program bazlı filtreleme
@@ -317,6 +331,7 @@ app.get('/api/admin/classes', async (req, res) => {
             console.log(`🎯 ${program} programı için sınıflar filtreleniyor`);
         }
         
+        console.log('Query çalıştırılıyor...');
         const { data: classes, error } = await query;
         
         if (error) {
@@ -336,7 +351,7 @@ app.get('/api/admin/classes', async (req, res) => {
         console.error('❌ Sınıf listesi hatası:', error);
         res.status(500).json({
             success: false,
-            error: 'Sunucu hatası'
+            error: 'Sunucu hatası: ' + error.message
         });
     }
 });
