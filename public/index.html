@@ -127,8 +127,18 @@
                 
                 <div class="form-group" id="subProgramGroup" style="display: none;">
                     <label for="registerSubProgram">Program Türü Seçin</label>
-                    <select id="registerSubProgram" name="subProgram" required>
+                    <select id="registerSubProgram" name="subProgram" required onchange="updateYKSField()">
                         <option value="">Program türü seçiniz</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="yksFieldGroup" style="display: none;">
+                    <label for="registerYKSField">YKS Alan Seçin</label>
+                    <select id="registerYKSField" name="yksField" required>
+                        <option value="">Alan seçiniz</option>
+                        <option value="sayisal">🔢 Sayısal</option>
+                        <option value="sozel">📚 Sözel</option>
+                        <option value="esit-agirlik">⚖️ Eşit Ağırlık</option>
                     </select>
                 </div>
                 

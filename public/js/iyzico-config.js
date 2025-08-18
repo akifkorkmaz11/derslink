@@ -486,7 +486,8 @@ window.IyzicoPaymentService = {
                     phone: paymentData.phone,
                     mainProgram: paymentData.mainProgram,
                     subProgram: paymentData.subProgram,
-                    programTitle: paymentData.programTitle
+                    programTitle: paymentData.programTitle,
+                    yksField: paymentData.yksField
                 })
             });
             

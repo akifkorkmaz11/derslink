@@ -426,6 +426,12 @@ function updateSubPrograms() {
     const subProgramGroup = document.getElementById('subProgramGroup');
     const subProgramSelect = document.getElementById('registerSubProgram');
     const programDetails = document.getElementById('programDetails');
+    const yksFieldGroup = document.getElementById('yksFieldGroup');
+    
+    // YKS alan seçimini gizle
+    if (yksFieldGroup) {
+        yksFieldGroup.style.display = 'none';
+    }
     
     if (mainProgram && programData[mainProgram]) {
         subProgramGroup.style.display = 'block';
@@ -444,6 +450,19 @@ function updateSubPrograms() {
     } else {
         subProgramGroup.style.display = 'none';
         programDetails.style.display = 'none';
+    }
+}
+
+// YKS alan seçimi güncelle
+function updateYKSField() {
+    const mainProgram = document.getElementById('registerProgram').value;
+    const subProgram = document.getElementById('registerSubProgram').value;
+    const yksFieldGroup = document.getElementById('yksFieldGroup');
+    
+    if (mainProgram === 'YKS' && subProgram) {
+        yksFieldGroup.style.display = 'block';
+    } else {
+        yksFieldGroup.style.display = 'none';
     }
 }
 
@@ -501,7 +520,7 @@ function validateEmail(email) {
 }
 
 // Önce ödeme yap, sonra kayıt işlemini gerçekleştir
-async function initializePaymentFirst(firstName, lastName, email, phone, mainProgram, subProgram, selectedProgram, password) {
+async function initializePaymentFirst(firstName, lastName, email, phone, mainProgram, subProgram, selectedProgram, password, yksField = '') {
     const submitBtn = document.getElementById('registerSubmitBtn');
     const originalText = submitBtn.innerHTML;
     
@@ -547,7 +566,8 @@ async function initializePaymentFirst(firstName, lastName, email, phone, mainPro
             phone: phone,
             selectedProgram: selectedProgram,
             mainProgram: mainProgram,
-            scheduleType: subProgram // Hafta içi, hafta sonu, karma bilgisi
+            scheduleType: subProgram, // Hafta içi, hafta sonu, karma bilgisi
+            yksField: yksField // YKS alan bilgisi
         };
         
         // Gerçek Iyzico ödeme sistemini başlat
@@ -728,7 +748,8 @@ async function handleModernPaymentSuccess() {
             lastName: formData.lastName,
             phone: formData.phone,
             selectedProgram: formData.selectedProgram,
-            mainProgram: formData.mainProgram
+            mainProgram: formData.mainProgram,
+            yksField: formData.yksField // YKS alan bilgisi
         };
         
         // UserService ile kayıt işlemi
@@ -753,7 +774,8 @@ async function handleModernPaymentSuccess() {
             await window.UserService.assignUserToClass(
                 registrationResult.user.id, 
                 formData.mainProgram, 
-                formData.scheduleType
+                formData.scheduleType,
+                formData.yksField
             );
             console.log('✅ Kullanıcı sınıfa otomatik atandı');
         } catch (classAssignmentError) {
@@ -1122,12 +1144,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const phone = document.getElementById('registerPhone').value;
             const mainProgram = document.getElementById('registerProgram').value;
             const subProgram = document.getElementById('registerSubProgram').value;
+            const yksField = document.getElementById('registerYKSField')?.value || '';
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('registerConfirmPassword').value;
             
             // Validation
             if (!firstName || !lastName || !email || !phone || !mainProgram || !subProgram || !password || !confirmPassword) {
                 showNotification('Lütfen tüm alanları doldurun.', 'error');
+                return;
+            }
+            
+            // YKS için alan seçimi kontrolü
+            if (mainProgram === 'YKS' && !yksField) {
+                showNotification('YKS için alan seçimi yapmanız gerekiyor.', 'error');
                 return;
             }
             
@@ -1145,10 +1174,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedProgram = programData[mainProgram].programs[subProgram];
             const price = selectedProgram.price;
             
-            // Show registration confirmation
-            if (confirm(`Seçtiğiniz program: ${selectedProgram.title}\nFiyat: ${price}\n\nÖdeme işlemi yapılacak, başarılı ödeme sonrası kayıt tamamlanacak. Devam etmek istiyor musunuz?`)) {
+            // YKS alan bilgisini ekle
+            const confirmationMessage = mainProgram === 'YKS' 
+                ? `Seçtiğiniz program: ${selectedProgram.title}\nAlan: ${yksField}\nFiyat: ${price}\n\nÖdeme işlemi yapılacak, başarılı ödeme sonrası kayıt tamamlanacak. Devam etmek istiyor musunuz?`
+                : `Seçtiğiniz program: ${selectedProgram.title}\nFiyat: ${price}\n\nÖdeme işlemi yapılacak, başarılı ödeme sonrası kayıt tamamlanacak. Devam etmek istiyor musunuz?`;
+            
+            if (confirm(confirmationMessage)) {
                 // Initialize payment first, then registration after successful payment
-                initializePaymentFirst(firstName, lastName, email, phone, mainProgram, subProgram, selectedProgram, password);
+                initializePaymentFirst(firstName, lastName, email, phone, mainProgram, subProgram, selectedProgram, password, yksField);
             }
         });
     }

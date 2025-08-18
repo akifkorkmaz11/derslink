@@ -90,7 +90,8 @@ const UserService = {
                     name: userData.firstName + ' ' + userData.lastName,
                     phone: userData.phone,
                     password_hash: 'temp_hash_' + Date.now(),
-                    enrolled_program: userData.mainProgram
+                    enrolled_program: userData.mainProgram,
+                    yks_field: userData.yksField || null // YKS alan bilgisi
                     // created_at ve updated_at otomatik olarak Supabase tarafından doldurulacak
                 };
                 
@@ -110,7 +111,7 @@ const UserService = {
             
             // Kullanıcıyı uygun sınıfa otomatik ata
             try {
-                await this.assignUserToClass(data.user.id, userData.mainProgram, userData.scheduleType);
+                await this.assignUserToClass(data.user.id, userData.mainProgram, userData.scheduleType, userData.yksField);
             } catch (classAssignmentError) {
                 console.error('❌ Sınıf atama hatası:', classAssignmentError);
                 // Sınıf atama başarısız olsa bile kayıt işlemi devam eder
@@ -246,9 +247,9 @@ const UserService = {
     },
 
     // Kullanıcıyı uygun sınıfa otomatik ata
-    async assignUserToClass(userId, mainProgram, scheduleType) {
+    async assignUserToClass(userId, mainProgram, scheduleType, yksField = null) {
         try {
-            console.log('🎯 Kullanıcı sınıfa atanıyor:', { userId, mainProgram, scheduleType });
+            console.log('🎯 Kullanıcı sınıfa atanıyor:', { userId, mainProgram, scheduleType, yksField });
             
             // Önce uygun sınıfı bul
             let query = supabase
@@ -257,9 +258,14 @@ const UserService = {
                 .eq('program_type', mainProgram)
                 .eq('schedule_type', scheduleType)
                 .lt('current_enrollment', 'max_capacity')
-                .eq('status', 'active')
-                .order('current_enrollment', { ascending: true })
-                .limit(1);
+                .eq('status', 'active');
+            
+            // YKS için alan filtresi ekle
+            if (mainProgram === 'YKS' && yksField) {
+                query = query.eq('yks_field', yksField);
+            }
+            
+            query = query.order('current_enrollment', { ascending: true }).limit(1);
             
             const { data: availableClasses, error: classError } = await query;
             
@@ -271,11 +277,15 @@ const UserService = {
                 console.log('⚠️ Uygun sınıf bulunamadı, yeni sınıf oluşturuluyor...');
                 
                 // Yeni sınıf oluştur
-                const newClassName = `${mainProgram}-${scheduleType}-${Date.now().toString().slice(-4)}`;
+                const newClassName = mainProgram === 'YKS' 
+                    ? `${mainProgram}-${yksField}-${scheduleType}-${Date.now().toString().slice(-4)}`
+                    : `${mainProgram}-${scheduleType}-${Date.now().toString().slice(-4)}`;
+                
                 const newClassData = {
                     class_name: newClassName,
                     program_type: mainProgram,
                     schedule_type: scheduleType,
+                    yks_field: mainProgram === 'YKS' ? yksField : null,
                     max_capacity: 5,
                     current_enrollment: 1,
                     status: 'active'
@@ -387,7 +397,7 @@ const UserService = {
             
             // Kullanıcıyı uygun sınıfa otomatik ata
             try {
-                await this.assignUserToClass(userData.id, userData.mainProgram, userData.scheduleType);
+                await this.assignUserToClass(userData.id, userData.mainProgram, userData.scheduleType, userData.yksField);
             } catch (classAssignmentError) {
                 console.error('❌ Sınıf atama hatası:', classAssignmentError);
                 // Sınıf atama başarısız olsa bile kayıt işlemi devam eder
