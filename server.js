@@ -226,4 +226,6 @@ app.post('/api/payment/success', async (req, res) => {
 });
 
 // Vercel için sadece app export et
-module.exports = app;
+const serverless = require('serverless-http');
+module.exports = serverless(app);
+
