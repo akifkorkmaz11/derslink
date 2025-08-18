@@ -933,37 +933,28 @@ async function loadAdminData() {
 // İstatistikleri yükle (LGS admin paneli için)
 async function loadStatistics(adminService) {
     try {
-        console.log('İstatistikler yükleniyor...');
+        console.log('LGS İstatistikler yükleniyor...');
         
-        // Hangi sayfada olduğumuzu kontrol et
-        const currentPage = window.location.pathname;
-        let programFilter = null;
-        
-        if (currentPage.includes('admin-lgs.html')) {
-            programFilter = 'LGS';
-        } else if (currentPage.includes('admin-yks.html')) {
-            programFilter = 'YKS';
-        }
+        // LGS programı için filtreleme
+        const programFilter = 'LGS';
         
         const classesResult = await adminService.getAllClasses(programFilter);
         const usersResult = await adminService.getAllUsers(programFilter);
         
-        console.log('Sınıf sonucu:', classesResult);
-        console.log('Kullanıcı sonucu:', usersResult);
+        console.log('LGS Sınıf sonucu:', classesResult);
+        console.log('LGS Kullanıcı sonucu:', usersResult);
         
         if (classesResult.success && usersResult.success) {
-            // Program bazlı sınıf sayısını hesapla
-            const programClasses = programFilter ? 
-                classesResult.classes.filter(cls => cls.program === programFilter) : 
-                classesResult.classes;
+            // LGS programı için sınıf sayısını hesapla
+            const lgsClasses = classesResult.classes.filter(cls => cls.program === 'LGS');
             
-            const totalClasses = programClasses.length;
+            const totalClasses = lgsClasses.length;
             const totalUsers = usersResult.users.length;
-            const activeEnrollments = programClasses.reduce((total, cls) => {
+            const activeEnrollments = lgsClasses.reduce((total, cls) => {
                 return total + (cls.class_enrollments?.filter(e => e.status === 'active').length || 0);
             }, 0);
             
-            console.log('Hesaplanan istatistikler:', { totalClasses, totalUsers, activeEnrollments });
+            console.log('LGS Hesaplanan istatistikler:', { totalClasses, totalUsers, activeEnrollments });
             
             // İstatistikleri göster
             const totalClassesElement = document.getElementById('totalClasses');
@@ -974,12 +965,12 @@ async function loadStatistics(adminService) {
             if (totalUsersElement) totalUsersElement.textContent = totalUsers;
             if (totalEnrollmentsElement) totalEnrollmentsElement.textContent = activeEnrollments;
             
-            console.log('İstatistikler yüklendi');
+            console.log('LGS İstatistikler yüklendi');
         } else {
-            console.error('İstatistik verileri alinamadi:', { classesResult, usersResult });
+            console.error('LGS İstatistik verileri alinamadi:', { classesResult, usersResult });
         }
     } catch (error) {
-        console.error('İstatistik yükleme hatasi:', error);
+        console.error('LGS İstatistik yükleme hatasi:', error);
     }
 }
 
@@ -1016,21 +1007,14 @@ async function loadLGSStatistics(adminService) {
 // Sınıf listesini yükle
 async function loadClassList(adminService) {
     try {
-        console.log('Sınıf listesi yükleniyor...');
+        console.log('LGS Sınıf listesi yükleniyor...');
         
-        // Hangi sayfada olduğumuzu kontrol et
-        const currentPage = window.location.pathname;
-        let programFilter = null;
-        
-        if (currentPage.includes('admin-lgs.html')) {
-            programFilter = 'LGS';
-        } else if (currentPage.includes('admin-yks.html')) {
-            programFilter = 'YKS';
-        }
+        // LGS programı için filtreleme
+        const programFilter = 'LGS';
         
         const result = await adminService.getAllClasses(programFilter);
         
-        console.log('Sınıf sonucu:', result);
+        console.log('LGS Sınıf sonucu:', result);
         
         if (result.success) {
             const classListContainer = document.getElementById('classList');
@@ -1044,26 +1028,23 @@ async function loadClassList(adminService) {
                         classListContainer.appendChild(classCard);
                     });
                 } else {
-                    const noClassesMessage = programFilter 
-                        ? `<p style="text-align: center; color: #6b7280;">Bu programda henüz sınıf bulunmuyor</p>`
-                        : `<p style="text-align: center; color: #6b7280;">Henüz sınıf bulunmuyor</p>`;
-                    classListContainer.innerHTML = noClassesMessage;
+                    classListContainer.innerHTML = '<p style="text-align: center; color: #6b7280;">LGS programında henüz sınıf bulunmuyor</p>';
                 }
             }
             
-            console.log('Sınıf listesi yüklendi');
+            console.log('LGS Sınıf listesi yüklendi');
         } else {
-            console.error('Sınıf listesi alınamadı:', result.error);
+            console.error('LGS Sınıf listesi alınamadı:', result.error);
             const classListContainer = document.getElementById('classList');
             if (classListContainer) {
-                classListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Sınıf listesi yüklenemedi: ' + result.error + '</p>';
+                classListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">LGS Sınıf listesi yüklenemedi: ' + result.error + '</p>';
             }
         }
     } catch (error) {
-        console.error('Sınıf listesi yükleme hatası:', error);
+        console.error('LGS Sınıf listesi yükleme hatası:', error);
         const classListContainer = document.getElementById('classList');
         if (classListContainer) {
-            classListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Sınıf listesi yüklenirken hata oluştu</p>';
+            classListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">LGS Sınıf listesi yüklenirken hata oluştu</p>';
         }
     }
 }
@@ -1071,21 +1052,14 @@ async function loadClassList(adminService) {
 // Kullanıcı listesini yükle
 async function loadUserList(adminService) {
     try {
-        console.log('Kullanıcı listesi yükleniyor...');
+        console.log('LGS Kullanıcı listesi yükleniyor...');
         
-        // Hangi sayfada olduğumuzu kontrol et
-        const currentPage = window.location.pathname;
-        let programFilter = null;
-        
-        if (currentPage.includes('admin-lgs.html')) {
-            programFilter = 'LGS';
-        } else if (currentPage.includes('admin-yks.html')) {
-            programFilter = 'YKS';
-        }
+        // LGS programı için filtreleme
+        const programFilter = 'LGS';
         
         const result = await adminService.getAllUsers(programFilter);
         
-        console.log('Kullanıcı sonucu:', result);
+        console.log('LGS Kullanıcı sonucu:', result);
         
         if (result.success) {
             const userListContainer = document.getElementById('userList');
@@ -1098,26 +1072,23 @@ async function loadUserList(adminService) {
                         userListContainer.appendChild(userCard);
                     });
                 } else {
-                    const noUsersMessage = programFilter 
-                        ? `<p style="text-align: center; color: #6b7280;">Bu programda henüz kullanıcı bulunmuyor</p>`
-                        : `<p style="text-align: center; color: #6b7280;">Henüz kullanıcı bulunmuyor</p>`;
-                    userListContainer.innerHTML = noUsersMessage;
+                    userListContainer.innerHTML = '<p style="text-align: center; color: #6b7280;">LGS programında henüz kullanıcı bulunmuyor</p>';
                 }
             }
             
-            console.log('Kullanıcı listesi yüklendi');
+            console.log('LGS Kullanıcı listesi yüklendi');
         } else {
-            console.error('Kullanıcı listesi alinamadi:', result.error);
+            console.error('LGS Kullanıcı listesi alinamadi:', result.error);
             const userListContainer = document.getElementById('userList');
             if (userListContainer) {
-                userListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Kullanıcı listesi yüklenemedi: ' + result.error + '</p>';
+                userListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">LGS Kullanıcı listesi yüklenemedi: ' + result.error + '</p>';
             }
         }
     } catch (error) {
-        console.error('Kullanıcı listesi yükleme hatasi:', error);
+        console.error('LGS Kullanıcı listesi yükleme hatasi:', error);
         const userListContainer = document.getElementById('userList');
         if (userListContainer) {
-            userListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Kullanıcı listesi yüklenirken hata oluştu</p>';
+            userListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">LGS Kullanıcı listesi yüklenirken hata oluştu</p>';
         }
     }
 }
