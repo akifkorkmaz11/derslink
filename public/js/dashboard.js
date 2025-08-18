@@ -512,7 +512,36 @@ async function loadClassSchedule() {
 
         // Sınıf verisi kontrolü
         if (!userClassResult.class || !userClassResult.class.classes) {
-            console.warn('⚠️ Kullanıcının sınıf verisi eksik, fallback kullanılıyor');
+            console.warn('⚠️ Kullanıcının sınıf verisi eksik, otomatik atama deneniyor...');
+            try {
+                // Kullanıcının YKS alanını al (varsa)
+                let yksField = null;
+                const { data: userRow } = await window.supabase
+                    .from('users')
+                    .select('yks_field')
+                    .eq('id', databaseUserId)
+                    .single();
+                if (userRow && userRow.yks_field) {
+                    yksField = userRow.yks_field;
+                }
+
+                // Otomatik sınıf atama (varsayılan schedule: karma)
+                if (window.UserService && window.UserService.assignUserToClass) {
+                    console.log('🎯 Otomatik sınıf atama denemesi başlatılıyor...', { userProgram, yksField });
+                    await window.UserService.assignUserToClass(databaseUserId, userProgram, 'karma', yksField);
+
+                    // Atama sonrası tekrar sınıfı getir
+                    const retryClass = await classService.getUserClass(databaseUserId);
+                    if (retryClass && retryClass.class && retryClass.class.classes) {
+                        console.log('✅ Otomatik atama başarılı, sınıf bulundu');
+                    } else {
+                        console.warn('⚠️ Otomatik atama sonrası sınıf bulunamadı');
+                    }
+                }
+            } catch (autoAssignError) {
+                console.error('❌ Otomatik sınıf atama denemesi başarısız:', autoAssignError);
+            }
+
             const fallbackSchedule = getScheduleForProgram(userProgram, 'karma');
             updateClassCounts(fallbackSchedule);
             displayTodayClasses(fallbackSchedule);
