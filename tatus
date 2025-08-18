@@ -1,0 +1,5 @@
+[33mb458a53[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix Iyzico date format error - use YYYY-MM-DD format
+[33ma7d4b31[m Add real Iyzico integration and improve class assignment debugging
+[33mec4b48e[m Fix YKS field selection visibility - add proper event handling and form state checking
+[33mcbe930b[m Fix form validation issues for hidden fields in registration form
+[33mdf5274e[m Fix YKS field validation issue - make required only when visible
