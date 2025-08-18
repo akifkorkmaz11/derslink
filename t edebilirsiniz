@@ -200,3 +200,47 @@
                   Highlight first new line after forward-screen.
   -W  ........  --HILITE-UNREAD
                   Highlight first new line after any forward movement.
+  -x [_N[,...]]  --tabs=[_N[,...]]
+                  Set tab stops.
+  -X  ........  --no-init
+                  Don't use termcap init/deinit strings.
+  -y [_N]  ....  --max-forw-scroll=[_N]
+                  Forward scroll limit.
+  -z [_N]  ....  --window=[_N]
+                  Set size of window.
+  -" [_c[_c]]  .  --quotes=[_c[_c]]
+                  Set shell quote characters.
+  -~  ........  --tilde
+                  Don't display tildes after end of file.
+  -# [_N]  ....  --shift=[_N]
+                  Set horizontal scroll amount (0 = one half screen width).
+
+                --exit-follow-on-close
+                  Exit F command on a pipe when writer closes pipe.
+                --file-size
+                  Automatically determine the size of the input file.
+                --follow-name
+                  The F command changes files if the input file is renamed.
+                --header=[_L[,_C[,_N]]]
+                  Use _L lines (starting at line _N) and _C columns as headers.
+                --incsearch
+                  Search file as each pattern character is typed in.
+                --intr=[_C]
+                  Use _C instead of ^X to interrupt a read.
+                --lesskey-context=_t_e_x_t
+                  Use lesskey source file contents.
+                --lesskey-src=_f_i_l_e
+                  Use a lesskey source file.
+                --line-num-width=[_N]
+                  Set the width of the -N line number field to _N characters.
+                --match-shift=[_N]
+                  Show at least _N characters to the left of a search match.
+                --modelines=[_N]
+                  Read _N lines from the input file and look for vim modelines.
+                --mouse
+                  Enable mouse input.
+                --no-keypad
+                  Don't send termcap keypad init/deinit strings.
+                --no-histdups
+                  Remove duplicates from command history.
+                --no-number-headers

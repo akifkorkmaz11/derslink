@@ -596,7 +596,7 @@ async function initializePaymentFirst(firstName, lastName, email, phone, mainPro
             phone: phone,
             selectedProgram: selectedProgram,
             mainProgram: mainProgram,
-            scheduleType: subProgram, // Hafta içi, hafta sonu, karma bilgisi
+            scheduleType: subProgram.value, // Hafta içi, hafta sonu, karma bilgisi
             yksField: yksField // YKS alan bilgisi
         };
         
