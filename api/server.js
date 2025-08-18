@@ -192,7 +192,7 @@ app.get('/api/admin/teacher-schedules', async (req, res) => {
                 start_time,
                 end_time,
                 program,
-                classes!class_schedules_class_id_fkey (
+                classes (
                     class_name,
                     schedule_type
                 )
