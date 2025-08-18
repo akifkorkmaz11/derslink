@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Derslink</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Admin Panel Styles */
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .admin-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Program Selection Styles */
+        .program-selection {
+            text-align: center;
+            margin: 50px 0;
+        }
+
+        .program-selection h2 {
+            font-size: 2.5rem;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+
+        .program-selection p {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-bottom: 40px;
+        }
+
+        .program-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .program-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .program-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .program-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .program-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .lgs-card .program-icon {
+            color: #667eea;
+        }
+
+        .yks-card .program-icon {
+            color: #10b981;
+        }
+
+        .program-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+
+        .program-description {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .program-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            padding: 15px 0;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .program-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .program-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .yks-card .program-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .yks-card .program-btn:hover {
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .program-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-coming {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 10px;
+            }
+
+            .program-selection h2 {
+                font-size: 2rem;
+            }
+
+            .program-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .program-card {
+                padding: 30px 20px;
+            }
+
+            .program-icon {
+                font-size: 3rem;
+            }
+
+            .program-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">Admin Panel - Derslink</h1>
+            <button class="logout-btn" onclick="logoutAdmin()">Çıkış</button>
+        </div>
+
+        <!-- Program Seçimi -->
+        <div class="program-selection">
+            <h2>Program Yönetimi</h2>
+            <p>Yönetmek istediğiniz programı seçin</p>
+            
+            <div class="program-grid">
+                <!-- LGS Program Kartı -->
+                <div class="program-card lgs-card" onclick="openLGSAdmin()">
+                    <span class="program-status status-active">Aktif</span>
+                    <div class="program-icon">📚</div>
+                    <h3 class="program-title">LGS Programı</h3>
+                    <p class="program-description">
+                        Lise Geçiş Sınavı hazırlık programı yönetimi. 
+                        Sınıf programları, öğretmen atamaları ve öğrenci yönetimi.
+                    </p>
+                    <div class="program-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="lgsClasses">12</span>
+                            <span class="stat-label">Sınıf</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="lgsStudents">0</span>
+                            <span class="stat-label">Öğrenci</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="lgsTeachers">9</span>
+                            <span class="stat-label">Öğretmen</span>
+                        </div>
+                    </div>
+                    <button class="program-btn">LGS Paneli Aç</button>
+                </div>
+
+                <!-- YKS Program Kartı -->
+                <div class="program-card yks-card" onclick="openYKSAdmin()">
+                    <span class="program-status status-active">Aktif</span>
+                    <div class="program-icon">🎓</div>
+                    <h3 class="program-title">YKS Programı</h3>
+                    <p class="program-description">
+                        Yükseköğretim Kurumları Sınavı hazırlık programı yönetimi. 
+                        Sınıf programları, öğretmen atamaları ve öğrenci yönetimi.
+                    </p>
+                    <div class="program-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="yksClasses">0</span>
+                            <span class="stat-label">Sınıf</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="yksStudents">0</span>
+                            <span class="stat-label">Öğrenci</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="yksTeachers">0</span>
+                            <span class="stat-label">Öğretmen</span>
+                        </div>
+                    </div>
+                    <button class="program-btn">YKS Paneli Aç</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

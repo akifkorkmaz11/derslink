@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Derslink - Online Eğitim Platformu</title>
+    
+
+    
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -21,6 +24,30 @@
                 <a href="#programs" class="nav-link">Programlar</a>
                 <a href="#advantages" class="nav-link">Avantajlar</a>
                 <a href="#contact" class="nav-link">İletişim</a>
+                <div class="mobile-auth">
+                    <button class="btn btn-login" onclick="openLoginModal()">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Giriş Yap
+                    </button>
+                    <button class="btn btn-register" onclick="openRegisterModal()">
+                        <i class="fas fa-user-plus"></i>
+                        Kayıt Ol
+                    </button>
+                </div>
+            </div>
+            <div class="nav-auth">
+                <button class="btn btn-admin" onclick="openAdminModal()" style="background: #f59e0b; color: white; margin-right: 10px;">
+                    <i class="fas fa-shield-alt"></i>
+                    Admin
+                </button>
+                <button class="btn btn-login" onclick="openLoginModal()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Giriş Yap
+                </button>
+                <button class="btn btn-register" onclick="openRegisterModal()">
+                    <i class="fas fa-user-plus"></i>
+                    Kayıt Ol
+                </button>
             </div>
             <div class="hamburger">
                 <span></span>
@@ -29,6 +56,191 @@
             </div>
         </div>
     </nav>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-sign-in-alt"></i> Giriş Yap</h2>
+                <span class="close" onclick="closeLoginModal()">&times;</span>
+            </div>
+            <form class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">E-posta</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Şifre</label>
+                    <div class="password-input">
+                        <input type="password" id="loginPassword" name="password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Giriş Yap
+                </button>
+                <div class="form-footer">
+                    <a href="#" onclick="showForgotPassword()">Şifremi unuttum</a>
+                    <span>Hesabın yok mu? <a href="#" onclick="switchToRegister()">Kayıt ol</a></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Kayıt Ol</h2>
+                <span class="close" onclick="closeRegisterModal()">&times;</span>
+            </div>
+            <form class="auth-form" id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registerFirstName">Ad</label>
+                        <input type="text" id="registerFirstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerLastName">Soyad</label>
+                        <input type="text" id="registerLastName" name="lastName" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">E-posta</label>
+                    <input type="email" id="registerEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPhone">Telefon</label>
+                    <input type="tel" id="registerPhone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerProgram">Ana Program Seçin</label>
+                    <select id="registerProgram" name="program" required onchange="updateSubPrograms()">
+                        <option value="">Ana program seçiniz</option>
+                        <option value="LGS">📘 LGS Hazırlık</option>
+                        <option value="YKS">📗 YKS - TYT - AYT</option>
+                        <option value="LISE">🎯 Lise Takviye</option>
+                        <option value="KPSS">🏛 KPSS Hazırlık</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="subProgramGroup" style="display: none;">
+                    <label for="registerSubProgram">Program Türü Seçin</label>
+                    <select id="registerSubProgram" name="subProgram" required>
+                        <option value="">Program türü seçiniz</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="programDetails" style="display: none;">
+                    <div class="program-info-card">
+                        <h4 id="programTitle">Program Detayları</h4>
+                        <div class="program-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <span id="programDays">Günler</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-book"></i>
+                                <span id="programHours">Toplam Saat</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-tag"></i>
+                                <span id="programPrice">Fiyat</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Şifre</label>
+                    <div class="password-input">
+                        <input type="password" id="registerPassword" name="password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('registerPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Şifre Tekrar</label>
+                    <div class="password-input">
+                        <input type="password" id="registerConfirmPassword" name="confirmPassword" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('registerConfirmPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full" id="registerSubmitBtn">
+                    <i class="fas fa-credit-card"></i>
+                    Ödeme ile Kayıt Ol
+                </button>
+                <div class="form-footer">
+                    <span>Zaten hesabın var mı? <a href="#" onclick="switchToLogin()">Giriş yap</a></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-key"></i> Şifremi Unuttum</h2>
+                <span class="close" onclick="closeForgotPasswordModal()">&times;</span>
+            </div>
+            <form class="auth-form" id="forgotPasswordForm">
+                <p class="form-description">
+                    E-posta adresinizi girin, şifrenizi sıfırlamak için size bir bağlantı göndereceğiz.
+                </p>
+                <div class="form-group">
+                    <label for="forgotEmail">E-posta</label>
+                    <input type="email" id="forgotEmail" name="email" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-paper-plane"></i>
+                    Şifre Sıfırlama Bağlantısı Gönder
+                </button>
+                <div class="form-footer">
+                    <a href="#" onclick="switchToLogin()">Giriş sayfasına dön</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-shield-alt"></i> Admin Girişi</h2>
+                <span class="close" onclick="closeAdminModal()">&times;</span>
+            </div>
+            <form class="auth-form" id="adminForm">
+                <div class="form-group">
+                    <label for="adminEmail">E-posta</label>
+                    <input type="email" id="adminEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Şifre</label>
+                    <div class="password-input">
+                        <input type="password" id="adminPassword" name="password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('adminPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-shield-alt"></i>
+                    Admin Girişi
+                </button>
+                <div class="form-footer">
+                    <small style="color: #6b7280;">Demo: admin@derslink.com / 123456</small>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section id="home" class="hero">
@@ -49,6 +261,10 @@
                     <button class="btn btn-secondary" onclick="scrollToSection('contact')">
                         <i class="fas fa-phone"></i>
                         Hemen Başla
+                    </button>
+                    <button class="btn btn-teachers" onclick="openTeachersModal()">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        Eğitim Kadromuz
                     </button>
                 </div>
             </div>
@@ -147,6 +363,301 @@
                         <li><i class="fas fa-check"></i> 4-5 kişilik özel gruplarla verimli dersler</li>
                         <li><i class="fas fa-check"></i> Her yerden erişim imkânı</li>
                     </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Program Details Section -->
+    <section id="programDetails" class="program-schedule-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">📅 Program Detayları ve Saatleri</h2>
+                <p class="section-subtitle">Her programa özel ders saatleri ve haftalık planlar</p>
+                <p class="section-note" style="color: #6b7280; font-size: 14px; margin-top: 10px; font-style: italic;">
+                    <i class="fas fa-info-circle"></i> Tüm ücretler aylık olarak hesaplanmaktadır.
+                </p>
+            </div>
+            
+            <div class="schedule-tabs">
+                <button class="tab-btn active" onclick="showSchedule('lgs')">📘 LGS Programları</button>
+                <button class="tab-btn" onclick="showSchedule('yks')">📗 YKS Programları</button>
+            </div>
+
+            <!-- LGS Schedule -->
+            <div id="lgs-schedule" class="schedule-content active">
+                <div class="schedule-grid">
+                    <div class="schedule-card">
+                        <div class="schedule-header">
+                            <h3>🔹 Hafta İçi Programı</h3>
+                            <span class="price-tag">
+                                <span class="old-price">₺6,000</span>
+                                <span class="new-price">₺5,000</span>
+                                <span class="price-note">/ay</span>
+                            </span>
+                        </div>
+                        <div class="schedule-body">
+                            <div class="schedule-info">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar-week"></i>
+                                    <span><strong>Günler:</strong> Pazartesi - Perşembe</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span><strong>Toplam:</strong> 12 saat/hafta</span>
+                                </div>
+                            </div>
+                            <div class="weekly-schedule">
+                                <div class="day-item">
+                                    <span class="day">Pazartesi</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Salı</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Çarşamba</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Perşembe</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                            </div>
+                            <div class="schedule-description">
+                                📚 Ders çıkışı vakitlerinde kaliteli tekrar ve takviye eğitimi
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-card">
+                        <div class="schedule-header">
+                            <h3>🔹 Hafta Sonu Programı</h3>
+                            <span class="price-tag">
+                                <span class="old-price">₺6,000</span>
+                                <span class="new-price">₺5,000</span>
+                                <span class="price-note">/ay</span>
+                            </span>
+                        </div>
+                        <div class="schedule-body">
+                            <div class="schedule-info">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar-week"></i>
+                                    <span><strong>Günler:</strong> Cumartesi - Pazar</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span><strong>Toplam:</strong> 12 saat/hafta</span>
+                                </div>
+                            </div>
+                            <div class="weekly-schedule">
+                                <div class="day-item">
+                                    <span class="day">Cumartesi</span>
+                                    <span class="hours">6 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Pazar</span>
+                                    <span class="hours">6 saat</span>
+                                </div>
+                            </div>
+                            <div class="schedule-description">
+                                🌅 Sabah saatlerinde zihinsel açıklıkla yoğun sınav hazırlığı
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-card featured">
+                        <div class="schedule-header">
+                            <h3>🔹 Karma Program</h3>
+                            <span class="price-tag">
+                                <span class="old-price">₺6,000</span>
+                                <span class="new-price">₺5,000</span>
+                                <span class="price-note">/ay</span>
+                            </span>
+                            <span class="popular-badge">En Popüler</span>
+                        </div>
+                        <div class="schedule-body">
+                            <div class="schedule-info">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar-week"></i>
+                                    <span><strong>Günler:</strong> Karma</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span><strong>Toplam:</strong> 12 saat/hafta</span>
+                                </div>
+                            </div>
+                            <div class="weekly-schedule">
+                                <div class="day-item">
+                                    <span class="day">Pazartesi</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Çarşamba</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Cumartesi</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Pazar</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                            </div>
+                            <div class="schedule-description">
+                                ⚖️ Hafta içi takip + hafta sonu yoğun tekrar için ideal denge
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YKS Schedule -->
+            <div id="yks-schedule" class="schedule-content">
+                <div class="schedule-grid">
+                    <div class="schedule-card">
+                        <div class="schedule-header">
+                            <h3>🔸 Hafta İçi Programı</h3>
+                            <span class="price-tag">
+                                <span class="old-price">₺6,000</span>
+                                <span class="new-price">₺5,000</span>
+                                <span class="price-note">/ay</span>
+                            </span>
+                        </div>
+                        <div class="schedule-body">
+                            <div class="schedule-info">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar-week"></i>
+                                    <span><strong>Günler:</strong> Pazartesi - Perşembe</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span><strong>Toplam:</strong> 12 saat/hafta</span>
+                                </div>
+                            </div>
+                            <div class="weekly-schedule">
+                                <div class="day-item">
+                                    <span class="day">Pazartesi</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Salı</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Çarşamba</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Perşembe</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                            </div>
+                            <div class="schedule-description">
+                                📖 TYT-AYT için hafta içi disiplinli ve planlı hazırlık
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-card">
+                        <div class="schedule-header">
+                            <h3>🔸 Hafta Sonu Programı</h3>
+                            <span class="price-tag">
+                                <span class="old-price">₺6,000</span>
+                                <span class="new-price">₺5,000</span>
+                                <span class="price-note">/ay</span>
+                            </span>
+                        </div>
+                        <div class="schedule-body">
+                            <div class="schedule-info">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar-week"></i>
+                                    <span><strong>Günler:</strong> Cumartesi - Pazar</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span><strong>Toplam:</strong> 12 saat/hafta</span>
+                                </div>
+                            </div>
+                            <div class="weekly-schedule">
+                                <div class="day-item">
+                                    <span class="day">Cumartesi</span>
+                                    <span class="hours">6 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Pazar</span>
+                                    <span class="hours">6 saat</span>
+                                </div>
+                            </div>
+                            <div class="schedule-description">
+                                🚀 Hafta sonu yoğun tempo ile sınav odaklı eğitim
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-card featured">
+                        <div class="schedule-header">
+                            <h3>🔸 Karma Program</h3>
+                            <span class="price-tag">
+                                <span class="old-price">₺6,000</span>
+                                <span class="new-price">₺5,000</span>
+                                <span class="price-note">/ay</span>
+                            </span>
+                            <span class="popular-badge">Önerilen</span>
+                        </div>
+                        <div class="schedule-body">
+                            <div class="schedule-info">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar-week"></i>
+                                    <span><strong>Günler:</strong> Karma</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span><strong>Toplam:</strong> 12 saat/hafta</span>
+                                </div>
+                            </div>
+                            <div class="weekly-schedule">
+                                <div class="day-item">
+                                    <span class="day">Salı</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Perşembe</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Cumartesi</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                                <div class="day-item">
+                                    <span class="day">Pazar</span>
+                                    <span class="hours">3 saat</span>
+                                </div>
+                            </div>
+                            <div class="schedule-description">
+                                🧠 Aralıklı tekrar + yoğun pratik için kusursuz uyum
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cta-container">
+                <div class="cta-content">
+                    <h3>🎯 Size Uygun Programı Seçin!</h3>
+                    <p>Profesyonel eğitmenler eşliğinde başarıya giden yolculuğunuza bugün başlayın</p>
+                    <button class="btn btn-primary btn-large" onclick="openRegisterModal()">
+                        <i class="fas fa-rocket"></i> 
+                        Hemen Kayıt Ol
+                    </button>
                 </div>
             </div>
         </div>
@@ -290,15 +801,90 @@
                 </div>
                 <p>&copy; 2025 Derslink. Tüm hakları saklıdır.</p>
                 <div class="social-links">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.instagram.com/derslinknet?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
                     <a href="#"><i class="fab fa-youtube"></i></a>
-                    <a href="#"><i class="fab fa-whatsapp"></i></a>
                 </div>
             </div>
         </div>
     </footer>
 
+
+
+    <!-- Teachers Modal -->
+    <div id="teachersModal" class="modal">
+        <div class="modal-content teachers-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-chalkboard-teacher"></i> Eğitim Kadromuz</h2>
+                <span class="close" onclick="closeTeachersModal()">&times;</span>
+            </div>
+            <div class="teachers-content">
+                <div class="teachers-intro">
+                    <p>Uzman eğitmenlerimizle tanışın! Her biri alanında yıllarca deneyime sahip, öğrenci odaklı yaklaşımıyla başarıya ulaştıran eğitim kadromuz.</p>
+                </div>
+                <div class="teachers-grid" id="teachersGrid">
+                    <!-- Teachers will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Client Library -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Supabase Configuration -->
+    <script src="supabase-config.js"></script>
+    <!-- Class Service -->
+    <script src="class-service.js"></script>
+    <!-- Iyzico Configuration -->
+    <script src="iyzico-config.js"></script>
+    <!-- Main Script -->
     <script src="script.js"></script>
+    
+    <!-- Schedule Tab Functionality -->
+    <script>
+        // Schedule Tab Functionality
+        function showSchedule(programType) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Hide all schedule contents
+            document.querySelectorAll('.schedule-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Show selected schedule content
+            document.getElementById(programType + '-schedule').classList.add('active');
+        }
+    </script>
+    
+    <!-- Console Log Yakalama -->
+    <script>
+        // Override console.log to capture logs
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const capturedLogs = [];
+        
+        console.log = function(...args) {
+            capturedLogs.push({ type: 'log', message: args.join(' ') });
+            originalConsoleLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            capturedLogs.push({ type: 'error', message: args.join(' ') });
+            originalConsoleError.apply(console, args);
+        };
+        
+        // Add debug function to window
+        window.showCapturedLogs = function() {
+            console.log('📋 Yakalanan console logları:');
+            capturedLogs.forEach(logEntry => {
+                console.log(`[${logEntry.type.toUpperCase()}] ${logEntry.message}`);
+            });
+        };
+    </script>
 </body>
 </html> 
