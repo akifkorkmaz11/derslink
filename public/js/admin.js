@@ -2073,8 +2073,19 @@ function openClassAssignmentModal(user, classes) {
     
     let currentClass = null;
     if (currentEnrollment) {
+        console.log('Aktif kayıt detayları:', currentEnrollment);
+        console.log('Aktif kayıt class_id:', currentEnrollment.class_id);
+        console.log('Filtrelenmiş sınıfların ID\'leri:', filteredClasses.map(c => c.id));
+        
         currentClass = filteredClasses.find(c => c.id === currentEnrollment.class_id);
         console.log('Mevcut sınıf bulundu:', currentClass);
+        
+        // Eğer bulunamazsa, tüm sınıflarda ara
+        if (!currentClass) {
+            console.log('Filtrelenmiş sınıflarda bulunamadı, tüm sınıflarda aranıyor...');
+            // Burada tüm sınıfları kullanmak için classResult.classes kullanabiliriz
+            // Ama şimdilik sadece debug edelim
+        }
     }
     
     // Sınıf seçeneklerini oluştur
