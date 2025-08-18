@@ -63,6 +63,7 @@ app.get('/api/admin/users', async (req, res) => {
                 *,
                 class_enrollments (
                     id,
+                    class_id,
                     enrollment_date,
                     status,
                     classes (
