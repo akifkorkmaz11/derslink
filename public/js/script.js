@@ -500,6 +500,82 @@ function validateEmail(email) {
     return { valid: true };
 }
 
+// Önce ödeme yap, sonra kayıt işlemini gerçekleştir
+async function initializePaymentFirst(firstName, lastName, email, phone, mainProgram, subProgram, selectedProgram, password) {
+    const submitBtn = document.getElementById('registerSubmitBtn');
+    const originalText = submitBtn.innerHTML;
+    
+    try {
+        // Global değişkenleri temizle (güvenlik için)
+        window.pendingRegistrationData = null;
+        window.completedPaymentData = null;
+        
+        // Önce email validation yap
+        const emailValidation = validateEmail(email);
+        if (!emailValidation.valid) {
+            throw new Error(emailValidation.message);
+        }
+        
+        // Show loading state - Ödeme işlemi başlıyor
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ödeme Hazırlanıyor...';
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+        
+        console.log('💳 Ödeme işlemi başlatılıyor...');
+        
+        // ÖNCE ÖDEME YAP (Kayıt işlemi öncesi)
+        const paymentData = {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phone: phone,
+            password: password,
+            mainProgram: mainProgram,
+            subProgram: subProgram,
+            selectedProgram: selectedProgram,
+            programTitle: selectedProgram.title,
+            price: selectedProgram.price,
+            amount: extractAmount(selectedProgram.price)
+        };
+        
+        // Form verilerini global değişkende sakla (callback için)
+        window.pendingRegistrationData = {
+            email: email,
+            password: password,
+            firstName: firstName,
+            lastName: lastName,
+            phone: phone,
+            selectedProgram: selectedProgram,
+            mainProgram: mainProgram,
+            scheduleType: subProgram // Hafta içi, hafta sonu, karma bilgisi
+        };
+        
+        // Gerçek Iyzico ödeme sistemini başlat
+        console.log('💳 Gerçek Iyzico ödeme sistemi başlatılıyor...');
+        
+        if (typeof window.IyzicoPaymentService !== 'undefined') {
+            const result = await window.IyzicoPaymentService.initializePayment(paymentData);
+            
+            if (!result.success) {
+                console.error('❌ Ödeme başlatma hatası:', result.error);
+                showNotification('Ödeme başlatılamadı: ' + result.error, 'error');
+                resetButton(submitBtn, originalText);
+                return;
+            }
+            
+            console.log('✅ Ödeme başlatıldı, kullanıcı ödeme sayfasına yönlendirildi');
+        } else {
+            throw new Error('Ödeme sistemi bulunamadı');
+        }
+        
+    } catch (error) {
+        console.error('❌ Ödeme başlatma hatası:', error);
+        showNotification('Ödeme başlatılamadı: ' + error.message, 'error');
+        resetButton(submitBtn, originalText);
+    }
+}
+
+// Eski fonksiyon - artık kullanılmıyor ama referans için tutuyoruz
 async function initializeRegistration(firstName, lastName, email, phone, mainProgram, subProgram, selectedProgram, password) {
     const submitBtn = document.getElementById('registerSubmitBtn');
     const originalText = submitBtn.innerHTML;
@@ -522,7 +598,10 @@ async function initializeRegistration(firstName, lastName, email, phone, mainPro
         
         console.log('📝 Kayıt işlemi başlatılıyor...');
         
-        // ÖNCE KAYIT İŞLEMİ YAP (Para çekilmeden)
+        // ÖDEME BAŞARILI - ŞİMDİ KAYIT İŞLEMİ YAP
+        console.log('✅ Ödeme başarılı, kayıt işlemi başlatılıyor...');
+        
+        // Kayıt işlemi için veri hazırla
         const registrationData = {
             email: email,
             password: password,
@@ -545,94 +624,20 @@ async function initializeRegistration(firstName, lastName, email, phone, mainPro
             throw new Error('Kayıt işlemi başarısız: ' + (registrationResult.error || 'Bilinmeyen hata'));
         }
         
-        console.log('✅ Kayıt işlemi başarılı, ödeme işlemi başlatılıyor...');
+        console.log('✅ Kayıt işlemi başarılı tamamlandı!');
         
-        // KAYIT BAŞARILI - ŞİMDİ ÖDEME YAP
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ödeme Hazırlanıyor...';
+        // Başarılı kayıt sonrası işlemler
+        showModernSuccessState();
+        closeRegisterModal();
+        registerForm.reset();
         
-        // Create payment form data
-        const paymentData = {
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            phone: phone,
-            password: password,
-            mainProgram: mainProgram,
-            subProgram: subProgram,
-            selectedProgram: selectedProgram,
-            programTitle: selectedProgram.title,
-            price: selectedProgram.price,
-            amount: extractAmount(selectedProgram.price),
-            userId: registrationResult.user.id // Kayıt edilen kullanıcının ID'si
-        };
+        // Global değişkenleri temizle
+        window.pendingRegistrationData = null;
+        window.completedPaymentData = null;
         
-        // Gerçek Iyzico ödeme sistemini başlat
-        console.log('💳 Gerçek Iyzico ödeme sistemi başlatılıyor...');
-        
-        if (typeof window.IyzicoPaymentService !== 'undefined') {
-            try {
-                        // Form verilerini global değişkende sakla (callback için)
-        window.pendingRegistrationData = {
-            email: email,
-            password: password,
-            firstName: firstName,
-            lastName: lastName,
-            phone: phone,
-            selectedProgram: selectedProgram,
-            mainProgram: mainProgram,
-            userId: registrationResult.user.id, // Kullanıcı ID'sini de sakla
-            scheduleType: subProgram // Hafta içi, hafta sonu, karma bilgisi
-        };
-                
-                const result = await window.IyzicoPaymentService.initializePayment(paymentData);
-                
-                if (!result.success) {
-                    console.error('❌ Ödeme başlatma hatası:', result.error);
-                    showNotification('Ödeme başlatılamadı: ' + result.error, 'error');
-                    resetButton(submitBtn, originalText);
-                    
-                    // Ödeme başarısız olursa kayıt edilen kullanıcıyı sil
-                    console.log('🗑️ Ödeme başarısız, kayıt edilen kullanıcı siliniyor...');
-                    try {
-                        await window.UserService.deleteUser(email);
-                        console.log('✅ Kayıt edilen kullanıcı silindi');
-                    } catch (deleteError) {
-                        console.error('❌ Kullanıcı silme hatası:', deleteError);
-                    }
-                }
-                // Başarılı durumda modal açılacak, button reset modal kapanırken olacak
-                
-            } catch (error) {
-                console.error('❌ Ödeme sistemi hatası:', error);
-                showNotification('Ödeme sistemi hatası: ' + error.message, 'error');
-                resetButton(submitBtn, originalText);
-                
-                // Ödeme hatası olursa kayıt edilen kullanıcıyı sil
-                console.log('🗑️ Ödeme hatası, kayıt edilen kullanıcı siliniyor...');
-                try {
-                    await window.UserService.deleteUser(email);
-                    console.log('✅ Kayıt edilen kullanıcı silindi');
-                } catch (deleteError) {
-                    console.error('❌ Kullanıcı silme hatası:', deleteError);
-                }
-            }
-        } else {
-            console.error('❌ IyzicoPaymentService bulunamadı');
-            showNotification('Ödeme sistemi yüklenemedi. Sayfayı yenileyin.', 'error');
-            resetButton(submitBtn, originalText);
-            
-            // Ödeme servisi bulunamazsa kayıt edilen kullanıcıyı sil
-            console.log('🗑️ Ödeme servisi bulunamadı, kayıt edilen kullanıcı siliniyor...');
-            try {
-                await window.UserService.deleteUser(email);
-                console.log('✅ Kayıt edilen kullanıcı silindi');
-            } catch (deleteError) {
-                console.error('❌ Kullanıcı silme hatası:', deleteError);
-            }
-        }
     } catch (error) {
-        console.error('Registration/Payment error:', error);
-        showNotification('İşlem hatası: ' + error.message, 'error');
+        console.error('❌ Kayıt işlemi hatası:', error);
+        showNotification('Kayıt işlemi hatası: ' + error.message, 'error');
         resetButton(submitBtn, originalText);
     }
 }
@@ -695,13 +700,12 @@ async function handleModernPaymentSuccess() {
     isPaymentSuccessProcessing = true;
     
     try {
+        console.log('🎉 Ödeme başarılı! Kayıt işlemi başlatılıyor...');
+        
         // Modal'ı kapat
         if (window.IyzicoPaymentService && window.IyzicoPaymentService.closeModal) {
             window.IyzicoPaymentService.closeModal();
         }
-
-        // Başarı animasyonu
-        showModernSuccessAnimation();
 
         // Form verilerini al
         const formData = window.pendingRegistrationData;
@@ -711,10 +715,38 @@ async function handleModernPaymentSuccess() {
         }
 
         // Loading durumu
-        showModernLoadingState('Ödeme tamamlanıyor...');
+        showModernLoadingState('Kayıt işlemi tamamlanıyor...');
 
-        // Kullanıcı zaten kayıt edilmiş, sadece payment kaydını güncelle
-        console.log('✅ Kullanıcı zaten kayıt edilmiş, payment kaydı güncelleniyor...');
+        // ÖDEME BAŞARILI - ŞİMDİ KAYIT İŞLEMİ YAP
+        console.log('✅ Ödeme başarılı, kayıt işlemi başlatılıyor...');
+        
+        // Kayıt işlemi için veri hazırla
+        const registrationData = {
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone,
+            selectedProgram: formData.selectedProgram,
+            mainProgram: formData.mainProgram
+        };
+        
+        // UserService ile kayıt işlemi
+        if (typeof window.UserService === 'undefined') {
+            throw new Error('UserService bulunamadı');
+        }
+        
+        console.log('🔄 UserService.registerUser çağrılıyor...');
+        const registrationResult = await window.UserService.registerUser(registrationData);
+        
+        if (!registrationResult.success) {
+            throw new Error('Kayıt işlemi başarısız: ' + (registrationResult.error || 'Bilinmeyen hata'));
+        }
+        
+        console.log('✅ Kayıt işlemi başarılı tamamlandı!');
+        
+        // Kullanıcı ID'sini al
+        formData.userId = registrationResult.user.id;
         
         // Payment kaydını güncelle (kullanıcı zaten kayıt edilmiş)
         if (window.completedPaymentData && formData.userId) {
@@ -1101,9 +1133,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const price = selectedProgram.price;
             
             // Show registration confirmation
-            if (confirm(`Seçtiğiniz program: ${selectedProgram.title}\nFiyat: ${price}\n\nÖnce kayıt işlemi yapılacak, sonra ödeme alınacak. Devam etmek istiyor musunuz?`)) {
-                // Initialize registration (which will handle payment after successful registration)
-                initializeRegistration(firstName, lastName, email, phone, mainProgram, subProgram, selectedProgram, password);
+            if (confirm(`Seçtiğiniz program: ${selectedProgram.title}\nFiyat: ${price}\n\nÖdeme işlemi yapılacak, başarılı ödeme sonrası kayıt tamamlanacak. Devam etmek istiyor musunuz?`)) {
+                // Initialize payment first, then registration after successful payment
+                initializePaymentFirst(firstName, lastName, email, phone, mainProgram, subProgram, selectedProgram, password);
             }
         });
     }
