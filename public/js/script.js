@@ -447,12 +447,31 @@ function updateSubPrograms() {
         });
         
         // Add change event listener
-        subProgramSelect.onchange = updateProgramDetails;
+        subProgramSelect.onchange = function() {
+            updateProgramDetails();
+            updateYKSField(); // YKS alan seçimini güncelle
+        };
     } else {
         subProgramGroup.style.display = 'none';
         subProgramSelect.required = false;
         subProgramSelect.value = '';
         programDetails.style.display = 'none';
+    }
+}
+
+// Sayfa yüklendiğinde form durumunu kontrol et
+function checkFormState() {
+    const mainProgram = document.getElementById('registerProgram');
+    const subProgram = document.getElementById('registerSubProgram');
+    
+    if (mainProgram && mainProgram.value) {
+        console.log('🔍 Mevcut program durumu kontrol ediliyor:', mainProgram.value);
+        updateSubPrograms();
+        
+        if (subProgram && subProgram.value) {
+            console.log('🔍 Mevcut alt program durumu kontrol ediliyor:', subProgram.value);
+            updateYKSField();
+        }
     }
 }
 
@@ -463,10 +482,14 @@ function updateYKSField() {
     const yksFieldGroup = document.getElementById('yksFieldGroup');
     const yksFieldSelect = document.getElementById('registerYKSField');
     
+    console.log('🔍 updateYKSField çağrıldı:', { mainProgram, subProgram });
+    
     if (mainProgram === 'YKS' && subProgram) {
+        console.log('✅ YKS alan seçimi gösteriliyor');
         yksFieldGroup.style.display = 'block';
         yksFieldSelect.required = true;
     } else {
+        console.log('❌ YKS alan seçimi gizleniyor');
         yksFieldGroup.style.display = 'none';
         yksFieldSelect.required = false;
         yksFieldSelect.value = '';
@@ -1740,6 +1763,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check authentication state on page load
     updateUIForLoggedInUser();
+    
+    // Sayfa yüklendiğinde mevcut form durumunu kontrol et
+    checkFormState();
     
     // Admin form submission
     const adminForm = document.getElementById('adminForm');
