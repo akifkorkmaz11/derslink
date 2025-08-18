@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 
@@ -7,9 +8,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Supabase client oluştur (environment variable'lardan)
+const supabaseUrl = process.env.SUPABASE_URL || 'https://hmvhqrtuocytmtbwxuyx.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtdmhxcnR1b2N5dG10Ynd4dXl4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDU5NzE5MCwiZXhwIjoyMDUwMTczMTkwfQ.hmvhqrtuocytmtbwxuyx';
+
+console.log('🔧 Supabase URL:', supabaseUrl);
+console.log('🔧 Supabase Key length:', supabaseKey?.length || 0);
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 // Test endpoint
 app.get('/api/test', (req, res) => {
-    res.json({ message: 'API Server çalışıyor!' });
+    res.json({ 
+        message: 'API Server çalışıyor!',
+        supabaseUrl: supabaseUrl,
+        supabaseKeyLength: supabaseKey?.length || 0
+    });
 });
 
 // Health check
@@ -17,8 +31,175 @@ app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'ok', 
         timestamp: new Date().toISOString(),
-        message: 'API Health check başarılı'
+        message: 'API Health check başarılı',
+        supabaseUrl: supabaseUrl,
+        supabaseKeyLength: supabaseKey?.length || 0
     });
+});
+
+// Admin API Endpoint'leri
+
+// Tüm kullanıcıları getir (program bazlı filtreleme ile)
+app.get('/api/admin/users', async (req, res) => {
+    try {
+        console.log('👥 Admin kullanıcı listesi isteği:', req.query);
+        
+        const { program } = req.query;
+        console.log('Program filtresi:', program);
+        
+        // Basit query ile başla
+        let query = supabase
+            .from('users')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        // Program bazlı filtreleme
+        if (program) {
+            query = query.eq('enrolled_program', program);
+            console.log(`🎯 ${program} programı için kullanıcılar filtreleniyor`);
+        }
+        
+        console.log('Query çalıştırılıyor...');
+        const { data: users, error } = await query;
+        
+        if (error) {
+            console.error('❌ Kullanıcı listesi alınamadı:', error);
+            return res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+        
+        console.log(`✅ ${users?.length || 0} kullanıcı alındı`);
+        res.json({
+            success: true,
+            users: users || []
+        });
+    } catch (error) {
+        console.error('❌ Kullanıcı listesi hatası:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Sunucu hatası: ' + error.message
+        });
+    }
+});
+
+// Tüm sınıfları getir (program bazlı filtreleme ile)
+app.get('/api/admin/classes', async (req, res) => {
+    try {
+        console.log('🏫 Admin sınıf listesi isteği:', req.query);
+        
+        const { program } = req.query;
+        console.log('Program filtresi:', program);
+        
+        // Basit query ile başla
+        let query = supabase
+            .from('classes')
+            .select('*')
+            .order('class_name');
+        
+        // Program bazlı filtreleme
+        if (program) {
+            query = query.eq('program', program);
+            console.log(`🎯 ${program} programı için sınıflar filtreleniyor`);
+        }
+        
+        console.log('Query çalıştırılıyor...');
+        const { data: classes, error } = await query;
+        
+        if (error) {
+            console.error('❌ Sınıf listesi alınamadı:', error);
+            return res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+        
+        console.log(`✅ ${classes?.length || 0} sınıf alındı`);
+        res.json({
+            success: true,
+            classes: classes || []
+        });
+    } catch (error) {
+        console.error('❌ Sınıf listesi hatası:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Sunucu hatası: ' + error.message
+        });
+    }
+});
+
+// Tüm öğretmenleri getir
+app.get('/api/admin/teachers', async (req, res) => {
+    try {
+        console.log('👨‍🏫 Admin öğretmen listesi isteği');
+        
+        const { data: teachers, error } = await supabase
+            .from('teachers')
+            .select('*')
+            .order('name');
+        
+        if (error) {
+            console.error('❌ Öğretmen listesi alınamadı:', error);
+            return res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+        
+        console.log(`✅ ${teachers?.length || 0} öğretmen alındı`);
+        res.json({
+            success: true,
+            teachers: teachers || []
+        });
+    } catch (error) {
+        console.error('❌ Öğretmen listesi hatası:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Sunucu hatası'
+        });
+    }
+});
+
+// Öğretmen programlarını getir (program bazlı filtreleme ile)
+app.get('/api/admin/teacher-schedules', async (req, res) => {
+    try {
+        console.log('📅 Admin öğretmen programları isteği:', req.query);
+        
+        const { program } = req.query;
+        let query = supabase
+            .from('teacher_schedules')
+            .select('*')
+            .order('teacher_name');
+        
+        // Program bazlı filtreleme
+        if (program) {
+            query = query.eq('program', program);
+            console.log(`🎯 ${program} programı için öğretmen programları filtreleniyor`);
+        }
+        
+        const { data: schedules, error } = await query;
+        
+        if (error) {
+            console.error('❌ Öğretmen programları alınamadı:', error);
+            return res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+        
+        console.log(`✅ ${schedules?.length || 0} öğretmen programı alındı`);
+        res.json({
+            success: true,
+            schedules: schedules || []
+        });
+    } catch (error) {
+        console.error('❌ Öğretmen programları hatası:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Sunucu hatası'
+        });
+    }
 });
 
 // Vercel için export
