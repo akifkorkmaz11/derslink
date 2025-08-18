@@ -458,11 +458,15 @@ function updateYKSField() {
     const mainProgram = document.getElementById('registerProgram').value;
     const subProgram = document.getElementById('registerSubProgram').value;
     const yksFieldGroup = document.getElementById('yksFieldGroup');
+    const yksFieldSelect = document.getElementById('registerYKSField');
     
     if (mainProgram === 'YKS' && subProgram) {
         yksFieldGroup.style.display = 'block';
+        yksFieldSelect.required = true;
     } else {
         yksFieldGroup.style.display = 'none';
+        yksFieldSelect.required = false;
+        yksFieldSelect.value = '';
     }
 }
 
