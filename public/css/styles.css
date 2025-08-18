@@ -927,8 +927,10 @@ body {
 
 .programs-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .program-card {
@@ -1657,6 +1659,7 @@ body {
     .programs-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
+        max-width: 100%;
     }
     
     .advantages-grid {
@@ -1685,6 +1688,7 @@ body {
     .programs-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+        max-width: 100%;
     }
     
     /* Mobile Modal Improvements */
