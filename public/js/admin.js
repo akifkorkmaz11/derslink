@@ -2886,7 +2886,7 @@ function createTeacherCardWithActions(teacherName, schedules) {
                         <div class="class-item">
                             <div class="class-time">${formatTime(schedule.start_time)} - ${formatTime(schedule.end_time)}</div>
                             <div class="class-info">
-                                <div class="class-name">${schedule.classes?.class_name || 'Bilinmeyen Sınıf'}</div>
+                                <div class="class-name">${schedule.class_name || 'Bilinmeyen Sınıf'}</div>
                                 <div class="class-type">${schedule.subject}</div>
                             </div>
                         </div>
@@ -2968,10 +2968,10 @@ function showTeacherScheduleModal(teacherName, schedules) {
             return `
                 <tr>
                     <td>${formatTime(schedule.start_time)} - ${formatTime(schedule.end_time)}</td>
-                    <td>${schedule.classes?.class_name || 'Bilinmeyen Sınıf'}</td>
+                    <td>${schedule.class_name || 'Bilinmeyen Sınıf'}</td>
                     <td>${schedule.subject}</td>
-                    <td>${schedule.classes?.program_type || '-'}</td>
-                    <td>${schedule.classes?.schedule_type || '-'}</td>
+                    <td>${schedule.program || '-'}</td>
+                    <td>${schedule.schedule_type || '-'}</td>
                 </tr>
             `;
         }).join('');
