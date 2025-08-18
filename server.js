@@ -246,12 +246,7 @@ app.get('/api/admin/users', async (req, res) => {
                     id,
                     enrollment_date,
                     status,
-                    classes (
-                        id,
-                        class_name,
-                        program_type,
-                        schedule_type
-                    )
+                    class_id
                 )
             `)
             .order('created_at', { ascending: false });
@@ -259,7 +254,7 @@ app.get('/api/admin/users', async (req, res) => {
         // Program bazlı filtreleme
         if (program) {
             query = query.eq('enrolled_program', program);
-            console.log(` ${program} programı için kullanıcılar filtreleniyor`);
+            console.log(`🎯 ${program} programı için kullanıcılar filtreleniyor`);
         }
         
         const { data: users, error } = await query;
@@ -319,7 +314,7 @@ app.get('/api/admin/classes', async (req, res) => {
         // Program bazlı filtreleme
         if (program) {
             query = query.eq('program', program);
-            console.log(` ${program} programı için sınıflar filtreleniyor`);
+            console.log(`🎯 ${program} programı için sınıflar filtreleniyor`);
         }
         
         const { data: classes, error } = await query;
@@ -392,7 +387,7 @@ app.get('/api/admin/teacher-schedules', async (req, res) => {
         // Program bazlı filtreleme
         if (program) {
             query = query.eq('program', program);
-            console.log(` ${program} programı için öğretmen programları filtreleniyor`);
+            console.log(`🎯 ${program} programı için öğretmen programları filtreleniyor`);
         }
         
         const { data: schedules, error } = await query;
