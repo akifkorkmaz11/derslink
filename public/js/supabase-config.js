@@ -250,6 +250,12 @@ const UserService = {
     async assignUserToClass(userId, mainProgram, scheduleType, yksField = null) {
         try {
             console.log('🎯 Kullanıcı sınıfa atanıyor:', { userId, mainProgram, scheduleType, yksField });
+            console.log('🔍 Parametre tipleri:', {
+                userId: typeof userId,
+                mainProgram: typeof mainProgram,
+                scheduleType: typeof scheduleType,
+                yksField: typeof yksField
+            });
             
             // Önce uygun sınıfı bul
             let query = supabase
@@ -263,11 +269,19 @@ const UserService = {
             // YKS için alan filtresi ekle
             if (mainProgram === 'YKS' && yksField) {
                 query = query.eq('yks_field', yksField);
+                console.log('🔍 YKS alan filtresi eklendi:', yksField);
             }
             
             query = query.order('current_enrollment', { ascending: true }).limit(1);
             
+            console.log('🔍 Sınıf arama sorgusu hazırlandı');
             const { data: availableClasses, error: classError } = await query;
+            
+            console.log('🔍 Sınıf arama sonucu:', {
+                availableClasses: availableClasses?.length || 0,
+                error: classError?.message || 'Yok',
+                classes: availableClasses
+            });
             
             if (classError) {
                 throw new Error('Sınıf arama hatası: ' + classError.message);

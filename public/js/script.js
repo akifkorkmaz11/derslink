@@ -808,6 +808,14 @@ async function handleModernPaymentSuccess() {
                 yksField: formData.yksField
             });
             
+            console.log('🔍 FormData detayları:', {
+                mainProgram: formData.mainProgram,
+                scheduleType: formData.scheduleType,
+                scheduleTypeType: typeof formData.scheduleType,
+                yksField: formData.yksField,
+                yksFieldType: typeof formData.yksField
+            });
+            
             const classAssignmentResult = await window.UserService.assignUserToClass(
                 registrationResult.user.id, 
                 formData.mainProgram, 
