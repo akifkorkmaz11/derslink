@@ -261,7 +261,7 @@ const UserService = {
             let query = supabase
                 .from('classes')
                 .select('*')
-                .lt('current_enrollment', 'max_students')
+                .lt('current_enrollment', 'max_capacity')
                 .eq('status', 'active');
             
             // Schedule type'ı düzelt (YKS için farklı format)
@@ -288,6 +288,12 @@ const UserService = {
                 // LGS için program_type filtresi
                 query = query.eq('program_type', mainProgram);
             }
+            
+            console.log('🔍 Final sorgu parametreleri:', {
+                mainProgram,
+                correctedScheduleType,
+                correctedYksField: mainProgram === 'YKS' && yksField ? (yksField === 'sayisal' ? 'Sayısal' : yksField === 'sozel' ? 'Sözel' : 'Eşit Ağırlık') : null
+            });
             
             query = query.order('current_enrollment', { ascending: true }).limit(1);
             
@@ -331,7 +337,7 @@ const UserService = {
                     program_type: mainProgram === 'YKS' ? correctedYksField : mainProgram,
                     schedule_type: correctedScheduleType,
                     program: mainProgram, // YKS sınıfları için program sütunu
-                    max_students: 5, // max_capacity yerine max_students kullan
+                    max_capacity: 5, // Doğru sütun adı
                     current_enrollment: 1,
                     status: 'active'
                 };
