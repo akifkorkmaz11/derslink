@@ -516,20 +516,8 @@ async function loadClassSchedule() {
             try {
                 // Kullanıcının YKS alanını al (varsa)
                 let yksField = null;
-                const { data: userRow, error: userError } = await window.supabase
-                    .from('users')
-                    .select('yks_field')
-                    .eq('id', databaseUserId)
-                    .single();
-                
-                if (userError) {
-                    console.error('❌ Kullanıcı bilgisi alınamadı:', userError);
-                } else if (userRow && userRow.yks_field) {
-                    yksField = userRow.yks_field;
-                    console.log('✅ Kullanıcının YKS alanı alındı:', yksField);
-                } else {
-                    console.log('ℹ️ Kullanıcının YKS alanı yok, varsayılan değer kullanılacak');
-                }
+                // users tablosunda yks_field sütunu yok, varsayılan değer kullan
+                console.log('ℹ️ users tablosunda yks_field sütunu yok, varsayılan değer kullanılacak');
 
                 // Otomatik sınıf atama (varsayılan schedule: karma)
                 if (window.UserService && window.UserService.assignUserToClass) {

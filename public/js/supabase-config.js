@@ -261,7 +261,7 @@ const UserService = {
             let query = supabase
                 .from('classes')
                 .select('*')
-                .lt('current_enrollment', 'max_students')
+                .lt('current_enrollment', 'max_capacity')
                 .eq('status', 'active');
             
             // Schedule type'ı düzelt (YKS için farklı format)
@@ -337,7 +337,7 @@ const UserService = {
                     program_type: mainProgram === 'YKS' ? correctedYksField : mainProgram,
                     schedule_type: correctedScheduleType,
                     program: mainProgram, // YKS sınıfları için program sütunu
-                    max_students: 5, // Doğru sütun adı
+                    max_capacity: 5, // Doğru sütun adı
                     current_enrollment: 1,
                     status: 'active'
                 };
