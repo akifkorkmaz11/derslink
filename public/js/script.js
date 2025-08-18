@@ -587,7 +587,7 @@ async function initializePaymentFirst(firstName, lastName, email, phone, mainPro
             amount: extractAmount(selectedProgram.price)
         };
         
-        // Form verilerini global değişkende sakla (callback için)
+                        // Form verilerini global değişkende sakla (callback için)
         window.pendingRegistrationData = {
             email: email,
             password: password,
@@ -599,17 +599,17 @@ async function initializePaymentFirst(firstName, lastName, email, phone, mainPro
             scheduleType: subProgram.value, // Hafta içi, hafta sonu, karma bilgisi
             yksField: yksField // YKS alan bilgisi
         };
-        
+                
         // Gerçek Iyzico ödeme sistemini başlat
         console.log('💳 Gerçek Iyzico ödeme sistemi başlatılıyor...');
         
         if (typeof window.IyzicoPaymentService !== 'undefined') {
-            const result = await window.IyzicoPaymentService.initializePayment(paymentData);
-            
-            if (!result.success) {
-                console.error('❌ Ödeme başlatma hatası:', result.error);
-                showNotification('Ödeme başlatılamadı: ' + result.error, 'error');
-                resetButton(submitBtn, originalText);
+                const result = await window.IyzicoPaymentService.initializePayment(paymentData);
+                
+                if (!result.success) {
+                    console.error('❌ Ödeme başlatma hatası:', result.error);
+                    showNotification('Ödeme başlatılamadı: ' + result.error, 'error');
+                    resetButton(submitBtn, originalText);
                 return;
             }
             
@@ -617,11 +617,11 @@ async function initializePaymentFirst(firstName, lastName, email, phone, mainPro
         } else {
             throw new Error('Ödeme sistemi bulunamadı');
         }
-        
-    } catch (error) {
+                
+            } catch (error) {
         console.error('❌ Ödeme başlatma hatası:', error);
         showNotification('Ödeme başlatılamadı: ' + error.message, 'error');
-        resetButton(submitBtn, originalText);
+                resetButton(submitBtn, originalText);
     }
 }
 
