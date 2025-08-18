@@ -1,0 +1,32 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "server.js",
+        "use": "@vercel/node"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/css/(.*)",
+        "dest": "/public/css/$1"
+      },
+      {
+        "src": "/js/(.*)",
+        "dest": "/public/js/$1"
+      },
+      {
+        "src": "/images/(.*)",
+        "dest": "/public/images/$1"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/server.js"
+      }
+    ],
+    "functions": {
+      "server.js": {
+        "maxDuration": 30
+      }
+    }
+  }

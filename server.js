@@ -21,29 +21,29 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Static files serve - Yeni yapıya göre
-app.use('/css', express.static(path.join(__dirname, '../public/css')));
-app.use('/js', express.static(path.join(__dirname, '../public/js')));
-app.use('/images', express.static(path.join(__dirname, '../public/images')));
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
+app.use('/js', express.static(path.join(__dirname, 'public/js')));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
-// HTML dosyaları için views klasörü
+// HTML dosyaları için public klasörü
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/index.html'));
+    res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/admin.html'));
+    res.sendFile(path.join(__dirname, 'public/admin.html'));
 });
 
 app.get('/admin-lgs', (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/admin-lgs.html'));
+    res.sendFile(path.join(__dirname, 'public/admin-lgs.html'));
 });
 
 app.get('/admin-yks', (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/admin-yks.html'));
+    res.sendFile(path.join(__dirname, 'public/admin-yks.html'));
 });
 
 app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/dashboard.html'));
+    res.sendFile(path.join(__dirname, 'public/dashboard.html'));
 });
 
 // ... geri kalan server.js kodları
