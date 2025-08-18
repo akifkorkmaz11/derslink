@@ -1842,7 +1842,7 @@ function showNotification(message, type = 'info') {
 // Admin panelinden çıkış
 function logoutAdmin() {
     if (confirm('Admin panelinden çıkmak istediğinizden emin misiniz?')) {
-        window.location.href = 'index.html';
+        window.location.href = '/';
     }
 }
 
@@ -3131,15 +3131,15 @@ function getDayName(dayOfWeek) {
 
 // Program seçimi fonksiyonları
 function openLGSAdmin() {
-    window.location.href = 'admin-lgs.html';
+    window.location.href = 'admin-lgs';
 }
 
 function openYKSAdmin() {
-    window.location.href = 'admin-yks.html';
+    window.location.href = 'admin-yks';
 }
 
 function goBackToMainAdmin() {
-    window.location.href = 'admin.html';
+    window.location.href = 'admin';
 }
 
 // Öğretmen programı modal'ını göster

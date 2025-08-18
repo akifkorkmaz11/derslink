@@ -958,7 +958,7 @@ async function handleModernPaymentSuccess() {
         
         // 3 saniye sonra dashboard'a yönlendir
         setTimeout(() => {
-            window.location.href = 'dashboard.html';
+            window.location.href = 'dashboard';
         }, 3000);
         
     } catch (error) {
@@ -1100,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Hemen yönlendir
                     setTimeout(() => {
                         console.log('🚀 Yönlendirme yapılıyor: dashboard.html');
-                        window.location.replace('dashboard.html');
+                        window.location.replace('dashboard');
                     }, 1000);
                 } else {
                     console.log('❌ Login başarısız:', result.error);
@@ -1688,7 +1688,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // After a short delay, redirect to thanks page
             setTimeout(() => {
-                window.location.href = 'thanks.html';
+                window.location.href = '/';
             }, 2000);
         });
     }
@@ -1712,7 +1712,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Redirect to admin panel
                 setTimeout(() => {
-                    window.open('admin.html', '_blank');
+                    window.location.href = 'admin-lgs';
                 }, 1000);
             } else {
                 showNotification('Hatalı e-posta veya şifre!', 'error');

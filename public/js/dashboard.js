@@ -247,7 +247,7 @@ async function checkUserAuthentication() {
                 <p style="margin-bottom: 20px; color: #666;">
                     Dashboard'a erişmek için giriş yapmanız gerekiyor.
                 </p>
-                <button onclick="window.location.href='index.html'" style="
+                <button onclick="window.location.href='/'" style="
                     background: linear-gradient(135deg, #667eea, #764ba2);
                     color: white;
                     border: none;
@@ -276,13 +276,13 @@ async function checkUserAuthentication() {
         
         // 5 saniye sonra otomatik yönlendir
         setTimeout(() => {
-            window.location.href = 'index.html';
+            window.location.href = '/';
         }, 5000);
         
     } catch (error) {
         console.error('❌ Auth kontrol hatası:', error);
         alert('Giriş kontrolü yapılamadı: ' + error.message);
-        window.location.href = 'index.html';
+        window.location.href = '/';
     }
 }
 
@@ -2043,7 +2043,7 @@ async function confirmLogout() {
             modal.remove();
             
             // Ana sayfaya yönlendir
-            window.location.replace('index.html');
+            window.location.replace('/');
         }, 300);
         
     } catch (error) {

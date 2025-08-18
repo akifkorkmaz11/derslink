@@ -114,18 +114,18 @@ app.post('/api/payment/initialize', async (req, res) => {
                 }
             ]
         };
-
+        
         // Iyzico ödeme başlat
         iyzipay.checkoutFormInitialize.create(request, function (err, result) {
             if (err) {
                 console.error('❌ Iyzico ödeme hatası:', err);
                 return res.status(500).json({ 
-                    success: false, 
+                    success: false,
                     error: 'Ödeme başlatılamadı',
                     details: err.message 
                 });
             }
-
+            
             if (result.status === 'success') {
                 console.log('✅ Ödeme başlatıldı:', result.checkoutFormContent);
                 
@@ -167,7 +167,7 @@ app.post('/api/payment/success', async (req, res) => {
             conversationId: 'CONV_' + Date.now(),
             token: token
         };
-
+        
         iyzipay.checkoutForm.retrieve(request, function (err, result) {
             if (err) {
                 console.error('❌ Ödeme kontrol hatası:', err);
@@ -176,7 +176,7 @@ app.post('/api/payment/success', async (req, res) => {
                     error: 'Ödeme kontrol edilemedi'
                 });
             }
-
+            
             if (result.status === 'success' && result.paymentStatus === 'SUCCESS') {
                 console.log('✅ Ödeme başarılı:', result);
                 
