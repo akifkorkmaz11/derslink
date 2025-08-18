@@ -107,6 +107,14 @@ const UserService = {
             }
 
             // Payment kaydı artık handleModernPaymentSuccess içinde yapılacak
+            
+            // Kullanıcıyı uygun sınıfa otomatik ata
+            try {
+                await this.assignUserToClass(data.user.id, userData.mainProgram, userData.scheduleType);
+            } catch (classAssignmentError) {
+                console.error('❌ Sınıf atama hatası:', classAssignmentError);
+                // Sınıf atama başarısız olsa bile kayıt işlemi devam eder
+            }
             // Burada sadece user kaydı yapılıyor
             
             return { success: true, user: data.user };
@@ -237,6 +245,114 @@ const UserService = {
         }
     },
 
+    // Kullanıcıyı uygun sınıfa otomatik ata
+    async assignUserToClass(userId, mainProgram, scheduleType) {
+        try {
+            console.log('🎯 Kullanıcı sınıfa atanıyor:', { userId, mainProgram, scheduleType });
+            
+            // Önce uygun sınıfı bul
+            let query = supabase
+                .from('classes')
+                .select('*')
+                .eq('program_type', mainProgram)
+                .eq('schedule_type', scheduleType)
+                .lt('current_enrollment', 'max_capacity')
+                .eq('status', 'active')
+                .order('current_enrollment', { ascending: true })
+                .limit(1);
+            
+            const { data: availableClasses, error: classError } = await query;
+            
+            if (classError) {
+                throw new Error('Sınıf arama hatası: ' + classError.message);
+            }
+            
+            if (!availableClasses || availableClasses.length === 0) {
+                console.log('⚠️ Uygun sınıf bulunamadı, yeni sınıf oluşturuluyor...');
+                
+                // Yeni sınıf oluştur
+                const newClassName = `${mainProgram}-${scheduleType}-${Date.now().toString().slice(-4)}`;
+                const newClassData = {
+                    class_name: newClassName,
+                    program_type: mainProgram,
+                    schedule_type: scheduleType,
+                    max_capacity: 5,
+                    current_enrollment: 1,
+                    status: 'active'
+                };
+                
+                const { data: newClass, error: createError } = await supabase
+                    .from('classes')
+                    .insert([newClassData])
+                    .select()
+                    .single();
+                
+                if (createError) {
+                    throw new Error('Yeni sınıf oluşturma hatası: ' + createError.message);
+                }
+                
+                console.log('✅ Yeni sınıf oluşturuldu:', newClass);
+                
+                // Kullanıcıyı yeni sınıfa ata
+                const enrollmentData = {
+                    user_id: userId,
+                    class_id: newClass.id,
+                    enrollment_date: new Date().toISOString(),
+                    status: 'active'
+                };
+                
+                const { error: enrollmentError } = await supabase
+                    .from('class_enrollments')
+                    .insert([enrollmentData]);
+                
+                if (enrollmentError) {
+                    throw new Error('Sınıf kayıt hatası: ' + enrollmentError.message);
+                }
+                
+                console.log('✅ Kullanıcı yeni sınıfa atandı:', newClass.class_name);
+                return newClass;
+                
+            } else {
+                // Mevcut sınıfa ata
+                const selectedClass = availableClasses[0];
+                console.log('✅ Uygun sınıf bulundu:', selectedClass.class_name);
+                
+                // Kullanıcıyı sınıfa ata
+                const enrollmentData = {
+                    user_id: userId,
+                    class_id: selectedClass.id,
+                    enrollment_date: new Date().toISOString(),
+                    status: 'active'
+                };
+                
+                const { error: enrollmentError } = await supabase
+                    .from('class_enrollments')
+                    .insert([enrollmentData]);
+                
+                if (enrollmentError) {
+                    throw new Error('Sınıf kayıt hatası: ' + enrollmentError.message);
+                }
+                
+                // Sınıf kapasitesini güncelle
+                const { error: updateError } = await supabase
+                    .from('classes')
+                    .update({ current_enrollment: selectedClass.current_enrollment + 1 })
+                    .eq('id', selectedClass.id);
+                
+                if (updateError) {
+                    console.error('⚠️ Sınıf kapasitesi güncellenemedi:', updateError);
+                }
+                
+                console.log('✅ Kullanıcı mevcut sınıfa atandı:', selectedClass.class_name);
+                return selectedClass;
+            }
+            
+        } catch (error) {
+            console.error('❌ Sınıf atama hatası:', error);
+            throw error;
+        }
+    },
+
     // Direct database insert method
     async insertToDatabase(userData) {
         try {
@@ -268,6 +384,14 @@ const UserService = {
             }
             
             console.log('✅ Users tablosuna kayıt başarılı:', userInsertData);
+            
+            // Kullanıcıyı uygun sınıfa otomatik ata
+            try {
+                await this.assignUserToClass(userData.id, userData.mainProgram, userData.scheduleType);
+            } catch (classAssignmentError) {
+                console.error('❌ Sınıf atama hatası:', classAssignmentError);
+                // Sınıf atama başarısız olsa bile kayıt işlemi devam eder
+            }
             
             // Payment kaydı artık handleModernPaymentSuccess içinde yapılacak
             // Burada sadece user kaydı yapılıyor

@@ -748,6 +748,19 @@ async function handleModernPaymentSuccess() {
         // Kullanıcı ID'sini al
         formData.userId = registrationResult.user.id;
         
+        // Kullanıcıyı uygun sınıfa otomatik ata
+        try {
+            await window.UserService.assignUserToClass(
+                registrationResult.user.id, 
+                formData.mainProgram, 
+                formData.scheduleType
+            );
+            console.log('✅ Kullanıcı sınıfa otomatik atandı');
+        } catch (classAssignmentError) {
+            console.error('❌ Sınıf atama hatası:', classAssignmentError);
+            // Sınıf atama başarısız olsa bile kayıt işlemi devam eder
+        }
+        
         // Payment kaydını güncelle (kullanıcı zaten kayıt edilmiş)
         if (window.completedPaymentData && formData.userId) {
             try {
