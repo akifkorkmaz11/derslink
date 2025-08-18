@@ -294,16 +294,7 @@ function closeRegisterModal() {
     document.body.style.overflow = 'auto';
 }
 
-function showForgotPassword() {
-    closeLoginModal();
-    document.getElementById('forgotPasswordModal').style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
 
-function closeForgotPasswordModal() {
-    document.getElementById('forgotPasswordModal').style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
 
 function switchToRegister() {
     closeLoginModal();
@@ -312,7 +303,6 @@ function switchToRegister() {
 
 function switchToLogin() {
     closeRegisterModal();
-    closeForgotPasswordModal();
     openLoginModal();
 }
 
