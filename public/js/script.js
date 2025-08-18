@@ -801,15 +801,27 @@ async function handleModernPaymentSuccess() {
         
         // Kullanıcıyı uygun sınıfa otomatik ata
         try {
-            await window.UserService.assignUserToClass(
+            console.log('🎯 Sınıf atama başlatılıyor...', {
+                userId: registrationResult.user.id,
+                mainProgram: formData.mainProgram,
+                scheduleType: formData.scheduleType,
+                yksField: formData.yksField
+            });
+            
+            const classAssignmentResult = await window.UserService.assignUserToClass(
                 registrationResult.user.id, 
                 formData.mainProgram, 
                 formData.scheduleType,
                 formData.yksField
             );
-            console.log('✅ Kullanıcı sınıfa otomatik atandı');
+            
+            console.log('✅ Kullanıcı sınıfa otomatik atandı:', classAssignmentResult);
         } catch (classAssignmentError) {
             console.error('❌ Sınıf atama hatası:', classAssignmentError);
+            console.error('❌ Hata detayları:', {
+                message: classAssignmentError.message,
+                stack: classAssignmentError.stack
+            });
             // Sınıf atama başarısız olsa bile kayıt işlemi devam eder
         }
         
