@@ -325,10 +325,10 @@ app.post('/api/payment/process-card', async (req, res) => {
                     gsmNumber: phone,
                     email: email,
                     identityNumber: '74300864791',
-                    lastLoginDate: new Date().toISOString(),
-                    registrationDate: new Date().toISOString(),
+                    lastLoginDate: new Date().toISOString().split('T')[0],
+                    registrationDate: new Date().toISOString().split('T')[0],
                     registrationAddress: 'Test Adres',
-                    ip: req.ip,
+                    ip: req.ip || '127.0.0.1',
                     city: 'Istanbul',
                     country: 'Turkey',
                     zipCode: '34732'
