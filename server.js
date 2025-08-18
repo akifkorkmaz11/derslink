@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const Iyzipay = require('iyzipay');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -13,7 +12,7 @@ const app = express();
 
 // CORS ve middleware
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['https://derslink-dc4fxrsx0-akif-korkmazs-projects.vercel.app'],
+    origin: '*', // Tüm origin'lere izin ver
     credentials: true
 }));
 app.use(express.json());
@@ -31,6 +30,15 @@ console.log('✅ Iyzico SDK hazırlandı');
 // Test endpoint
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Server çalışıyor!' });
+});
+
+// Basit test endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
 });
 
 // Admin test endpoint
@@ -67,31 +75,8 @@ app.get('/api/admin/test', async (req, res) => {
     }
 });
 
-// Static files serve
-app.use('/css', express.static(path.join(__dirname, 'public/css')));
-app.use('/js', express.static(path.join(__dirname, 'public/js')));
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
-
-// HTML dosyaları için public klasörü
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/index.html'));
-});
-
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/admin.html'));
-});
-
-app.get('/admin-lgs', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/admin-lgs.html'));
-});
-
-app.get('/admin-yks', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/admin-yks.html'));
-});
-
-app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/dashboard.html'));
-});
+// Vercel için static file serving ve HTML route'ları kaldırıldı
+// Bunlar vercel.json ile yönetiliyor
 
 // Kullanıcının program bilgisini güncelle
 async function updateUserProgram(email, program) {
