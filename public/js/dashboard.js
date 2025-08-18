@@ -516,19 +516,27 @@ async function loadClassSchedule() {
             try {
                 // Kullanıcının YKS alanını al (varsa)
                 let yksField = null;
-                const { data: userRow } = await window.supabase
+                const { data: userRow, error: userError } = await window.supabase
                     .from('users')
                     .select('yks_field')
                     .eq('id', databaseUserId)
                     .single();
-                if (userRow && userRow.yks_field) {
+                
+                if (userError) {
+                    console.error('❌ Kullanıcı bilgisi alınamadı:', userError);
+                } else if (userRow && userRow.yks_field) {
                     yksField = userRow.yks_field;
+                    console.log('✅ Kullanıcının YKS alanı alındı:', yksField);
+                } else {
+                    console.log('ℹ️ Kullanıcının YKS alanı yok, varsayılan değer kullanılacak');
                 }
 
                 // Otomatik sınıf atama (varsayılan schedule: karma)
                 if (window.UserService && window.UserService.assignUserToClass) {
-                    console.log('🎯 Otomatik sınıf atama denemesi başlatılıyor...', { userProgram, yksField });
-                    await window.UserService.assignUserToClass(databaseUserId, userProgram, 'karma', yksField);
+                    // YKS alanı yoksa varsayılan olarak "sayisal" kullan
+                    const finalYksField = yksField || 'sayisal';
+                    console.log('🎯 Otomatik sınıf atama denemesi başlatılıyor...', { userProgram, finalYksField });
+                    await window.UserService.assignUserToClass(databaseUserId, userProgram, 'karma', finalYksField);
 
                     // Atama sonrası tekrar sınıfı getir
                     const retryClass = await classService.getUserClass(databaseUserId);
