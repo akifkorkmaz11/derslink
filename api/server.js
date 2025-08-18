@@ -64,8 +64,9 @@ app.get('/api/admin/users', async (req, res) => {
         
         // Program bazlı filtreleme
         if (program) {
-            query = query.eq('enrolled_program', program);
-            console.log(`🎯 ${program} programı için kullanıcılar filtreleniyor`);
+            // enrolled_program veya selected_program alanına göre filtrele
+            query = query.or(`enrolled_program.eq.${program},selected_program.eq.${program}`);
+            console.log(`🎯 ${program} programı için kullanıcılar filtreleniyor (enrolled_program = ${program} OR selected_program = ${program})`);
         }
         
         console.log('Query çalıştırılıyor...');
@@ -74,14 +75,14 @@ app.get('/api/admin/users', async (req, res) => {
         if (error) {
             console.error('❌ Kullanıcı listesi alınamadı:', error);
             return res.status(500).json({
-                success: false,
+                    success: false,
                 error: error.message
-            });
-        }
-        
+                });
+            }
+            
         console.log(`✅ ${users?.length || 0} kullanıcı alındı`);
-        res.json({
-            success: true,
+                res.json({
+                    success: true,
             users: users || []
         });
     } catch (error) {
@@ -104,7 +105,11 @@ app.get('/api/admin/classes', async (req, res) => {
         // Basit query ile başla
         let query = supabase
             .from('classes')
-            .select('*')
+            .select(`
+                *,
+                class_schedules (id, day_of_week, start_time, end_time, subject, teacher_name),
+                class_enrollments (id, user_id, status, users (name, email))
+            `)
             .order('class_name');
         
         // Program bazlı filtreleme
@@ -119,14 +124,14 @@ app.get('/api/admin/classes', async (req, res) => {
         if (error) {
             console.error('❌ Sınıf listesi alınamadı:', error);
             return res.status(500).json({
-                success: false,
+                    success: false,
                 error: error.message
-            });
-        }
-        
+                });
+            }
+            
         console.log(`✅ ${classes?.length || 0} sınıf alındı`);
-        res.json({
-            success: true,
+                res.json({
+                    success: true,
             classes: classes || []
         });
     } catch (error) {
@@ -170,7 +175,7 @@ app.get('/api/admin/teachers', async (req, res) => {
     }
 });
 
-// Öğretmen programlarını getir (class_schedules üzerinden)
+// Öğretmen programlarını getir (class_schedules + classes üzerinden)
 app.get('/api/admin/teacher-schedules', async (req, res) => {
     try {
         console.log('📅 Admin öğretmen programları isteği:', req.query);
@@ -178,7 +183,20 @@ app.get('/api/admin/teacher-schedules', async (req, res) => {
         const { program } = req.query;
         let query = supabase
             .from('class_schedules')
-            .select('*')
+            .select(`
+                id,
+                class_id,
+                teacher_name,
+                subject,
+                day_of_week,
+                start_time,
+                end_time,
+                program,
+                classes!class_schedules_class_id_fkey (
+                    class_name,
+                    schedule_type
+                )
+            `)
             .order('teacher_name');
 
         if (program) {
@@ -186,7 +204,7 @@ app.get('/api/admin/teacher-schedules', async (req, res) => {
             console.log(`🎯 ${program} programı için öğretmen programları filtreleniyor`);
         }
 
-        const { data: schedules, error } = await query;
+        const { data, error } = await query;
 
         if (error) {
             console.error('❌ Öğretmen programları alınamadı:', error);
@@ -196,10 +214,23 @@ app.get('/api/admin/teacher-schedules', async (req, res) => {
             });
         }
 
-        console.log(`✅ ${schedules?.length || 0} öğretmen programı alındı`);
-        res.json({
-            success: true,
-            schedules: schedules || []
+        const schedules = (data || []).map((row) => ({
+            id: row.id,
+            class_id: row.class_id,
+            teacher_name: row.teacher_name,
+            subject: row.subject,
+            day_of_week: row.day_of_week,
+            start_time: row.start_time,
+            end_time: row.end_time,
+            program: row.program,
+            class_name: row.classes?.class_name || 'Bilinmeyen Sınıf',
+            schedule_type: row.classes?.schedule_type || 'Bilinmeyen Program'
+        }));
+
+        console.log(`✅ ${schedules.length} öğretmen programı alındı`);
+                res.json({
+                    success: true,
+            schedules: schedules
         });
     } catch (error) {
         console.error('❌ Öğretmen programları hatası:', error);

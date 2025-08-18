@@ -916,9 +916,9 @@ async function loadYKSAdminData() {
         // Kullanıcı listesini yükle
         await loadUserList(adminService);
         
-        console.log('LGS admin paneli verileri başarıyla yüklendi');
+        console.log('YKS admin paneli verileri başarıyla yüklendi');
     } catch (error) {
-        console.error('LGS admin paneli veri yükleme hatasi:', error);
+        console.error('YKS admin paneli veri yükleme hatasi:', error);
         showNotification('Veriler yüklenirken hata oluştu', 'error');
     }
 }
@@ -928,38 +928,29 @@ async function loadAdminData() {
     return await loadLGSAdminData();
 }
 
-// İstatistikleri yükle (LGS admin paneli için)
+// İstatistikleri yükle (YKS admin paneli için)
 async function loadStatistics(adminService) {
     try {
-        console.log('İstatistikler yükleniyor...');
+        console.log('YKS İstatistikler yükleniyor...');
         
-        // Hangi sayfada olduğumuzu kontrol et
-        const currentPage = window.location.pathname;
-        let programFilter = null;
-        
-        if (currentPage.includes('admin-lgs.html')) {
-            programFilter = 'LGS';
-        } else if (currentPage.includes('admin-yks.html')) {
-            programFilter = 'YKS';
-        }
+        // YKS programı için filtreleme
+        const programFilter = 'YKS';
         
         const classesResult = await adminService.getAllClasses(programFilter);
         const usersResult = await adminService.getAllUsers(programFilter);
         const teachersResult = await adminService.getAllTeachers();
         
-        console.log('Sınıf sonucu:', classesResult);
-        console.log('Kullanıcı sonucu:', usersResult);
-        console.log('Öğretmen sonucu:', teachersResult);
+        console.log('YKS Sınıf sonucu:', classesResult);
+        console.log('YKS Kullanıcı sonucu:', usersResult);
+        console.log('YKS Öğretmen sonucu:', teachersResult);
         
         if (classesResult.success && usersResult.success && teachersResult.success) {
-            // Program bazlı sınıf sayısını hesapla
-            const programClasses = programFilter ? 
-                classesResult.classes.filter(cls => cls.program === programFilter) : 
-                classesResult.classes;
+            // YKS programı için sınıf sayısını hesapla
+            const yksClasses = classesResult.classes.filter(cls => cls.program === 'YKS');
             
-            const totalClasses = programClasses.length;
+            const totalClasses = yksClasses.length;
             const totalUsers = usersResult.users.length;
-            const activeEnrollments = programClasses.reduce((total, cls) => {
+            const activeEnrollments = yksClasses.reduce((total, cls) => {
                 return total + (cls.class_enrollments?.filter(e => e.status === 'active').length || 0);
             }, 0);
             
@@ -971,7 +962,7 @@ async function loadStatistics(adminService) {
                  teacher.specialties.toLowerCase().includes('ayt'))
             ).length;
             
-            console.log('Hesaplanan istatistikler:', { totalClasses, totalUsers, activeEnrollments, totalTeachers });
+            console.log('YKS Hesaplanan istatistikler:', { totalClasses, totalUsers, activeEnrollments, totalTeachers });
             
             // İstatistikleri göster
             const totalClassesElement = document.getElementById('totalClasses');
@@ -984,12 +975,12 @@ async function loadStatistics(adminService) {
             if (totalEnrollmentsElement) totalEnrollmentsElement.textContent = activeEnrollments;
             if (totalTeachersElement) totalTeachersElement.textContent = totalTeachers;
             
-            console.log('İstatistikler yüklendi');
+            console.log('YKS İstatistikler yüklendi');
         } else {
-            console.error('İstatistik verileri alinamadi:', { classesResult, usersResult });
+            console.error('YKS İstatistik verileri alinamadi:', { classesResult, usersResult });
         }
     } catch (error) {
-        console.error('İstatistik yükleme hatasi:', error);
+        console.error('YKS İstatistik yükleme hatasi:', error);
     }
 }
 
@@ -1072,21 +1063,14 @@ async function loadClassList(adminService) {
 // Kullanıcı listesini yükle
 async function loadUserList(adminService) {
     try {
-        console.log('Kullanıcı listesi yükleniyor...');
+        console.log('YKS Kullanıcı listesi yükleniyor...');
         
-        // Hangi sayfada olduğumuzu kontrol et
-        const currentPage = window.location.pathname;
-        let programFilter = null;
-        
-        if (currentPage.includes('admin-lgs.html')) {
-            programFilter = 'LGS';
-        } else if (currentPage.includes('admin-yks.html')) {
-            programFilter = 'YKS';
-        }
+        // YKS programı için filtreleme
+        const programFilter = 'YKS';
         
         const result = await adminService.getAllUsers(programFilter);
         
-        console.log('Kullanıcı sonucu:', result);
+        console.log('YKS Kullanıcı sonucu:', result);
         
         if (result.success) {
             const userListContainer = document.getElementById('userList');
@@ -1099,26 +1083,23 @@ async function loadUserList(adminService) {
                         userListContainer.appendChild(userCard);
                     });
                 } else {
-                    const noUsersMessage = programFilter 
-                        ? `<p style="text-align: center; color: #6b7280;">Bu programda henüz kullanıcı bulunmuyor</p>`
-                        : `<p style="text-align: center; color: #6b7280;">Henüz kullanıcı bulunmuyor</p>`;
-                    userListContainer.innerHTML = noUsersMessage;
+                    userListContainer.innerHTML = '<p style="text-align: center; color: #6b7280;">YKS programında henüz kullanıcı bulunmuyor</p>';
                 }
             }
             
-            console.log('Kullanıcı listesi yüklendi');
+            console.log('YKS Kullanıcı listesi yüklendi');
         } else {
-            console.error('Kullanıcı listesi alinamadi:', result.error);
+            console.error('YKS Kullanıcı listesi alinamadi:', result.error);
             const userListContainer = document.getElementById('userList');
             if (userListContainer) {
-                userListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Kullanıcı listesi yüklenemedi: ' + result.error + '</p>';
+                userListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">YKS Kullanıcı listesi yüklenemedi: ' + result.error + '</p>';
             }
         }
     } catch (error) {
-        console.error('Kullanıcı listesi yükleme hatasi:', error);
+        console.error('YKS Kullanıcı listesi yükleme hatasi:', error);
         const userListContainer = document.getElementById('userList');
         if (userListContainer) {
-            userListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Kullanıcı listesi yüklenirken hata oluştu</p>';
+            userListContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">YKS Kullanıcı listesi yüklenirken hata oluştu</p>';
         }
     }
 }
@@ -1336,7 +1317,7 @@ function createTeacherCard(teacherName, schedules) {
             <div class="class-item">
                 <div class="class-time">${formatTime(schedule.start_time)} - ${formatTime(schedule.end_time)}</div>
                 <div class="class-info">
-                    <div class="class-name">${schedule.classes?.class_name || 'Bilinmeyen Sınıf'}</div>
+                    <div class="class-name">${schedule.class_name || schedule.classes?.class_name || ''}</div>
                     <div class="class-type">${schedule.subject} • ${schedule.classes?.schedule_type || ''}</div>
                 </div>
             </div>
@@ -2963,7 +2944,7 @@ function createTeacherCardWithActions(teacherName, schedules) {
                         <div class="class-item">
                             <div class="class-time">${formatTime(schedule.start_time)} - ${formatTime(schedule.end_time)}</div>
                             <div class="class-info">
-                                <div class="class-name">${schedule.classes?.class_name || 'Bilinmeyen Sınıf'}</div>
+                                <div class="class-name">${schedule.class_name || schedule.classes?.class_name || ''}</div>
                                 <div class="class-type">${schedule.subject}</div>
                             </div>
                         </div>
@@ -3045,7 +3026,7 @@ function showTeacherScheduleModal(teacherName, schedules) {
             return `
                 <tr>
                     <td>${formatTime(schedule.start_time)} - ${formatTime(schedule.end_time)}</td>
-                    <td>${schedule.classes?.class_name || 'Bilinmeyen Sınıf'}</td>
+                    <td>${schedule.class_name || schedule.classes?.class_name || ''}</td>
                     <td>${schedule.subject}</td>
                     <td>${schedule.classes?.program_type || '-'}</td>
                     <td>${schedule.classes?.schedule_type || '-'}</td>
