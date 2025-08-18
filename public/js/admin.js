@@ -1647,6 +1647,9 @@ function showNotification(message, type = 'info') {
 // Admin panelinden çıkış
 function logoutAdmin() {
     if (confirm('Admin panelinden çıkmak istediğinizden emin misiniz?')) {
+        // Session storage'ı temizle
+        sessionStorage.removeItem('adminAuthenticated');
+        sessionStorage.removeItem('adminToken');
         window.location.href = '/';
     }
 }

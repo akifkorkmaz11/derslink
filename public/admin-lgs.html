@@ -721,14 +721,12 @@
         (function() {
             // Session storage'dan admin authentication kontrolü
             const isAdminAuthenticated = sessionStorage.getItem('adminAuthenticated');
-            const adminToken = sessionStorage.getItem('adminToken');
             
             console.log('🔐 Admin authentication kontrolü...');
             console.log('Admin authenticated:', isAdminAuthenticated);
-            console.log('Admin token:', adminToken);
             
             // Eğer admin authentication yoksa ana sayfaya yönlendir
-            if (!isAdminAuthenticated || !adminToken) {
+            if (!isAdminAuthenticated) {
                 console.log('❌ Admin authentication bulunamadı, ana sayfaya yönlendiriliyor...');
                 alert('Admin paneline erişim için giriş yapmanız gerekiyor.');
                 window.location.href = '/';

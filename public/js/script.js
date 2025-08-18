@@ -1653,12 +1653,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
             
-            // Demo admin credentials
-            if (email === 'admin@derslink.com' && password === '123456') {
+            // Admin credentials
+            if (email === 'admin@derslink.com' && password === '537944') {
                 showNotification('Admin girişi başarılı!', 'success');
                 closeAdminModal();
                 
-                // Redirect to admin panel - DÜZELTME: admin-lgs -> admin
+                // Set admin authentication in session storage
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                sessionStorage.setItem('adminToken', 'admin_' + Date.now());
+                
+                // Redirect to admin panel
                 setTimeout(() => {
                     window.location.href = 'admin';
                 }, 1000);
