@@ -325,8 +325,6 @@ app.post('/api/payment/process-card', async (req, res) => {
                     gsmNumber: phone,
                     email: email,
                     identityNumber: '74300864791',
-                    lastLoginDate: '2024-01-15',
-                    registrationDate: '2024-01-15',
                     registrationAddress: 'Test Adres',
                     ip: req.ip || '127.0.0.1',
                     city: 'Istanbul',
