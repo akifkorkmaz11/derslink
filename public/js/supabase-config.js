@@ -88,7 +88,10 @@ const UserService = {
                     mainProgram: userData.mainProgram,
                     scheduleType: userData.scheduleType,
                     yksField: userData.yksField,
-                    userDataKeys: Object.keys(userData)
+                    userDataKeys: Object.keys(userData),
+                    userDataValues: Object.values(userData),
+                    scheduleTypeType: typeof userData.scheduleType,
+                    yksFieldType: typeof userData.yksField
                 });
                 
                 const userInsertPayload = {
@@ -457,7 +460,10 @@ const UserService = {
                 mainProgram: userData.mainProgram,
                 scheduleType: userData.scheduleType,
                 yksField: userData.yksField,
-                userDataKeys: Object.keys(userData)
+                userDataKeys: Object.keys(userData),
+                userDataValues: Object.values(userData),
+                scheduleTypeType: typeof userData.scheduleType,
+                yksFieldType: typeof userData.yksField
             });
             
             // Insert into users table
