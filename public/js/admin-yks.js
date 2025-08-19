@@ -2267,6 +2267,14 @@ async function openUserDetailsModal(userId) {
                             <p><strong>Ad Soyad:</strong> ${user.name || 'Belirtilmemiş'}</p>
                             <p><strong>E-posta:</strong> ${user.email}</p>
                             <p><strong>Telefon:</strong> ${user.phone || 'Belirtilmemiş'}</p>
+                            <p><strong>Program:</strong> ${user.enrolled_program || 'Belirtilmemiş'}</p>
+                            <p><strong>Program Türü:</strong> ${user.schedule_type === 'hafta-ici' ? 'Hafta İçi' : 
+                                                              user.schedule_type === 'hafta-sonu' ? 'Hafta Sonu' : 
+                                                              user.schedule_type === 'karma' ? 'Karma' : 'Belirtilmemiş'}</p>
+                            ${user.enrolled_program === 'YKS' && user.yks_field ? 
+                                `<p><strong>YKS Alanı:</strong> ${user.yks_field === 'sayisal' ? 'Sayısal' : 
+                                                                 user.yks_field === 'sozel' ? 'Sözel' : 
+                                                                 user.yks_field === 'esit-agirlik' ? 'Eşit Ağırlık' : user.yks_field}</p>` : ''}
                             <p><strong>Kayıt Tarihi:</strong> ${user.created_at ? new Date(user.created_at).toLocaleDateString('tr-TR') : 'Belirtilmemiş'}</p>
                         </div>
                         
