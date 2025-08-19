@@ -567,6 +567,7 @@ async function loadClassSchedule() {
             current_enrollment: classData?.current_enrollment,
             max_capacity: classData?.max_capacity
         });
+        console.log('🔍 Tam sınıf objesi:', JSON.stringify(classData, null, 2));
         
         // Veri kontrolü
         if (!classData || !classData.class_name) {
