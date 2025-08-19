@@ -587,7 +587,11 @@ async function initializePaymentFirst(firstName, lastName, email, phone, mainPro
             amount: extractAmount(selectedProgram.price)
         };
         
-                        // Form verilerini global değişkende sakla (callback için)
+                        console.log('🔍 initializePaymentFirst parametreleri:', {
+            firstName, lastName, email, phone, mainProgram, subProgram, password, yksField
+        });
+        
+        // Form verilerini global değişkende sakla (callback için)
         window.pendingRegistrationData = {
             email: email,
             password: password,
@@ -599,6 +603,8 @@ async function initializePaymentFirst(firstName, lastName, email, phone, mainPro
             scheduleType: subProgram, // Hafta içi, hafta sonu, karma bilgisi
             yksField: yksField // YKS alan bilgisi
         };
+        
+        console.log('📋 window.pendingRegistrationData oluşturuldu:', window.pendingRegistrationData);
                 
         // Gerçek Iyzico ödeme sistemini başlat
         console.log('💳 Gerçek Iyzico ödeme sistemi başlatılıyor...');
@@ -809,13 +815,15 @@ async function handleModernPaymentSuccess() {
                 yksField: formData.yksField
             });
             
-            console.log('🔍 FormData detayları:', {
-                mainProgram: formData.mainProgram,
-                scheduleType: formData.scheduleType,
-                scheduleTypeType: typeof formData.scheduleType,
-                yksField: formData.yksField,
-                yksFieldType: typeof formData.yksField
-            });
+                    console.log('🔍 FormData detayları:', {
+            mainProgram: formData.mainProgram,
+            scheduleType: formData.scheduleType,
+            scheduleTypeType: typeof formData.scheduleType,
+            yksField: formData.yksField,
+            yksFieldType: typeof formData.yksField,
+            formDataKeys: Object.keys(formData),
+            formDataValues: Object.values(formData)
+        });
             
             console.log('✅ Kullanıcı kayıt işlemi tamamlandı');
         } catch (error) {
