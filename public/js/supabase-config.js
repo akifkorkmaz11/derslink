@@ -313,6 +313,11 @@ const UserService = {
                 .eq('program', 'YKS');
             
             console.log('🔍 Tüm YKS sınıfları:', allClasses);
+            console.log('🔍 Arama kriterleri:', {
+                status: 'active',
+                schedule_type: correctedScheduleType,
+                program_type: mainProgram === 'YKS' && yksField ? (yksField === 'sayisal' ? 'Sayısal' : yksField === 'sozel' ? 'Sözel' : 'Eşit Ağırlık') : mainProgram
+            });
             
             if (classError) {
                 throw new Error('Sınıf arama hatası: ' + classError.message);
