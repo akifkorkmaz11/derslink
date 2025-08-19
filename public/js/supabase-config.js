@@ -288,6 +288,9 @@ const UserService = {
                 query = query.eq('program_type', mainProgram);
             }
             
+            // Kapasite kontrolü ekle - sadece dolu olmayan sınıfları ara
+            query = query.lt('current_enrollment', 'max_capacity');
+            
             console.log('🔍 Final sorgu parametreleri:', {
                 mainProgram,
                 correctedScheduleType,
