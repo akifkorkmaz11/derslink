@@ -816,29 +816,13 @@ async function handleModernPaymentSuccess() {
                 yksFieldType: typeof formData.yksField
             });
             
-            console.log('🔍 Bekleme listesi ekleme öncesi veri kontrolü:', {
-                userId: registrationResult.user.id,
-                mainProgram: formData.mainProgram,
-                scheduleType: formData.scheduleType,
-                yksField: formData.yksField,
-                formDataKeys: Object.keys(formData)
-            });
-            
-            const pendingResult = await window.UserService.addToPendingEnrollments(
-                registrationResult.user.id, 
-                formData.mainProgram, 
-                formData.scheduleType || 'hafta-ici', // Varsayılan değer
-                formData.yksField
-            );
-            
-            console.log('✅ Kullanıcı bekleme listesine eklendi:', pendingResult);
-        } catch (pendingError) {
-            console.error('❌ Bekleme listesi ekleme hatası:', pendingError);
+            console.log('✅ Kullanıcı kayıt işlemi tamamlandı');
+        } catch (error) {
+            console.error('❌ Kayıt işlemi hatası:', error);
             console.error('❌ Hata detayları:', {
-                message: pendingError.message,
-                stack: pendingError.stack
+                message: error.message,
+                stack: error.stack
             });
-            // Bekleme listesi ekleme başarısız olsa bile kayıt işlemi devam eder
         }
         
         // Payment kaydını güncelle (kullanıcı zaten kayıt edilmiş)

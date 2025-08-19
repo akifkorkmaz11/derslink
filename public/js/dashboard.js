@@ -512,32 +512,14 @@ async function loadClassSchedule() {
 
         // Sınıf verisi kontrolü
         if (!userClassResult.class || !userClassResult.class.classes) {
-            console.warn('⚠️ Kullanıcının sınıf verisi eksik, bekleme listesinde olabilir');
+            console.warn('⚠️ Kullanıcının sınıf verisi eksik, henüz sınıfa atanmamış');
             
-            // Kullanıcının bekleme listesinde olup olmadığını kontrol et
-            const { data: pendingEnrollment, error: pendingError } = await window.supabase
-                .from('pending_enrollments')
-                .select('*')
-                .eq('user_id', databaseUserId)
-                .eq('status', 'pending')
-                .single();
-            
-            if (pendingEnrollment) {
-                console.log('✅ Kullanıcı bekleme listesinde:', pendingEnrollment);
-                // Bekleme listesinde ise fallback göster
-                const fallbackSchedule = getScheduleForProgram(userProgram, 'karma');
-                updateClassCounts(fallbackSchedule);
-                displayTodayClasses(fallbackSchedule);
-                displayWeeklyTable(fallbackSchedule);
-                return;
-            } else {
-                console.log('ℹ️ Kullanıcı bekleme listesinde değil, fallback gösteriliyor');
-                const fallbackSchedule = getScheduleForProgram(userProgram, 'karma');
-                updateClassCounts(fallbackSchedule);
-                displayTodayClasses(fallbackSchedule);
-                displayWeeklyTable(fallbackSchedule);
-                return;
-            }
+            // Kullanıcı henüz sınıfa atanmamış, fallback göster
+            const fallbackSchedule = getScheduleForProgram(userProgram, 'karma');
+            updateClassCounts(fallbackSchedule);
+            displayTodayClasses(fallbackSchedule);
+            displayWeeklyTable(fallbackSchedule);
+            return;
         }
         
         if (!userClassResult.class) {

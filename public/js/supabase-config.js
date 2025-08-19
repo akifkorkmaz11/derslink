@@ -91,6 +91,7 @@ const UserService = {
                     phone: userData.phone,
                     password_hash: 'temp_hash_' + Date.now(),
                     enrolled_program: userData.mainProgram,
+                    schedule_type: userData.scheduleType || 'hafta-ici', // Program türü
                     yks_field: userData.yksField || null // YKS alan bilgisi
                     // created_at ve updated_at otomatik olarak Supabase tarafından doldurulacak
                 };
@@ -109,13 +110,8 @@ const UserService = {
 
             // Payment kaydı artık handleModernPaymentSuccess içinde yapılacak
             
-            // Kullanıcıyı bekleme listesine ekle
-            try {
-                await this.addToPendingEnrollments(data.user.id, userData.mainProgram, userData.scheduleType, userData.yksField);
-            } catch (pendingError) {
-                console.error('❌ Bekleme listesi ekleme hatası:', pendingError);
-                // Bekleme listesi ekleme başarısız olsa bile kayıt işlemi devam eder
-            }
+            // Kullanıcı kayıt işlemi tamamlandı
+            console.log('✅ Kullanıcı başarıyla kayıt edildi');
             // Burada sadece user kaydı yapılıyor
             
             return { success: true, user: data.user };
@@ -246,37 +242,7 @@ const UserService = {
         }
     },
 
-    // Kullanıcıyı bekleme listesine ekle
-    async addToPendingEnrollments(userId, mainProgram, scheduleType, yksField = null) {
-        try {
-            console.log('📋 Kullanıcı bekleme listesine ekleniyor:', { userId, mainProgram, scheduleType, yksField });
-            
-            const pendingData = {
-                user_id: userId,
-                main_program: mainProgram,
-                schedule_type: scheduleType,
-                yks_field: yksField,
-                status: 'pending'
-            };
-            
-            const { data, error } = await supabase
-                .from('pending_enrollments')
-                .insert([pendingData])
-                .select()
-                .single();
-            
-            if (error) {
-                throw new Error('Bekleme listesi ekleme hatası: ' + error.message);
-            }
-            
-            console.log('✅ Kullanıcı bekleme listesine eklendi:', data);
-            return data;
-            
-        } catch (error) {
-            console.error('❌ Bekleme listesi ekleme hatası:', error);
-            throw error;
-        }
-    },
+
 
     // Kullanıcıyı uygun sınıfa otomatik ata (eski fonksiyon - artık kullanılmıyor)
     async assignUserToClass(userId, mainProgram, scheduleType, yksField = null) {

@@ -22,37 +22,7 @@ class AdminService {
         this.supabase = window.supabase;
     }
 
-    // Bekleme listesindeki kullanıcıları getir
-    async getPendingEnrollments() {
-        try {
-            console.log('Bekleme listesi getiriliyor...');
-            
-            const { data, error } = await this.supabase
-                .from('pending_enrollments')
-                .select(`
-                    *,
-                    users (
-                        id,
-                        name,
-                        email,
-                        phone
-                    )
-                `)
-                .eq('status', 'pending')
-                .order('created_at', { ascending: false });
-            
-            if (error) {
-                console.error('Bekleme listesi alınamadı:', error);
-                return { success: false, error: error.message };
-            }
-            
-            console.log('Bekleme listesi alındı:', data?.length || 0);
-            return { success: true, pendingEnrollments: data || [] };
-        } catch (error) {
-            console.error('Bekleme listesi hatası:', error);
-            return { success: false, error: error.message };
-        }
-    }
+
 
     // Tüm sınıfları getir (program bazlı filtreleme ile)
     async getAllClasses(program = null) {
@@ -945,8 +915,7 @@ async function loadYKSAdminData() {
         // Öğretmenleri yükle
         await loadTeachers();
         
-        // Bekleme listesini yükle
-        await loadPendingEnrollments(adminService);
+
         
         // Kullanıcı listesini yükle
         await loadUserList(adminService);
@@ -1095,68 +1064,7 @@ async function loadClassList(adminService) {
     }
 }
 
-// Bekleme listesini yükle
-async function loadPendingEnrollments(adminService) {
-    try {
-        console.log('Bekleme listesi yükleniyor...');
-        
-        const result = await adminService.getPendingEnrollments();
-        
-        if (!result.success) {
-            console.error('Bekleme listesi alınamadı:', result.error);
-            showNotification('Bekleme listesi yüklenirken hata oluştu', 'error');
-            return;
-        }
-        
-        const pendingList = document.getElementById('pendingList');
-        if (!pendingList) {
-            console.error('Bekleme listesi container bulunamadı');
-            return;
-        }
-        
-        if (result.pendingEnrollments.length === 0) {
-            pendingList.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">Bekleme listesinde kullanıcı bulunmuyor.</p>';
-            return;
-        }
-        
-        pendingList.innerHTML = result.pendingEnrollments.map(pending => {
-            const user = pending.users;
-            const scheduleTypeText = pending.schedule_type === 'hafta-ici' ? 'Hafta İçi' : 
-                                    pending.schedule_type === 'hafta-sonu' ? 'Hafta Sonu' : 'Karma';
-            
-            const yksFieldText = pending.yks_field === 'sayisal' ? 'Sayısal' : 
-                                pending.yks_field === 'sozel' ? 'Sözel' : 
-                                pending.yks_field === 'esit-agirlik' ? 'Eşit Ağırlık' : '';
-            
-            return `
-                <div class="pending-card">
-                    <h3>${user?.name || 'İsimsiz Kullanıcı'}</h3>
-                    <div class="pending-info">
-                        <p><strong>E-posta:</strong> ${user?.email || 'N/A'}</p>
-                        <p><strong>Telefon:</strong> ${user?.phone || 'N/A'}</p>
-                        <p><strong>Program:</strong> ${pending.main_program}</p>
-                        <p><strong>Program Türü:</strong> ${scheduleTypeText}</p>
-                        ${pending.main_program === 'YKS' && pending.yks_field ? `<p><strong>YKS Alanı:</strong> ${yksFieldText}</p>` : ''}
-                        <p><strong>Kayıt Tarihi:</strong> ${new Date(pending.created_at).toLocaleString('tr-TR')}</p>
-                    </div>
-                    <div class="pending-actions">
-                        <button class="btn btn-primary" onclick="assignPendingUser('${pending.id}', '${pending.user_id}')">
-                            <i class="fas fa-user-plus"></i> Sınıf Ata
-                        </button>
-                        <button class="btn btn-secondary" onclick="viewPendingUserDetails('${pending.id}')">
-                            <i class="fas fa-eye"></i> Detaylar
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        console.log('Bekleme listesi yüklendi:', result.pendingEnrollments.length);
-    } catch (error) {
-        console.error('Bekleme listesi yükleme hatası:', error);
-        showNotification('Bekleme listesi yüklenirken hata oluştu', 'error');
-    }
-}
+
 
 // Kullanıcı listesini yükle
 async function loadUserList(adminService) {
@@ -1620,6 +1528,15 @@ function createUserCard(user) {
         programBadge = '<span class="program-badge new-user-badge">Yeni Kayıt</span>';
     }
     
+    // Program detayları
+    const scheduleTypeText = user.schedule_type === 'hafta-ici' ? 'Hafta İçi' : 
+                            user.schedule_type === 'hafta-sonu' ? 'Hafta Sonu' : 
+                            user.schedule_type === 'karma' ? 'Karma' : 'Belirtilmemiş';
+    
+    const yksFieldText = user.yks_field === 'sayisal' ? 'Sayısal' : 
+                        user.yks_field === 'sozel' ? 'Sözel' : 
+                        user.yks_field === 'esit-agirlik' ? 'Eşit Ağırlık' : '';
+    
     card.innerHTML = `
         <div class="user-info">
             <div class="user-header">
@@ -1627,6 +1544,8 @@ function createUserCard(user) {
                 ${programBadge}
             </div>
             <p>${userEmail}</p>
+            <p><strong>Program Türü:</strong> ${scheduleTypeText}</p>
+            ${user.enrolled_program === 'YKS' && yksFieldText ? `<p><strong>YKS Alanı:</strong> ${yksFieldText}</p>` : ''}
             <p><strong>Kayıt Tarihi:</strong> ${user.created_at ? new Date(user.created_at).toLocaleDateString('tr-TR') : 'Bilinmiyor'}</p>
         </div>
         <div class="user-actions">
