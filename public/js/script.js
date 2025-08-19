@@ -551,6 +551,10 @@ function validateEmail(email) {
 
 // Önce ödeme yap, sonra kayıt işlemini gerçekleştir
 async function initializePaymentFirst(firstName, lastName, email, phone, mainProgram, subProgram, selectedProgram, password, yksField = '') {
+    console.log('🚀 initializePaymentFirst çağrıldı:', {
+        firstName, lastName, email, phone, mainProgram, subProgram, 
+        selectedProgramTitle: selectedProgram?.title, password: '***', yksField
+    });
     const submitBtn = document.getElementById('registerSubmitBtn');
     const originalText = submitBtn.innerHTML;
     
@@ -1210,6 +1214,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const yksField = document.getElementById('registerYKSField')?.value || '';
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            console.log('🔍 Form verileri alındı:', {
+                firstName, lastName, email, phone, mainProgram, subProgram, yksField, password: '***'
+            });
             
             // Validation
             if (!firstName || !lastName || !email || !phone || !mainProgram || !subProgram || !password || !confirmPassword) {
