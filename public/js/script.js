@@ -816,21 +816,21 @@ async function handleModernPaymentSuccess() {
                 yksFieldType: typeof formData.yksField
             });
             
-            const classAssignmentResult = await window.UserService.assignUserToClass(
+            const pendingResult = await window.UserService.addToPendingEnrollments(
                 registrationResult.user.id, 
                 formData.mainProgram, 
                 formData.scheduleType,
                 formData.yksField
             );
             
-            console.log('✅ Kullanıcı sınıfa otomatik atandı:', classAssignmentResult);
-        } catch (classAssignmentError) {
-            console.error('❌ Sınıf atama hatası:', classAssignmentError);
+            console.log('✅ Kullanıcı bekleme listesine eklendi:', pendingResult);
+        } catch (pendingError) {
+            console.error('❌ Bekleme listesi ekleme hatası:', pendingError);
             console.error('❌ Hata detayları:', {
-                message: classAssignmentError.message,
-                stack: classAssignmentError.stack
+                message: pendingError.message,
+                stack: pendingError.stack
             });
-            // Sınıf atama başarısız olsa bile kayıt işlemi devam eder
+            // Bekleme listesi ekleme başarısız olsa bile kayıt işlemi devam eder
         }
         
         // Payment kaydını güncelle (kullanıcı zaten kayıt edilmiş)

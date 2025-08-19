@@ -512,40 +512,32 @@ async function loadClassSchedule() {
 
         // Sınıf verisi kontrolü
         if (!userClassResult.class || !userClassResult.class.classes) {
-            console.warn('⚠️ Kullanıcının sınıf verisi eksik, otomatik atama deneniyor...');
-            try {
-                // Kullanıcının YKS alanını al (varsa)
-                let yksField = null;
-                // users tablosunda yks_field sütunu yok, varsayılan değer kullan
-                console.log('ℹ️ users tablosunda yks_field sütunu yok, varsayılan değer kullanılacak');
-
-                // Otomatik sınıf atama - Kullanıcının seçimini kullan
-                if (window.UserService && window.UserService.assignUserToClass) {
-                    // Kullanıcının seçtiği schedule type'ı al (varsayılan: hafta-ici)
-                    let userScheduleType = 'hafta-ici'; // Varsayılan olarak hafta içi
-                    
-                    // YKS alanı yoksa varsayılan olarak "sayisal" kullan
-                    const finalYksField = yksField || 'sayisal';
-                    console.log('🎯 Otomatik sınıf atama denemesi başlatılıyor...', { userProgram, userScheduleType, finalYksField });
-                    await window.UserService.assignUserToClass(databaseUserId, userProgram, userScheduleType, finalYksField);
-
-                    // Atama sonrası tekrar sınıfı getir
-                    const retryClass = await classService.getUserClass(databaseUserId);
-                    if (retryClass && retryClass.class && retryClass.class.classes) {
-                        console.log('✅ Otomatik atama başarılı, sınıf bulundu');
-                    } else {
-                        console.warn('⚠️ Otomatik atama sonrası sınıf bulunamadı');
-                    }
-                }
-            } catch (autoAssignError) {
-                console.error('❌ Otomatik sınıf atama denemesi başarısız:', autoAssignError);
+            console.warn('⚠️ Kullanıcının sınıf verisi eksik, bekleme listesinde olabilir');
+            
+            // Kullanıcının bekleme listesinde olup olmadığını kontrol et
+            const { data: pendingEnrollment, error: pendingError } = await window.supabase
+                .from('pending_enrollments')
+                .select('*')
+                .eq('user_id', databaseUserId)
+                .eq('status', 'pending')
+                .single();
+            
+            if (pendingEnrollment) {
+                console.log('✅ Kullanıcı bekleme listesinde:', pendingEnrollment);
+                // Bekleme listesinde ise fallback göster
+                const fallbackSchedule = getScheduleForProgram(userProgram, 'karma');
+                updateClassCounts(fallbackSchedule);
+                displayTodayClasses(fallbackSchedule);
+                displayWeeklyTable(fallbackSchedule);
+                return;
+            } else {
+                console.log('ℹ️ Kullanıcı bekleme listesinde değil, fallback gösteriliyor');
+                const fallbackSchedule = getScheduleForProgram(userProgram, 'karma');
+                updateClassCounts(fallbackSchedule);
+                displayTodayClasses(fallbackSchedule);
+                displayWeeklyTable(fallbackSchedule);
+                return;
             }
-
-            const fallbackSchedule = getScheduleForProgram(userProgram, 'karma');
-            updateClassCounts(fallbackSchedule);
-            displayTodayClasses(fallbackSchedule);
-            displayWeeklyTable(fallbackSchedule);
-            return;
         }
         
         if (!userClassResult.class) {
@@ -569,23 +561,8 @@ async function loadClassSchedule() {
         });
         console.log('🔍 Tam sınıf objesi:', JSON.stringify(classData, null, 2));
         
-        // Debug: Kullanıcının sınıf kaydını sil (test için)
-        if (classData?.class_name?.includes('YKS-Sayısal-hafta-ici-')) {
-            console.log('🧪 Test: Yeni oluşturulan sınıf tespit edildi, kayıt siliniyor...');
-            const { error: deleteError } = await window.supabase
-                .from('class_enrollments')
-                .delete()
-                .eq('user_id', databaseUserId);
-            
-            if (deleteError) {
-                console.error('❌ Sınıf kaydı silme hatası:', deleteError);
-            } else {
-                console.log('✅ Sınıf kaydı silindi, otomatik atama tekrar çalışacak');
-                // Sayfayı yenile
-                window.location.reload();
-                return;
-            }
-        }
+        // Kullanıcı zaten bir sınıfa atanmış, bekleme listesine ekleme yapmaya gerek yok
+        console.log('✅ Kullanıcı zaten sınıfa atanmış:', classData.class_name);
         
         // Veri kontrolü
         if (!classData || !classData.class_name) {
