@@ -560,6 +560,13 @@ async function loadClassSchedule() {
         
         const classData = userClassResult.class.classes;
         console.log('✅ Kullanıcının sınıfı:', classData);
+        console.log('🔍 Sınıf detayları:', {
+            class_name: classData?.class_name,
+            program_type: classData?.program_type,
+            schedule_type: classData?.schedule_type,
+            current_enrollment: classData?.current_enrollment,
+            max_capacity: classData?.max_capacity
+        });
         
         // Veri kontrolü
         if (!classData || !classData.class_name) {
