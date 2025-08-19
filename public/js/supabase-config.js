@@ -288,8 +288,8 @@ const UserService = {
                 query = query.eq('program_type', mainProgram);
             }
             
-            // Kapasite kontrolü ekle - sadece dolu olmayan sınıfları ara
-            query = query.lt('current_enrollment', 'max_capacity');
+            // Kapasite kontrolünü kaldırdık - Supabase desteklemiyor
+            // Sadece aktif sınıfları ara, kapasite kontrolünü sonra yapacağız
             
             console.log('🔍 Final sorgu parametreleri:', {
                 mainProgram,
@@ -326,7 +326,14 @@ const UserService = {
                 throw new Error('Sınıf arama hatası: ' + classError.message);
             }
             
-            if (!availableClasses || availableClasses.length === 0) {
+            // Kapasite kontrolü - JavaScript tarafında filtrele
+            const availableClassesWithCapacity = availableClasses?.filter(cls => 
+                cls.current_enrollment < cls.max_capacity
+            ) || [];
+            
+            console.log('🔍 Kapasite kontrolü sonrası uygun sınıflar:', availableClassesWithCapacity);
+            
+            if (!availableClassesWithCapacity || availableClassesWithCapacity.length === 0) {
                 console.log('⚠️ Uygun sınıf bulunamadı, yeni sınıf oluşturuluyor...');
                 
                 // Yeni sınıf oluştur
@@ -391,7 +398,7 @@ const UserService = {
                 
             } else {
                 // Mevcut sınıfa ata
-                const selectedClass = availableClasses[0];
+                const selectedClass = availableClassesWithCapacity[0];
                 console.log('✅ Uygun sınıf bulundu:', selectedClass.class_name);
                 
                 // Kullanıcıyı sınıfa ata
