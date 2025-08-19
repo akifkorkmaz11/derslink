@@ -1,6 +1,6 @@
 # 🚀 Derslink Migration Guide
 
-Bu rehber, Derslink sisteminin kurulumu ve veritabanı migration işlemlerini açıklar.
+Bu rehber, Derslink sisteminin kurulumu ve veritabanı migration işlemlerini açıklar
 
 ## 📋 Ön Gereksinimler
 
