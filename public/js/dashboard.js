@@ -519,12 +519,15 @@ async function loadClassSchedule() {
                 // users tablosunda yks_field sütunu yok, varsayılan değer kullan
                 console.log('ℹ️ users tablosunda yks_field sütunu yok, varsayılan değer kullanılacak');
 
-                // Otomatik sınıf atama (varsayılan schedule: karma)
+                // Otomatik sınıf atama - Kullanıcının seçimini kullan
                 if (window.UserService && window.UserService.assignUserToClass) {
+                    // Kullanıcının seçtiği schedule type'ı al (varsayılan: hafta-ici)
+                    let userScheduleType = 'hafta-ici'; // Varsayılan olarak hafta içi
+                    
                     // YKS alanı yoksa varsayılan olarak "sayisal" kullan
                     const finalYksField = yksField || 'sayisal';
-                    console.log('🎯 Otomatik sınıf atama denemesi başlatılıyor...', { userProgram, finalYksField });
-                    await window.UserService.assignUserToClass(databaseUserId, userProgram, 'karma', finalYksField);
+                    console.log('🎯 Otomatik sınıf atama denemesi başlatılıyor...', { userProgram, userScheduleType, finalYksField });
+                    await window.UserService.assignUserToClass(databaseUserId, userProgram, userScheduleType, finalYksField);
 
                     // Atama sonrası tekrar sınıfı getir
                     const retryClass = await classService.getUserClass(databaseUserId);
