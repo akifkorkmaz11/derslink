@@ -305,6 +305,15 @@ const UserService = {
                 classes: availableClasses
             });
             
+            // Debug: Tüm sınıfları listele
+            const { data: allClasses, error: allClassesError } = await supabase
+                .from('classes')
+                .select('class_name, program_type, schedule_type, current_enrollment, max_capacity')
+                .eq('status', 'active')
+                .eq('program', 'YKS');
+            
+            console.log('🔍 Tüm YKS sınıfları:', allClasses);
+            
             if (classError) {
                 throw new Error('Sınıf arama hatası: ' + classError.message);
             }
