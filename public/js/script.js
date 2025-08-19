@@ -438,16 +438,27 @@ function updateSubPrograms() {
         subProgramSelect.required = true;
         subProgramSelect.innerHTML = '<option value="">Program türü seçiniz</option>';
         
+        console.log('📋 Program seçenekleri oluşturuluyor:', {
+            mainProgram,
+            availablePrograms: Object.keys(programData[mainProgram].programs)
+        });
+        
         Object.keys(programData[mainProgram].programs).forEach(key => {
             const program = programData[mainProgram].programs[key];
             const option = document.createElement('option');
             option.value = key;
             option.textContent = program.title;
             subProgramSelect.appendChild(option);
+            console.log('✅ Option oluşturuldu:', { key, title: program.title });
         });
         
         // Add change event listener
         subProgramSelect.onchange = function() {
+            console.log('🔄 SubProgram değişti:', {
+                selectedValue: this.value,
+                selectedText: this.options[this.selectedIndex]?.text,
+                allOptions: Array.from(this.options).map(opt => ({ value: opt.value, text: opt.text }))
+            });
             updateProgramDetails();
             updateYKSField(); // YKS alan seçimini güncelle
         };
@@ -1222,7 +1233,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const confirmPassword = document.getElementById('registerConfirmPassword').value;
             
             console.log('🔍 Form verileri alındı:', {
-                firstName, lastName, email, phone, mainProgram, subProgram, yksField, password: '***'
+                firstName, lastName, email, phone, mainProgram, subProgram, yksField, password: '***',
+                subProgramType: typeof subProgram,
+                subProgramLength: subProgram ? subProgram.length : 0,
+                subProgramElement: document.getElementById('registerSubProgram')?.value,
+                subProgramElementType: typeof document.getElementById('registerSubProgram')?.value
             });
             
             // Validation
