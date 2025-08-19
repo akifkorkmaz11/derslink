@@ -562,7 +562,7 @@ async function loadClassSchedule() {
         
         document.getElementById('userProgramDisplay').innerHTML = `
             <i class="fas fa-graduation-cap"></i>
-            ${classData.class_name} - ${scheduleTypeText} Programı
+            ${classData.class_name}
         `;
         
         // Bugünkü dersleri göster
