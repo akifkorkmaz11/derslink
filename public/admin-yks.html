@@ -98,7 +98,44 @@
             color: #1f2937;
         }
 
-        .class-grid, .user-grid {
+        .class-grid,         .pending-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .pending-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #f59e0b;
+        }
+
+        .pending-card h3 {
+            margin: 0 0 10px 0;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+
+        .pending-info {
+            margin-bottom: 15px;
+        }
+
+        .pending-info p {
+            margin: 5px 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .pending-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .user-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
@@ -587,6 +624,14 @@
             <div class="teacher-schedule-grid" id="teacherScheduleGrid">
                 <!-- Öğretmen programları buraya yüklenecek -->
             </div>
+        </div>
+
+        <!-- Yeni Gelenler -->
+        <div class="section-title">
+            <i class="fas fa-user-clock"></i> Yeni Gelenler (Bekleme Listesi)
+        </div>
+        <div class="pending-grid" id="pendingList">
+            <!-- Bekleme listesi kartları buraya yüklenecek -->
         </div>
 
         <!-- Kullanıcı Listesi -->
