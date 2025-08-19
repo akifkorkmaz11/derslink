@@ -1,4 +1,4 @@
-// Supabase Configuration - Final Version
+// Supabase Configuration - Final Version - CACHE TEMIZLEME: 2024-01-20
 console.log('🔧 Supabase config dosyası yükleniyor...');
 
 // Supabase credentials
@@ -257,11 +257,10 @@ const UserService = {
                 yksField: typeof yksField
             });
             
-            // Önce uygun sınıfı bul
+            // Önce uygun sınıfı bul - Kapasite kontrolünü kaldırdık
             let query = supabase
                 .from('classes')
                 .select('*')
-                .lt('current_enrollment', 'max_capacity')
                 .eq('status', 'active');
             
             // Schedule type'ı düzelt (YKS için farklı format)
@@ -295,7 +294,7 @@ const UserService = {
                 correctedYksField: mainProgram === 'YKS' && yksField ? (yksField === 'sayisal' ? 'Sayısal' : yksField === 'sozel' ? 'Sözel' : 'Eşit Ağırlık') : null
             });
             
-            query = query.order('current_enrollment', { ascending: true }).limit(1);
+            query = query.order('class_name', { ascending: true }).limit(1);
             
             console.log('🔍 Sınıf arama sorgusu hazırlandı');
             const { data: availableClasses, error: classError } = await query;
