@@ -61,7 +61,9 @@ const UserService = {
                     lastName: userData.lastName,
                     phone: userData.phone,
                     selectedProgram: userData.selectedProgram,
-                    mainProgram: userData.mainProgram
+                    mainProgram: userData.mainProgram,
+                    scheduleType: userData.scheduleType, // Program türü
+                    yksField: userData.yksField // YKS alan bilgisi
                 });
                 
                 if (insertResult.success) {
