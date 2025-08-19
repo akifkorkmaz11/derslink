@@ -453,6 +453,13 @@ const UserService = {
                 throw new Error('Supabase client not initialized');
             }
             
+            console.log('🔍 insertToDatabase verileri:', {
+                mainProgram: userData.mainProgram,
+                scheduleType: userData.scheduleType,
+                yksField: userData.yksField,
+                userDataKeys: Object.keys(userData)
+            });
+            
             // Insert into users table
             const userInsertPayload = {
                 id: userData.id,
@@ -460,9 +467,13 @@ const UserService = {
                 name: userData.firstName + ' ' + userData.lastName,
                 phone: userData.phone,
                 password_hash: 'manual_hash_' + Date.now(),
-                enrolled_program: userData.mainProgram
+                enrolled_program: userData.mainProgram,
+                schedule_type: userData.scheduleType || 'hafta-ici', // Program türü
+                yks_field: userData.yksField || null // YKS alan bilgisi
                 // created_at ve updated_at otomatik olarak Supabase tarafından doldurulacak
             };
+            
+            console.log('📝 insertToDatabase kaydedilecek veri:', userInsertPayload);
             
             const { data: userInsertData, error: userInsertError } = await supabase
                 .from('users')
