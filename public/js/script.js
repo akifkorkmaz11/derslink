@@ -816,10 +816,18 @@ async function handleModernPaymentSuccess() {
                 yksFieldType: typeof formData.yksField
             });
             
+            console.log('🔍 Bekleme listesi ekleme öncesi veri kontrolü:', {
+                userId: registrationResult.user.id,
+                mainProgram: formData.mainProgram,
+                scheduleType: formData.scheduleType,
+                yksField: formData.yksField,
+                formDataKeys: Object.keys(formData)
+            });
+            
             const pendingResult = await window.UserService.addToPendingEnrollments(
                 registrationResult.user.id, 
                 formData.mainProgram, 
-                formData.scheduleType,
+                formData.scheduleType || 'hafta-ici', // Varsayılan değer
                 formData.yksField
             );
             
