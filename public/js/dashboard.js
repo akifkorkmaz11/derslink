@@ -569,6 +569,24 @@ async function loadClassSchedule() {
         });
         console.log('🔍 Tam sınıf objesi:', JSON.stringify(classData, null, 2));
         
+        // Debug: Kullanıcının sınıf kaydını sil (test için)
+        if (classData?.class_name?.includes('YKS-Sayısal-hafta-ici-')) {
+            console.log('🧪 Test: Yeni oluşturulan sınıf tespit edildi, kayıt siliniyor...');
+            const { error: deleteError } = await window.supabase
+                .from('class_enrollments')
+                .delete()
+                .eq('user_id', databaseUserId);
+            
+            if (deleteError) {
+                console.error('❌ Sınıf kaydı silme hatası:', deleteError);
+            } else {
+                console.log('✅ Sınıf kaydı silindi, otomatik atama tekrar çalışacak');
+                // Sayfayı yenile
+                window.location.reload();
+                return;
+            }
+        }
+        
         // Veri kontrolü
         if (!classData || !classData.class_name) {
             console.warn('⚠️ Sınıf verisi eksik, fallback kullanılıyor');
