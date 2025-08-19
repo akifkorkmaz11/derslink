@@ -827,33 +827,9 @@ async function handleModernPaymentSuccess() {
         // Kullanıcı ID'sini al
         formData.userId = registrationResult.user.id;
         
-        // Kullanıcıyı uygun sınıfa otomatik ata
-        try {
-            console.log('🎯 Sınıf atama başlatılıyor...', {
-                userId: registrationResult.user.id,
-                mainProgram: formData.mainProgram,
-                scheduleType: formData.scheduleType,
-                yksField: formData.yksField
-            });
-            
-                    console.log('🔍 FormData detayları:', {
-            mainProgram: formData.mainProgram,
-            scheduleType: formData.scheduleType,
-            scheduleTypeType: typeof formData.scheduleType,
-            yksField: formData.yksField,
-            yksFieldType: typeof formData.yksField,
-            formDataKeys: Object.keys(formData),
-            formDataValues: Object.values(formData)
-        });
-            
-            console.log('✅ Kullanıcı kayıt işlemi tamamlandı');
-        } catch (error) {
-            console.error('❌ Kayıt işlemi hatası:', error);
-            console.error('❌ Hata detayları:', {
-                message: error.message,
-                stack: error.stack
-            });
-        }
+        // Manuel sınıf atama için otomatik atama kapatıldı
+        console.log('ℹ️ Otomatik sınıf atama kapatıldı, manuel atama bekleniyor');
+        console.log('✅ Kullanıcı kayıt işlemi tamamlandı');
         
         // Payment kaydını güncelle (kullanıcı zaten kayıt edilmiş)
         if (window.completedPaymentData && formData.userId) {

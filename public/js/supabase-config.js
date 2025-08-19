@@ -495,13 +495,8 @@ const UserService = {
             
             console.log('✅ Users tablosuna kayıt başarılı:', userInsertData);
             
-            // Kullanıcıyı uygun sınıfa otomatik ata
-            try {
-                await this.assignUserToClass(userData.id, userData.mainProgram, userData.scheduleType, userData.yksField);
-            } catch (classAssignmentError) {
-                console.error('❌ Sınıf atama hatası:', classAssignmentError);
-                // Sınıf atama başarısız olsa bile kayıt işlemi devam eder
-            }
+            // Manuel sınıf atama için otomatik atama kapatıldı
+            console.log('ℹ️ Otomatik sınıf atama kapatıldı, manuel atama bekleniyor');
             
             // Payment kaydı artık handleModernPaymentSuccess içinde yapılacak
             // Burada sadece user kaydı yapılıyor
