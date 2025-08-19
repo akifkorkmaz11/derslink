@@ -779,6 +779,7 @@ async function handleModernPaymentSuccess() {
             phone: formData.phone,
             selectedProgram: formData.selectedProgram,
             mainProgram: formData.mainProgram,
+            scheduleType: formData.scheduleType, // Program türü
             yksField: formData.yksField // YKS alan bilgisi
         };
         

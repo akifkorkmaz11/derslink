@@ -84,6 +84,13 @@ const UserService = {
             
             // Users tablosuna kayıt
             try {
+                console.log('🔍 Kayıt verileri:', {
+                    mainProgram: userData.mainProgram,
+                    scheduleType: userData.scheduleType,
+                    yksField: userData.yksField,
+                    userDataKeys: Object.keys(userData)
+                });
+                
                 const userInsertPayload = {
                     id: data.user.id,
                     email: userData.email,
@@ -95,6 +102,8 @@ const UserService = {
                     yks_field: userData.yksField || null // YKS alan bilgisi
                     // created_at ve updated_at otomatik olarak Supabase tarafından doldurulacak
                 };
+                
+                console.log('📝 Database\'e kaydedilecek veri:', userInsertPayload);
                 
                 const { data: userInsertData, error: userInsertError } = await supabase
                     .from('users')
