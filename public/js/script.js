@@ -592,7 +592,9 @@ async function initializePaymentFirst(firstName, lastName, email, phone, mainPro
         };
         
                         console.log('🔍 initializePaymentFirst parametreleri:', {
-            firstName, lastName, email, phone, mainProgram, subProgram, password, yksField
+            firstName, lastName, email, phone, mainProgram, subProgram, password, yksField,
+            subProgramType: typeof subProgram,
+            subProgramLength: subProgram ? subProgram.length : 0
         });
         
         // Form verilerini global değişkende sakla (callback için)
@@ -608,7 +610,11 @@ async function initializePaymentFirst(firstName, lastName, email, phone, mainPro
             yksField: yksField // YKS alan bilgisi
         };
         
-        console.log('📋 window.pendingRegistrationData oluşturuldu:', window.pendingRegistrationData);
+        console.log('📋 window.pendingRegistrationData oluşturuldu:', {
+            ...window.pendingRegistrationData,
+            scheduleTypeValue: window.pendingRegistrationData.scheduleType,
+            scheduleTypeType: typeof window.pendingRegistrationData.scheduleType
+        });
                 
         // Gerçek Iyzico ödeme sistemini başlat
         console.log('💳 Gerçek Iyzico ödeme sistemi başlatılıyor...');
