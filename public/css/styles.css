@@ -2272,8 +2272,120 @@ body {
     background: #dc2626;
 }
 
-/* About Page Styles */
+/* About Section Styles (Main Page) */
 .about-section {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.about-card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb;
+}
+
+.about-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.about-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.about-icon i {
+    font-size: 1.8rem;
+    color: white;
+}
+
+.about-card h3 {
+    color: #1f2937;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.about-card p {
+    color: #4b5563;
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+.about-card p:last-child {
+    margin-bottom: 0;
+}
+
+.about-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.about-list li {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.about-list li:before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #10b981;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.about-list li:last-child {
+    margin-bottom: 0;
+}
+
+.about-list li strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.about-conclusion {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 20px;
+    padding: 30px;
+    margin-top: 40px;
+    text-align: center;
+    border-left: 4px solid #667eea;
+}
+
+.about-conclusion p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1e40af;
+    font-style: italic;
+    margin: 0;
+}
+
+/* About Page Styles (Separate Page) */
+.about-page-section {
     padding: 120px 0 80px;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     min-height: 100vh;
@@ -2435,9 +2547,57 @@ body {
     box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
 }
 
-/* Responsive Design for About Page */
+/* Responsive Design for About Section */
 @media (max-width: 768px) {
     .about-section {
+        padding: 60px 0;
+    }
+    
+    .about-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-top: 30px;
+    }
+    
+    .about-card {
+        padding: 25px;
+    }
+    
+    .about-icon {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .about-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .about-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    .about-card p {
+        font-size: 0.95rem;
+    }
+    
+    .about-list li {
+        font-size: 0.9rem;
+        padding-left: 18px;
+    }
+    
+    .about-conclusion {
+        padding: 25px;
+        margin-top: 30px;
+    }
+    
+    .about-conclusion p {
+        font-size: 1rem;
+    }
+}
+
+/* Responsive Design for About Page */
+@media (max-width: 768px) {
+    .about-page-section {
         padding: 100px 0 60px;
     }
     
