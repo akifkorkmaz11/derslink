@@ -1831,4 +1831,46 @@ function closeAdminModal() {
     document.getElementById('adminModal').style.display = 'none';
 }
 
+// Legal Modal Functions
+function openDeliveryReturnModal() {
+    document.getElementById('deliveryReturnModal').style.display = 'block';
+}
+
+function closeDeliveryReturnModal() {
+    document.getElementById('deliveryReturnModal').style.display = 'none';
+}
+
+function openPrivacyPolicyModal() {
+    document.getElementById('privacyPolicyModal').style.display = 'block';
+}
+
+function closePrivacyPolicyModal() {
+    document.getElementById('privacyPolicyModal').style.display = 'none';
+}
+
+function openDistanceSalesModal() {
+    document.getElementById('distanceSalesModal').style.display = 'block';
+}
+
+function closeDistanceSalesModal() {
+    document.getElementById('distanceSalesModal').style.display = 'none';
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const deliveryReturnModal = document.getElementById('deliveryReturnModal');
+    const privacyPolicyModal = document.getElementById('privacyPolicyModal');
+    const distanceSalesModal = document.getElementById('distanceSalesModal');
+    
+    if (event.target === deliveryReturnModal) {
+        closeDeliveryReturnModal();
+    }
+    if (event.target === privacyPolicyModal) {
+        closePrivacyPolicyModal();
+    }
+    if (event.target === distanceSalesModal) {
+        closeDistanceSalesModal();
+    }
+}
+
  

@@ -181,6 +181,15 @@
                     </div>
                 </div>
 
+                <div class="form-group checkbox-group">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="privacyPolicy" name="privacyPolicy" required>
+                        <label for="privacyPolicy">
+                            <a href="#" onclick="openPrivacyPolicyModal()">Gizlilik Politikası</a>'nı okudum ve kabul ediyorum.
+                        </label>
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-primary btn-full" id="registerSubmitBtn">
                     <i class="fas fa-credit-card"></i>
                     Ödeme ile Kayıt Ol
@@ -834,14 +843,24 @@
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-logo">
-                    <!-- <img src="images/logo3.png" alt="Derslink Logo" class="nav-logo-img" /> -->
-                    <span>Derslink</span>
+                <div class="footer-main">
+                    <div class="footer-logo">
+                        <!-- <img src="images/logo3.png" alt="Derslink Logo" class="nav-logo-img" /> -->
+                        <span>Derslink</span>
+                    </div>
+                    <p>&copy; 2025 Derslink. Tüm hakları saklıdır.</p>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/derslinknet?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+                        <a href="https://youtube.com/@derslinknet?feature=shared" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+                    </div>
                 </div>
-                <p>&copy; 2025 Derslink. Tüm hakları saklıdır.</p>
-                <div class="social-links">
-                    <a href="https://www.instagram.com/derslinknet?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
-                    <a href="https://youtube.com/@derslinknet?feature=shared" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+                <div class="footer-legal">
+                    <h4>Yasal</h4>
+                    <div class="legal-links">
+                        <a href="#" onclick="openDeliveryReturnModal()">Teslimat & İade</a>
+                        <a href="#" onclick="openPrivacyPolicyModal()">Gizlilik Politikası</a>
+                        <a href="#" onclick="openDistanceSalesModal()">Mesafeli Satış Sözleşmesi</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -862,6 +881,197 @@
                 </div>
                 <div class="teachers-grid" id="teachersGrid">
                     <!-- Teachers will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delivery & Return Modal -->
+    <div id="deliveryReturnModal" class="modal">
+        <div class="modal-content legal-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-shipping-fast"></i> Teslimat ve İade Şartları</h2>
+                <span class="close" onclick="closeDeliveryReturnModal()">&times;</span>
+            </div>
+            <div class="legal-content">
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-truck"></i> Teslimat</h3>
+                    <ul class="legal-list">
+                        <li>Derslink platformunda herhangi bir fiziksel ürün teslimatı bulunmamaktadır.</li>
+                        <li>Ödeme işlemi tamamlandığı anda, kullanıcı hesabı aktif hale gelir.</li>
+                        <li>Kullanıcıya, ödeme tarihinden itibaren 30 (otuz) gün boyunca Derslink yönetimi tarafından belirlenen ders programına erişim hakkı tanımlanır.</li>
+                        <li>Ders içerikleri ve program akışı Derslink yönetimi tarafından sağlanır; gerekli görülmesi halinde değişiklik yapma hakkı saklıdır.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-undo"></i> İade</h3>
+                    <ul class="legal-list">
+                        <li>Sunulan hizmet, dijital içerik ve eğitim programı olduğundan iptal ve iade hakkı bulunmamaktadır.</li>
+                        <li>Kullanıcı, ödeme yaptığı andan itibaren belirtilen süre boyunca (30 gün) programa erişim hakkına sahiptir.</li>
+                        <li>Hizmetin sağlanmasında teknik aksaklık olması durumunda, Derslink yönetimi gerekli desteği sağlayarak kullanıcı mağduriyetini giderecektir.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-info-circle"></i> Ek Bilgilendirme</h3>
+                    <ul class="legal-list">
+                        <li>Kullanıcı ödeme yaptığı anda bu şartları kabul etmiş sayılır.</li>
+                        <li>Derslik yönetimi, eğitim programlarını geliştirmek ve kullanıcı deneyimini artırmak amacıyla içeriklerde güncelleme yapabilir.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyPolicyModal" class="modal">
+        <div class="modal-content legal-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-shield-alt"></i> Gizlilik Politikası</h2>
+                <span class="close" onclick="closePrivacyPolicyModal()">&times;</span>
+            </div>
+            <div class="legal-content">
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-info-circle"></i> 1. Giriş</h3>
+                    <p>Derslink (bundan sonra "Platform" olarak anılacaktır), kullanıcılarının kişisel verilerinin gizliliğine büyük önem vermektedir. Bu gizlilik politikası, kullanıcıların platformu kullanırken sağladıkları bilgilerin nasıl toplandığını, işlendiğini, saklandığını ve korunduğunu açıklamaktadır. Platformu kullanan her kullanıcı, işbu Gizlilik Politikası'nı kabul etmiş sayılır.</p>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-database"></i> 2. Toplanan Veriler</h3>
+                    <ul class="legal-list">
+                        <li>Ad, soyad, iletişim bilgileri (telefon, e-posta)</li>
+                        <li>Ödeme ve fatura bilgileri</li>
+                        <li>Platform kullanımına ilişkin teknik veriler (IP adresi, cihaz bilgileri, çerez verileri)</li>
+                        <li>Kullanıcı tarafından gönüllü olarak paylaşılan diğer bilgiler</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-cogs"></i> 3. Verilerin Kullanım Amaçları</h3>
+                    <ul class="legal-list">
+                        <li>Eğitim hizmetlerinin sunulması ve geliştirilmesi</li>
+                        <li>Ödeme işlemlerinin güvenli bir şekilde gerçekleştirilmesi</li>
+                        <li>Platform güvenliğinin sağlanması</li>
+                        <li>Yasal yükümlülüklerin yerine getirilmesi</li>
+                        <li>Kullanıcılara bilgilendirme, duyuru ve güncellemelerin yapılması</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-lock"></i> 4. Verilerin Saklanması ve Güvenliği</h3>
+                    <ul class="legal-list">
+                        <li>Tüm kullanıcı verileri gizlilik esasına uygun şekilde saklanır.</li>
+                        <li>Veriler, şifreleme teknolojileri ve güvenlik duvarı sistemleri ile korunur.</li>
+                        <li>Yetkisiz erişimlere karşı gerekli tüm teknik ve idari önlemler alınır.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-users"></i> 5. Üçüncü Taraflarla Paylaşım</h3>
+                    <ul class="legal-list">
+                        <li>Kullanıcı verileri, hiçbir şekilde üçüncü kişilerle paylaşılmaz.</li>
+                        <li>Yalnızca yasal yükümlülükler, mahkeme kararları veya resmi makam talepleri doğrultusunda paylaşılabilir.</li>
+                        <li>Ödeme altyapısı sağlayıcılarıyla yalnızca işlem güvenliği için gerekli minimum bilgiler paylaşılır.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-user-check"></i> 6. Kullanıcı Hakları</h3>
+                    <p>Kullanıcılar, yürürlükteki mevzuat kapsamında;</p>
+                    <ul class="legal-list">
+                        <li>Kişisel verilerinin işlenip işlenmediğini öğrenme,</li>
+                        <li>Yanlış veya eksik işlenen verilerin düzeltilmesini talep etme,</li>
+                        <li>Verilerinin silinmesini veya anonim hale getirilmesini talep etme,</li>
+                        <li>Açık rıza verdikleri işlemler için bu rızayı geri çekme haklarına sahiptir.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-cookie-bite"></i> 7. Çerez (Cookie) Kullanımı</h3>
+                    <ul class="legal-list">
+                        <li>Platform, kullanıcı deneyimini geliştirmek için çerezlerden faydalanabilir.</li>
+                        <li>Kullanıcı, tarayıcı ayarlarından çerez kullanımını kısıtlama veya engelleme hakkına sahiptir.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-edit"></i> 8. Değişiklik Hakkı</h3>
+                    <p>Platform, işbu Gizlilik Politikası'nda dilediği zaman değişiklik yapma hakkını saklı tutar. Güncellenen metin yayınlandığı tarihten itibaren yürürlüğe girer.</p>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-envelope"></i> 9. İletişim</h3>
+                    <p>Gizlilik politikamız hakkında tüm soru ve talepleriniz için bizimle iletişime geçebilirsiniz:</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-envelope"></i> <strong>E-posta:</strong> derslinknet@gmail.com</p>
+                        <p><i class="fas fa-phone"></i> <strong>Telefon:</strong> 0531 739 70 90</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Distance Sales Agreement Modal -->
+    <div id="distanceSalesModal" class="modal">
+        <div class="modal-content legal-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-contract"></i> Mesafeli Satış Sözleşmesi</h2>
+                <span class="close" onclick="closeDistanceSalesModal()">&times;</span>
+            </div>
+            <div class="legal-content">
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-users"></i> Madde 1 – Taraflar</h3>
+                    <p>İşbu Mesafeli Satış Sözleşmesi, bir tarafta aşağıdaki bilgileri bulunan:</p>
+                    
+                    <div class="company-info">
+                        <h4>Satıcı / Hizmet Sağlayıcı</h4>
+                        <ul class="legal-list">
+                            <li><strong>Unvan:</strong> YUCAB Eğitim Yazılım Reklam ve Danışmanlık Sanayi ve Ticaret Limited Şirketi</li>
+                            <li><strong>E-posta:</strong> derslinknet@gmail.com</li>
+                            <li><strong>Telefon:</strong> 0531 739 70 90</li>
+                            <li><strong>Adres:</strong> Merkez / Bilecik</li>
+                        </ul>
+                    </div>
+                    
+                    <p>diğer tarafta internet sitesi üzerinden hizmet satın alan ("Alıcı" veya "Kullanıcı") arasında akdedilmiştir.</p>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-bullseye"></i> Madde 2 – Sözleşmenin Konusu</h3>
+                    <p>İşbu sözleşmenin konusu, Alıcı'nın platform üzerinden satın aldığı eğitim danışmanlığı ve online eğitim programı hizmetlerinin ifası ile ilgili tarafların hak ve yükümlülüklerinin belirlenmesidir.</p>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-truck"></i> Madde 3 – Hizmetin Teslimi ve İfası</h3>
+                    <ul class="legal-list">
+                        <li>Alıcı tarafından yapılan ödeme sonrasında kullanıcı hesabı aktif hale gelir.</li>
+                        <li>Kullanıcıya, ödeme tarihinden itibaren 30 (otuz) gün süreyle platforma erişim hakkı tanımlanır.</li>
+                        <li>Eğitim programı, Derslink yönetimi tarafından hazırlanır; gerekli görüldüğünde içerikte değişiklik yapma hakkı saklıdır.</li>
+                        <li>Herhangi bir fiziki ürün teslimatı bulunmamaktadır.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-undo"></i> Madde 4 – Cayma Hakkı ve İade</h3>
+                    <ul class="legal-list">
+                        <li>Sunulan hizmet, dijital içerik ve anında ifa edilen eğitim danışmanlığı hizmeti olduğundan, 6502 sayılı Tüketicinin Korunması Hakkında Kanun'un Mesafeli Sözleşmeler Yönetmeliği uyarınca cayma hakkı bulunmamaktadır.</li>
+                        <li>Ancak, teknik sorunlar veya hizmetin sağlanamaması durumunda, Satıcı gerekli desteği sağlayacak ve kullanıcı mağduriyetini giderecektir.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-balance-scale"></i> Madde 5 – Tarafların Hak ve Yükümlülükleri</h3>
+                    <ul class="legal-list">
+                        <li>Alıcı, hizmeti yalnızca kişisel eğitim/danışmanlık amacıyla kullanabilir.</li>
+                        <li>Satıcı, hizmetin sürekliliğini sağlamak için gerekli teknik desteği vermekle yükümlüdür.</li>
+                        <li>Kullanıcı bilgileri gizlilik politikası kapsamında korunur.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-section-block">
+                    <h3><i class="fas fa-check-circle"></i> Madde 6 – Yürürlük</h3>
+                    <p>Alıcı, ödeme işlemini tamamlayarak işbu sözleşmenin tüm koşullarını okuduğunu, anladığını ve kabul ettiğini beyan eder.</p>
                 </div>
             </div>
         </div>

@@ -379,6 +379,15 @@ window.IyzicoPaymentService = {
                         </div>
                     </div>
                     
+                    <div class="form-group checkbox-group">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="distanceSalesAgreement" name="distanceSalesAgreement" required>
+                            <label for="distanceSalesAgreement">
+                                <a href="#" onclick="openDistanceSalesModal()">Mesafeli Satış Sözleşmesi</a>'ni okudum ve kabul ediyorum.
+                            </label>
+                        </div>
+                    </div>
+                    
                     <button type="submit" class="pay-button" id="payButton">
                         🔒 ${paymentData.amount} TL Öde
                     </button>
