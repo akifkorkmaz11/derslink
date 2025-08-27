@@ -246,6 +246,52 @@ window.IyzicoPaymentService = {
                     font-size: 13px;
                 }
                 
+                /* Payment Logos Styles */
+                .payment-logos {
+                    margin-top: 20px;
+                    padding-top: 20px;
+                    border-top: 1px solid #e5e7eb;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 15px;
+                }
+                
+                .card-logos {
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                    justify-content: center;
+                }
+                
+                .card-logo {
+                    height: 30px;
+                    width: auto;
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+                    transition: transform 0.3s ease;
+                }
+                
+                .card-logo:hover {
+                    transform: scale(1.05);
+                }
+                
+                .iyzico-logo {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                
+                .iyzico-logo-img {
+                    height: 35px;
+                    width: auto;
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+                    transition: transform 0.3s ease;
+                }
+                
+                .iyzico-logo-img:hover {
+                    transform: scale(1.05);
+                }
+                
                 .loading-spinner {
                     width: 20px;
                     height: 20px;
@@ -298,6 +344,24 @@ window.IyzicoPaymentService = {
                     
                     .amount-value {
                         font-size: 28px;
+                    }
+                    
+                    .payment-logos {
+                        margin-top: 15px;
+                        padding-top: 15px;
+                        gap: 12px;
+                    }
+                    
+                    .card-logos {
+                        gap: 12px;
+                    }
+                    
+                    .card-logo {
+                        height: 25px;
+                    }
+                    
+                    .iyzico-logo-img {
+                        height: 30px;
                     }
                     
                     .form-row {
@@ -395,6 +459,17 @@ window.IyzicoPaymentService = {
                     <div class="security-info">
                         <i class="fas fa-shield-alt"></i>
                         SSL ile güvenli ödeme
+                    </div>
+                    
+                    <!-- Payment Logos - İyzico Requirements -->
+                    <div class="payment-logos">
+                        <div class="card-logos">
+                            <img src="/images/payment-logos/visa.svg" alt="Visa" class="card-logo">
+                            <img src="/images/payment-logos/mastercard.svg" alt="Mastercard" class="card-logo">
+                        </div>
+                        <div class="iyzico-logo">
+                            <img src="/images/payment-logos/iyzico-logo.svg" alt="iyzico ile Öde" class="iyzico-logo-img">
+                        </div>
                     </div>
                 </form>
             </div>
