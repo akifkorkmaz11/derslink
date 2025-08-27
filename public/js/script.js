@@ -330,7 +330,7 @@ const programData = {
                 days: "Pazartesi (3h), Salı (3h), Çarşamba (3h), Perşembe (3h)",
                 time: "17:20",
                 hours: "12 saat/hafta",
-                price: "₺5,000/ay",
+                price: "₺7,500/ay",
                 value: "LGS-WEEKDAY",
                 description: "Öğrencilerimiz ders çıkışı vakitlerinde kaliteli bir tekrar ve takviye eğitimiyle sınavlara hazırlanır.",
                 schedule: {
@@ -345,7 +345,7 @@ const programData = {
                 days: "Cumartesi (6h), Pazar (6h)",
                 time: "09:30",
                 hours: "12 saat/hafta",
-                price: "₺5,000/ay",
+                price: "₺7,500/ay",
                 value: "LGS-WEEKEND",
                 description: "Sabah saatlerinde zihnin en açık olduğu vakitlerde, dolu dolu bir sınav hazırlık süreci.",
                 schedule: {
@@ -358,7 +358,7 @@ const programData = {
                 days: "Pazartesi (3h), Çarşamba (3h), Cumartesi (3h), Pazar (3h)",
                 time: "Hafta İçi: 17:20 | Hafta Sonu: 09:30",
                 hours: "12 saat/hafta",
-                price: "₺5,000/ay",
+                price: "₺7,500/ay",
                 value: "LGS-MIXED",
                 description: "Hem hafta içi takip hem de hafta sonu yoğun tekrar isteyen öğrenciler için ideal denge.",
                 schedule: {
@@ -378,7 +378,7 @@ const programData = {
                 days: "Pazartesi, Salı, Çarşamba, Perşembe (her gün 3h)",
                 time: "17:20",
                 hours: "12 saat/hafta",
-                price: "₺5,000/ay",
+                price: "₺7,500/ay",
                 value: "YKS-WEEKDAY",
                 description: "TYT–AYT hazırlığında hafta içi disiplinli çalışma tercih edenler için yoğun ve planlı bir içerik.",
                 schedule: {
@@ -393,7 +393,7 @@ const programData = {
                 days: "Cumartesi (6h), Pazar (6h)",
                 time: "09:30",
                 hours: "12 saat/hafta",
-                price: "₺5,000/ay",
+                price: "₺7,500/ay",
                 value: "YKS-WEEKEND",
                 description: "Hafta sonunu verimli kullanmak isteyen öğrenciler için sınav odaklı yüksek tempolu eğitim.",
                 schedule: {
@@ -406,7 +406,7 @@ const programData = {
                 days: "Salı (3h), Perşembe (3h), Cumartesi (3h), Pazar (3h)",
                 time: "Hafta İçi: 17:20 | Hafta Sonu: 09:30",
                 hours: "12 saat/hafta",
-                price: "₺5,000/ay",
+                price: "₺7,500/ay",
                 value: "YKS-MIXED",
                 description: "Konulara hem aralıklı tekrar hem de yoğun pratikle çalışmak isteyenler için kusursuz uyum.",
                 schedule: {
