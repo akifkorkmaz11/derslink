@@ -2272,4 +2272,250 @@ body {
     background: #dc2626;
 }
 
+/* About Page Styles */
+.about-section {
+    padding: 120px 0 80px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+}
+
+.about-content {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.about-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px;
+    text-align: center;
+}
+
+.about-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.about-header h1 i {
+    margin-right: 15px;
+    font-size: 2.8rem;
+}
+
+.about-section-block {
+    padding: 30px 40px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.about-section-block:last-child {
+    border-bottom: none;
+}
+
+.about-section-block h2 {
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.about-section-block h2 i {
+    color: #667eea;
+    font-size: 1.8rem;
+}
+
+.about-section-block p {
+    color: #4b5563;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 15px;
+}
+
+.about-section-block p:last-child {
+    margin-bottom: 0;
+}
+
+.about-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.about-list li {
+    color: #4b5563;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 12px;
+    padding-left: 25px;
+    position: relative;
+}
+
+.about-list li:before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #10b981;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.about-list li:last-child {
+    margin-bottom: 0;
+}
+
+.about-list li strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.about-conclusion {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-left: 4px solid #667eea;
+}
+
+.about-conclusion p {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #1e40af;
+    text-align: center;
+    font-style: italic;
+}
+
+.about-cta {
+    padding: 40px;
+    text-align: center;
+    background: #f8fafc;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.about-cta .btn {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.about-cta .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.about-cta .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.about-cta .btn-secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.about-cta .btn-secondary:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+}
+
+/* Responsive Design for About Page */
+@media (max-width: 768px) {
+    .about-section {
+        padding: 100px 0 60px;
+    }
+    
+    .about-content {
+        margin: 0 20px;
+        border-radius: 15px;
+    }
+    
+    .about-header {
+        padding: 30px 20px;
+    }
+    
+    .about-header h1 {
+        font-size: 2rem;
+    }
+    
+    .about-header h1 i {
+        font-size: 2.2rem;
+    }
+    
+    .about-section-block {
+        padding: 25px 20px;
+    }
+    
+    .about-section-block h2 {
+        font-size: 1.3rem;
+    }
+    
+    .about-section-block h2 i {
+        font-size: 1.5rem;
+    }
+    
+    .about-section-block p {
+        font-size: 1rem;
+    }
+    
+    .about-list li {
+        font-size: 1rem;
+        padding-left: 20px;
+    }
+    
+    .about-conclusion p {
+        font-size: 1.1rem;
+    }
+    
+    .about-cta {
+        padding: 30px 20px;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .about-cta .btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .about-header h1 i {
+        font-size: 2rem;
+    }
+    
+    .about-section-block h2 {
+        font-size: 1.2rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .about-cta .btn {
+        padding: 12px 25px;
+        font-size: 1rem;
+    }
+}
+
 
