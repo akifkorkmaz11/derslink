@@ -1627,6 +1627,28 @@ body {
     color: #0078e2;
 }
 
+/* Footer Payment Logos */
+.payment-logos-footer {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #374151;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.payment-band-logo {
+    height: 32px;
+    width: auto;
+    max-width: 100%;
+    filter: brightness(0.9);
+    transition: filter 0.3s ease;
+}
+
+.payment-band-logo:hover {
+    filter: brightness(1);
+}
+
 /* Modern Payment Animations */
 @keyframes spin {
     0% { transform: rotate(0deg); }
@@ -1767,6 +1789,15 @@ body {
         width: 40px;
         height: 40px;
         font-size: 1.1rem;
+    }
+    
+    .payment-logos-footer {
+        margin-top: 0.8rem;
+        padding-top: 0.8rem;
+    }
+    
+    .payment-band-logo {
+        height: 28px;
     }
 }
 
