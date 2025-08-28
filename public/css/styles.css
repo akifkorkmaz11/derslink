@@ -1517,15 +1517,33 @@ body {
 
 .footer-content {
     display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.footer-main {
+    display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+    flex: 1;
 }
 
 .footer-logo {
     display: flex;
     align-items: center;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0078e2;
+    margin-bottom: 0.5rem;
+}
+
+.footer-logo span {
+    font-size: 1.8rem;
     font-weight: 700;
     color: #0078e2;
 }
@@ -1535,14 +1553,21 @@ body {
     font-size: 2rem;
 }
 
+.footer-main p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
 .social-links {
     display: flex;
     gap: 1rem;
+    margin-top: 0.5rem;
 }
 
 .social-links a {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     background: linear-gradient(45deg, #ff6b6b, #feca57);
     display: flex;
@@ -1551,6 +1576,7 @@ body {
     color: white;
     text-decoration: none;
     transition: all 0.3s ease;
+    font-size: 1.2rem;
 }
 
 .social-links a:hover {
@@ -1561,6 +1587,44 @@ body {
 .social-links a[href*="instagram"]:hover {
     background: linear-gradient(45deg, #e1306c, #fd1d1d, #fcb045);
     box-shadow: 0 10px 20px rgba(225, 48, 108, 0.4);
+}
+
+.social-links a[href*="youtube"]:hover {
+    background: linear-gradient(45deg, #ff0000, #ff4444);
+    box-shadow: 0 10px 20px rgba(255, 0, 0, 0.4);
+}
+
+.footer-legal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    flex: 0 0 auto;
+}
+
+.footer-legal h4 {
+    color: #0078e2;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.legal-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.legal-links a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+    padding: 0.25rem 0;
+}
+
+.legal-links a:hover {
+    color: #0078e2;
 }
 
 /* Modern Payment Animations */
@@ -1668,6 +1732,41 @@ body {
     
     .floating-cards {
         display: none;
+    }
+    
+    /* Footer Responsive */
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .footer-main {
+        order: 1;
+    }
+    
+    .footer-legal {
+        order: 2;
+        align-items: center;
+    }
+    
+    .legal-links {
+        align-items: center;
+    }
+    
+    .footer-logo {
+        font-size: 1.6rem;
+    }
+    
+    .footer-logo span {
+        font-size: 1.6rem;
+    }
+    
+    .social-links a {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
     }
 }
 
