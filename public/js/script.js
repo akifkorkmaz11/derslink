@@ -330,7 +330,7 @@ const programData = {
                 days: "Pazartesi (3h), Salı (3h), Çarşamba (3h), Perşembe (3h)",
                 time: "17:20",
                 hours: "12 saat/hafta",
-                price: "₺7,500/ay",
+                price: "₺1/ay",
                 value: "LGS-WEEKDAY",
                 description: "Öğrencilerimiz ders çıkışı vakitlerinde kaliteli bir tekrar ve takviye eğitimiyle sınavlara hazırlanır.",
                 schedule: {

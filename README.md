@@ -109,8 +109,15 @@ VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # İyzico
-IYZICO_API_KEY=your_iyzico_api_key
-IYZICO_SECRET_KEY=your_iyzico_secret_key
+# Iyzico Production Configuration
+IYZICO_API_KEY=your_production_api_key_here
+IYZICO_SECRET_KEY=your_production_secret_key_here
+IYZICO_URI=https://api.iyzipay.com
+
+# Sandbox Configuration (test için)
+# IYZICO_API_KEY=sandbox-afXhZPW0MQlE4dCUUlHcEopnMBgXnAZI
+# IYZICO_SECRET_KEY=sandbox-wbwpzKJDmlGqJxlzQpGgddCtB1QbT2Hq
+# IYZICO_URI=https://sandbox-api.iyzipay.com
 ```
 
 ## 📁 Proje Yapısı
