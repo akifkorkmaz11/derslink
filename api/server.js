@@ -298,112 +298,103 @@ app.post('/api/payment/process-card', async (req, res) => {
             });
         }
         
-        // Test kartı kontrolü (sadece test amaçlı)
-        if (cardNumber.replace(/\s/g, '') === '5528790000000008' && cardCvv === '973') {
-            console.log('✅ Test kartı ile ödeme başarılı');
+        // Gerçek Iyzico ödeme işlemi
+        console.log('✅ Gerçek kart ile ödeme başlatılıyor');
+        
+        const request = {
+            locale: 'tr',
+            conversationId: 'conv_' + Date.now(),
+            price: amount.toString(),
+            paidPrice: amount.toString(),
+            currency: 'TRY',
+            installment: '1',
+            basketId: 'B' + Date.now(),
+            paymentChannel: 'WEB',
+            paymentGroup: 'PRODUCT',
+            paymentCard: {
+                cardHolderName: cardHolder,
+                cardNumber: cardNumber.replace(/\s/g, ''),
+                expireMonth: cardExpiry.split('/')[0],
+                expireYear: '20' + cardExpiry.split('/')[1],
+                cvc: cardCvv,
+                registerCard: '0'
+            },
+            buyer: {
+                id: 'BY' + Date.now(),
+                name: firstName,
+                surname: lastName,
+                gsmNumber: phone,
+                email: email,
+                identityNumber: '74300864791',
+                registrationAddress: 'Test Adres',
+                ip: req.ip || '127.0.0.1',
+                city: 'Istanbul',
+                country: 'Turkey',
+                zipCode: '34732'
+            },
+            shippingAddress: {
+                contactName: firstName + ' ' + lastName,
+                city: 'Istanbul',
+                country: 'Turkey',
+                address: 'Test Adres',
+                zipCode: '34732'
+            },
+            billingAddress: {
+                contactName: firstName + ' ' + lastName,
+                city: 'Istanbul',
+                country: 'Turkey',
+                address: 'Test Adres',
+                zipCode: '34732'
+            },
+            basketItems: [
+                {
+                    id: 'BI' + Date.now(),
+                    name: programTitle,
+                    category1: mainProgram,
+                    category2: subProgram,
+                    itemType: 'VIRTUAL',
+                    price: amount.toString()
+                }
+            ]
+        };
+        
+        // Iyzico ödeme işlemi
+        iyzipay.payment.create(request, function (err, result) {
+            if (err) {
+                console.error('❌ Iyzico ödeme hatası:', err);
+                return res.status(500).json({
+                    success: false,
+                    error: 'Ödeme işlemi başarısız: ' + err.message
+                });
+            }
             
-            // Gerçek Iyzico ödeme işlemi
-            const request = {
-                locale: 'tr',
-                conversationId: 'conv_' + Date.now(),
-                price: amount.toString(),
-                paidPrice: amount.toString(),
-                currency: 'TRY',
-                installment: '1',
-                basketId: 'B' + Date.now(),
-                paymentChannel: 'WEB',
-                paymentGroup: 'PRODUCT',
-                paymentCard: {
-                    cardHolderName: cardHolder,
-                    cardNumber: cardNumber.replace(/\s/g, ''),
-                    expireMonth: cardExpiry.split('/')[0],
-                    expireYear: '20' + cardExpiry.split('/')[1],
-                    cvc: cardCvv,
-                    registerCard: '0'
-                },
-                buyer: {
-                    id: 'BY' + Date.now(),
-                    name: firstName,
-                    surname: lastName,
-                    gsmNumber: phone,
-                    email: email,
-                    identityNumber: '74300864791',
-                    registrationAddress: 'Test Adres',
-                    ip: req.ip || '127.0.0.1',
-                    city: 'Istanbul',
-                    country: 'Turkey',
-                    zipCode: '34732'
-                },
-                shippingAddress: {
-                    contactName: firstName + ' ' + lastName,
-                    city: 'Istanbul',
-                    country: 'Turkey',
-                    address: 'Test Adres',
-                    zipCode: '34732'
-                },
-                billingAddress: {
-                    contactName: firstName + ' ' + lastName,
-                    city: 'Istanbul',
-                    country: 'Turkey',
-                    address: 'Test Adres',
-                    zipCode: '34732'
-                },
-                basketItems: [
-                    {
-                        id: 'BI' + Date.now(),
-                        name: programTitle,
-                        category1: mainProgram,
-                        category2: subProgram,
-                        itemType: 'VIRTUAL',
-                        price: amount.toString()
+            console.log('✅ Iyzico ödeme sonucu:', result);
+            
+            if (result.status === 'success') {
+                return res.json({
+                    success: true,
+                    message: 'Ödeme başarıyla tamamlandı',
+                    paymentId: result.paymentId,
+                    conversationId: result.conversationId,
+                    amount: amount,
+                    userData: {
+                        firstName,
+                        lastName,
+                        email,
+                        phone,
+                        mainProgram,
+                        subProgram,
+                        programTitle,
+                        yksField
                     }
-                ]
-            };
-            
-            // Iyzico ödeme işlemi
-            iyzipay.payment.create(request, function (err, result) {
-                if (err) {
-                    console.error('❌ Iyzico ödeme hatası:', err);
-                    return res.status(500).json({
-                        success: false,
-                        error: 'Ödeme işlemi başarısız: ' + err.message
-                    });
-                }
-                
-                console.log('✅ Iyzico ödeme sonucu:', result);
-                
-                if (result.status === 'success') {
-                    return res.json({
-                        success: true,
-                        message: 'Ödeme başarıyla tamamlandı',
-                        paymentId: result.paymentId,
-                        conversationId: result.conversationId,
-                        amount: amount,
-                        userData: {
-                            firstName,
-                            lastName,
-                            email,
-                            phone,
-                            mainProgram,
-                            subProgram,
-                            programTitle,
-                            yksField
-                        }
-                    });
-                } else {
-                    return res.status(400).json({
-                        success: false,
-                        error: 'Ödeme başarısız: ' + (result.errorMessage || 'Bilinmeyen hata')
-                    });
-                }
-            });
-        } else {
-            console.log('❌ Geçersiz kart bilgileri');
-            return res.status(400).json({
-                success: false,
-                error: 'Geçersiz kart bilgileri. Test kartı kullanın: 5528 7900 0000 0008 / 973'
-            });
-        }
+                });
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Ödeme başarısız: ' + (result.errorMessage || 'Bilinmeyen hata')
+                });
+            }
+        });
         
     } catch (error) {
         console.error('❌ Ödeme işlemi hatası:', error);
