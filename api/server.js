@@ -23,19 +23,12 @@ console.log('🔧 Supabase Key length:', supabaseKey?.length || 0);
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Iyzico konfigürasyonu - PRODUCTION
+// Iyzico konfigürasyonu
 const iyzipay = new Iyzipay({
-    apiKey: process.env.IYZICO_API_KEY || 'your_production_api_key_here',
-    secretKey: process.env.IYZICO_SECRET_KEY || 'your_production_secret_key_here',
-    uri: process.env.IYZICO_URI || 'https://api.iyzipay.com'
+    apiKey: process.env.IYZICO_API_KEY || 'sandbox-afXhZPW0MQlE4dCUUlHcEopnMBgXnAZI',
+    secretKey: process.env.IYZICO_SECRET_KEY || 'sandbox-wbwpzKJDmlGqJxlzQpGgddCtB1QbT2Hq',
+    uri: process.env.IYZICO_URI || 'https://sandbox-api.iyzipay.com'
 });
-
-// Sandbox konfigürasyonu (test için)
-// const iyzipay = new Iyzipay({
-//     apiKey: process.env.IYZICO_API_KEY || 'sandbox-afXhZPW0MQlE4dCUUlHcEopnMBgXnAZI',
-//     secretKey: process.env.IYZICO_SECRET_KEY || 'sandbox-wbwpzKJDmlGqJxlzQpGgddCtB1QbT2Hq',
-//     uri: process.env.IYZICO_URI || 'https://sandbox-api.iyzipay.com'
-// });
 
 console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length || 0);
 
@@ -58,7 +51,10 @@ app.get('/api/health', (req, res) => {
         message: 'API Health check başarılı',
         environment: {
             supabaseUrl: process.env.SUPABASE_URL || 'NOT SET',
-            supabaseKeyLength: process.env.SUPABASE_KEY?.length || 0
+            supabaseKeyLength: process.env.SUPABASE_KEY?.length || 0,
+            iyzicoApiKeyLength: process.env.IYZICO_API_KEY?.length || 0,
+            iyzicoSecretKeyLength: process.env.IYZICO_SECRET_KEY?.length || 0,
+            iyzicoUri: process.env.IYZICO_URI || 'NOT SET'
         }
     });
 });
@@ -302,8 +298,11 @@ app.post('/api/payment/process-card', async (req, res) => {
             });
         }
         
-        // Gerçek Iyzico ödeme işlemi
-        console.log('✅ Gerçek kart ile ödeme başlatılıyor');
+        // Test kartı kontrolü (sadece test amaçlı)
+        if (cardNumber.replace(/\s/g, '') === '5528790000000008' && cardCvv === '973') {
+            console.log('✅ Test kartı ile ödeme başarılı');
+            
+            // Gerçek Iyzico ödeme işlemi
             const request = {
                 locale: 'tr',
                 conversationId: 'conv_' + Date.now(),
@@ -398,6 +397,13 @@ app.post('/api/payment/process-card', async (req, res) => {
                     });
                 }
             });
+        } else {
+            console.log('❌ Geçersiz kart bilgileri');
+            return res.status(400).json({
+                success: false,
+                error: 'Geçersiz kart bilgileri. Test kartı kullanın: 5528 7900 0000 0008 / 973'
+            });
+        }
         
     } catch (error) {
         console.error('❌ Ödeme işlemi hatası:', error);
