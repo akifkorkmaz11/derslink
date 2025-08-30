@@ -23,11 +23,11 @@ console.log('🔧 Supabase Key length:', supabaseKey?.length || 0);
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Iyzico konfigürasyonu
+// Iyzico konfigürasyonu - PRODUCTION
 const iyzipay = new Iyzipay({
-    apiKey: process.env.IYZICO_API_KEY || 'sandbox-afXhZPW0MQlE4dCUUlHcEopnMBgXnAZI',
-    secretKey: process.env.IYZICO_SECRET_KEY || 'sandbox-wbwpzKJDmlGqJxlzQpGgddCtB1QbT2Hq',
-    uri: process.env.IYZICO_URI || 'https://sandbox-api.iyzipay.com'
+    apiKey: process.env.IYZICO_API_KEY || 'your_production_api_key_here',
+    secretKey: process.env.IYZICO_SECRET_KEY || 'your_production_secret_key_here',
+    uri: process.env.IYZICO_URI || 'https://api.iyzipay.com'
 });
 
 console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length || 0);
