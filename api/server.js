@@ -308,6 +308,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             paidPrice: amount.toString(),
             currency: 'TRY',
             installment: '1',
+            enabledInstallments: '1', // 3D Secure'ü devre dışı bırak
             basketId: 'B' + Date.now(),
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
