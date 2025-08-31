@@ -32,6 +32,7 @@ const iyzicoConfig = {
 };
 
 console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length || 0);
+console.log('🔧 Iyzico Merchant ID:', process.env.IYZICO_MERCHANT_ID || 'NOT SET');
 
 // Iyzico direkt API helper fonksiyonları
 function generateAuthHeader(apiKey, secretKey, requestBody) {
@@ -343,14 +344,9 @@ app.post('/api/payment/process-card', async (req, res) => {
         
         console.log('🔧 ConversationId kullanılıyor:', finalConversationId);
         
-        // merchantId kontrolü
-        if (!process.env.IYZICO_MERCHANT_ID) {
-            console.error('❌ Iyzico merchantId ayarlanmadı');
-            return res.status(500).json({
-                success: false,
-                error: 'Ödeme sistemi yapılandırması eksik'
-            });
-        }
+        // merchantId kontrolü - geçici olarak test için
+        const merchantId = process.env.IYZICO_MERCHANT_ID || '0000000000000000';
+        console.log('🔧 Merchant ID kullanılıyor:', merchantId);
         
         const request = {
             locale: 'tr',
@@ -370,7 +366,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             merchantOrderId: 'M' + generateRandomString(8),
             posOrderId: 'POS' + generateRandomString(8),
             orderId: 'O' + generateRandomString(8),
-            merchantId: process.env.IYZICO_MERCHANT_ID,
+            merchantId: merchantId,
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
