@@ -24,11 +24,11 @@ console.log('🔧 Supabase Key length:', supabaseKey?.length || 0);
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Iyzico konfigürasyonu
+// Iyzico konfigürasyonu - Production değerleri
 const iyzicoConfig = {
-    apiKey: process.env.IYZICO_API_KEY || '1kQYscHqEXZTFC5J1y9JsxCNTqk6XG9O',
-    secretKey: process.env.IYZICO_SECRET_KEY || 'XmmzZpBZMQ4ZbIBBLkoLRFMKKD1CI8vH',
-    uri: process.env.IYZICO_URI || 'https://api.iyzipay.com'
+    apiKey: '1kQYscHqEXZTFC5J1y9JsxCNTqk6XG9O',
+    secretKey: 'XmmzZpBZMQ4ZbIBBLkoLRFMKKD1CI8vH',
+    uri: 'https://api.iyzipay.com'
 };
 
 console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length || 0);
@@ -367,8 +367,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             basketId: 'B12345',
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
-            callbackUrl: process.env.CALLBACK_URL || 'https://derslink-dc4fxrsx0-akif-korkmazs-projects.vercel.app/api/payment/callback',
-            threeDS: '1',
+            callbackUrl: 'https://derslink-dc4fxrsx0-akif-korkmazs-projects.vercel.app/api/payment/callback',
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
