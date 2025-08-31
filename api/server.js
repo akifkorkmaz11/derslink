@@ -26,8 +26,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Iyzico konfigürasyonu
 const iyzicoConfig = {
-    apiKey: process.env.IYZICO_API_KEY || 'your_production_api_key_here',
-    secretKey: process.env.IYZICO_SECRET_KEY || 'your_production_secret_key_here',
+    apiKey: process.env.IYZICO_API_KEY || '1kQYscHqEXZTFC5J1y9JsxCNTqk6XG9O',
+    secretKey: process.env.IYZICO_SECRET_KEY || 'XmmzZpBZMQ4ZbIBBLkoLRFMKKD1CI8vH',
     uri: process.env.IYZICO_URI || 'https://api.iyzipay.com'
 };
 
@@ -354,17 +354,8 @@ app.post('/api/payment/process-card', async (req, res) => {
         
         console.log('🔧 Final conversationId kullanılıyor:', finalConversationId);
         
-        // merchantId kontrolü - gerçek merchant ID gerekli
-        if (!process.env.IYZICO_MERCHANT_ID) {
-            console.error('❌ Iyzico merchantId ayarlanmadı');
-            return res.status(500).json({
-                success: false,
-                error: 'Ödeme sistemi yapılandırması eksik - Merchant ID gerekli'
-            });
-        }
-        
-        const merchantId = process.env.IYZICO_MERCHANT_ID;
-        console.log('🔧 Merchant ID kullanılıyor:', merchantId);
+        // merchantId - Iyzico bunu API key'den otomatik alır
+        console.log('🔧 Iyzico production ortamında merchantId API key\'den otomatik alınır');
         
         const request = {
             locale: 'tr',
@@ -376,9 +367,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             basketId: 'B12345',
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
-            callbackUrl: process.env.NODE_ENV === 'production' 
-                ? 'https://www.derslink.net.tr/api/payment/callback'
-                : 'http://localhost:3000/api/payment/callback',
+            callbackUrl: process.env.CALLBACK_URL || 'https://derslink-dc4fxrsx0-akif-korkmazs-projects.vercel.app/api/payment/callback',
             threeDS: '1',
             paymentCard: {
                 cardHolderName: cardHolder,
