@@ -552,6 +552,10 @@ window.IyzicoPaymentService = {
         
         try {
             
+            // Benzersiz conversationId oluştur
+            const conversationId = "conv_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+            console.log('🔧 Frontend conversationId oluşturuldu:', conversationId);
+            
             // Backend'e kart bilgileri ile ödeme isteği gönder
             const response = await fetch('/api/payment/process-card', {
                 method: 'POST',
@@ -571,7 +575,8 @@ window.IyzicoPaymentService = {
                     mainProgram: paymentData.mainProgram,
                     subProgram: paymentData.subProgram,
                     programTitle: paymentData.programTitle,
-                    yksField: paymentData.yksField
+                    yksField: paymentData.yksField,
+                    conversationId: conversationId // 🔑 Frontend'den conversationId gönderiliyor
                 })
             });
             

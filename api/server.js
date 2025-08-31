@@ -314,7 +314,8 @@ app.post('/api/payment/process-card', async (req, res) => {
             mainProgram,
             subProgram,
             programTitle,
-            yksField
+            yksField,
+            conversationId
         } = req.body;
         
         // Validasyon
@@ -332,14 +333,14 @@ app.post('/api/payment/process-card', async (req, res) => {
             ? 'https://www.derslink.net.tr/api/payment/callback'
             : 'http://localhost:3000/api/payment/callback');
         
-        // Benzersiz conversationId oluştur - basit format
-        const conversationId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        // Frontend'den gelen conversationId'yi kullan veya yeni oluştur
+        const finalConversationId = conversationId || `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
-        console.log('🔧 ConversationId oluşturuldu:', conversationId);
+        console.log('🔧 ConversationId kullanılıyor:', finalConversationId);
         
         const request = {
             locale: 'tr',
-            conversationId: conversationId,
+            conversationId: finalConversationId,
             price: amount.toString(),
             paidPrice: amount.toString(),
             currency: 'TRY',
