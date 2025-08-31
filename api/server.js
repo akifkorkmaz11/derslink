@@ -1,7 +1,23 @@
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
-const Iyzipay = require('iyzipay');
+// Iyzico import - alternatif yöntemler
+let Iyzipay;
+try {
+    Iyzipay = require('iyzipay');
+    console.log('🔧 Iyzico kütüphanesi yükleniyor...');
+    console.log('🔧 Iyzipay object:', typeof Iyzipay);
+    console.log('🔧 Iyzipay methods:', Object.keys(Iyzipay));
+} catch (error) {
+    console.error('❌ Iyzico kütüphanesi yüklenemedi:', error);
+    // Alternatif import deneyelim
+    try {
+        Iyzipay = require('iyzipay').default;
+        console.log('✅ Iyzico kütüphanesi default export ile yüklendi');
+    } catch (error2) {
+        console.error('❌ Iyzico kütüphanesi hiçbir yöntemle yüklenemedi:', error2);
+    }
+}
 
 const app = express();
 
@@ -24,13 +40,27 @@ console.log('🔧 Supabase Key length:', supabaseKey?.length || 0);
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Iyzico konfigürasyonu - PRODUCTION
-const iyzipay = new Iyzipay({
-    apiKey: process.env.IYZICO_API_KEY || 'your_production_api_key_here',
-    secretKey: process.env.IYZICO_SECRET_KEY || 'your_production_secret_key_here',
-    uri: process.env.IYZICO_URI || 'https://api.iyzipay.com'
-});
-
-console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length || 0);
+let iyzipay;
+if (Iyzipay) {
+    try {
+        iyzipay = new Iyzipay({
+            apiKey: process.env.IYZICO_API_KEY || 'your_production_api_key_here',
+            secretKey: process.env.IYZICO_SECRET_KEY || 'your_production_secret_key_here',
+            uri: process.env.IYZICO_URI || 'https://api.iyzipay.com'
+        });
+        
+        console.log('🔧 Iyzico client oluşturuldu');
+        console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length || 0);
+        console.log('🔧 Iyzipay client methods:', Object.keys(iyzipay));
+        console.log('🔧 Iyzipay threeds methods:', Object.keys(iyzipay.threeds || {}));
+    } catch (error) {
+        console.error('❌ Iyzico client oluşturulamadı:', error);
+        iyzipay = null;
+    }
+} else {
+    console.error('❌ Iyzico kütüphanesi yüklenmediği için client oluşturulamadı');
+    iyzipay = null;
+}
 
 // Test endpoint
 app.get('/api/test', (req, res) => {
@@ -297,6 +327,15 @@ app.post('/api/payment/process-card', async (req, res) => {
             yksField
         } = req.body;
         
+        // Iyzico client kontrolü
+        if (!iyzipay) {
+            console.error('❌ Iyzico client bulunamadı');
+            return res.status(500).json({
+                success: false,
+                error: 'Ödeme sistemi şu anda kullanılamıyor'
+            });
+        }
+        
         // Validasyon
         if (!cardNumber || !cardHolder || !cardExpiry || !cardCvv || !amount) {
             console.log('❌ Validasyon hatası: Eksik kart bilgileri');
@@ -381,6 +420,18 @@ app.post('/api/payment/process-card', async (req, res) => {
             callbackUrl: request.callbackUrl,
             cardNumber: cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4)
         });
+        
+        // Iyzico client kontrolü
+        if (!iyzipay || !iyzipay.threeds || !iyzipay.threeds.initialize) {
+            console.error('❌ Iyzico client veya threeds.initialize bulunamadı');
+            console.error('❌ iyzipay:', !!iyzipay);
+            console.error('❌ iyzipay.threeds:', !!iyzipay?.threeds);
+            console.error('❌ iyzipay.threeds.initialize:', !!iyzipay?.threeds?.initialize);
+            return res.status(500).json({
+                success: false,
+                error: 'Iyzico kütüphanesi yüklenemedi'
+            });
+        }
         
         // Iyzico 3D Secure ödeme işlemi
         iyzipay.threeds.initialize(request, function (err, result) {
