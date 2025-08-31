@@ -334,13 +334,13 @@ app.post('/api/payment/process-card', async (req, res) => {
             ? 'https://www.derslink.net.tr/api/payment/callback'
             : 'http://localhost:3000/api/payment/callback');
         
-        // Iyzico formatına uygun benzersiz string üret
-        function generateRandomString(length = 12) {
-            return crypto.randomBytes(length).toString('hex');
+        // Iyzico formatına uygun alfanumerik string üret
+        function generateRandomAlphaNum(length = 8) {
+            return Array.from({length}, () => (Math.random() * 36 | 0).toString(36)).join('');
         }
         
         // Frontend'den gelen conversationId'yi kullan veya yeni oluştur
-        const finalConversationId = conversationId || `conv_${Date.now()}_${generateRandomString(8)}`;
+        const finalConversationId = conversationId || `conv_${Date.now()}_${generateRandomAlphaNum(8)}`;
         
         console.log('🔧 ConversationId kullanılıyor:', finalConversationId);
         
@@ -371,9 +371,9 @@ app.post('/api/payment/process-card', async (req, res) => {
                 : 'http://localhost:3000/api/payment/callback',
             threeDS: '1', // ✅ Doğru parametre
             paymentSource: 'API',
-            merchantOrderId: `M${Date.now()}_${generateRandomString(6)}`,
-            posOrderId: `POS${Date.now()}_${generateRandomString(6)}`,
-            orderId: `O${Date.now()}_${generateRandomString(6)}`,
+            merchantOrderId: `M${Date.now()}_${generateRandomAlphaNum(6)}`,
+            posOrderId: `POS${Date.now()}_${generateRandomAlphaNum(6)}`,
+            orderId: `O${Date.now()}_${generateRandomAlphaNum(6)}`,
             merchantId: merchantId,
             paymentCard: {
                 cardHolderName: cardHolder,
@@ -384,7 +384,7 @@ app.post('/api/payment/process-card', async (req, res) => {
                 registerCard: '0'
             },
             buyer: {
-                id: `BY${Date.now()}_${generateRandomString(6)}`,
+                id: `BY${Date.now()}_${generateRandomAlphaNum(6)}`,
                 name: firstName,
                 surname: lastName,
                 gsmNumber: phone,
@@ -412,7 +412,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             },
             basketItems: [
                 {
-                    id: `BI${Date.now()}_${generateRandomString(6)}`,
+                    id: `BI${Date.now()}_${generateRandomAlphaNum(6)}`,
                     name: programTitle,
                     category1: mainProgram,
                     category2: subProgram,
