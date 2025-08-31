@@ -340,12 +340,20 @@ app.post('/api/payment/process-card', async (req, res) => {
         }
         
         // Frontend'den gelen conversationId'yi kullan veya yeni oluştur
-        const finalConversationId = conversationId || `conv_${generateRandomString(12)}`;
+        const finalConversationId = conversationId || `conv_${Date.now()}_${generateRandomString(8)}`;
         
         console.log('🔧 ConversationId kullanılıyor:', finalConversationId);
         
-        // merchantId kontrolü - geçici olarak test için
-        const merchantId = process.env.IYZICO_MERCHANT_ID || '0000000000000000';
+        // merchantId kontrolü - gerçek merchant ID gerekli
+        if (!process.env.IYZICO_MERCHANT_ID) {
+            console.error('❌ Iyzico merchantId ayarlanmadı');
+            return res.status(500).json({
+                success: false,
+                error: 'Ödeme sistemi yapılandırması eksik - Merchant ID gerekli'
+            });
+        }
+        
+        const merchantId = process.env.IYZICO_MERCHANT_ID;
         console.log('🔧 Merchant ID kullanılıyor:', merchantId);
         
         const request = {
@@ -363,9 +371,9 @@ app.post('/api/payment/process-card', async (req, res) => {
                 : 'http://localhost:3000/api/payment/callback',
             threeDS: '1', // ✅ Doğru parametre
             paymentSource: 'API',
-            merchantOrderId: 'M' + generateRandomString(8),
-            posOrderId: 'POS' + generateRandomString(8),
-            orderId: 'O' + generateRandomString(8),
+            merchantOrderId: `M${Date.now()}_${generateRandomString(6)}`,
+            posOrderId: `POS${Date.now()}_${generateRandomString(6)}`,
+            orderId: `O${Date.now()}_${generateRandomString(6)}`,
             merchantId: merchantId,
             paymentCard: {
                 cardHolderName: cardHolder,
@@ -376,7 +384,7 @@ app.post('/api/payment/process-card', async (req, res) => {
                 registerCard: '0'
             },
             buyer: {
-                id: 'BY' + generateRandomString(8),
+                id: `BY${Date.now()}_${generateRandomString(6)}`,
                 name: firstName,
                 surname: lastName,
                 gsmNumber: phone,
@@ -404,7 +412,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             },
             basketItems: [
                 {
-                    id: 'BI' + generateRandomString(8),
+                    id: `BI${Date.now()}_${generateRandomString(6)}`,
                     name: programTitle,
                     category1: mainProgram,
                     category2: subProgram,
