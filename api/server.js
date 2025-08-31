@@ -356,6 +356,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             merchantOrderId: 'M' + Date.now(),
             posOrderId: 'POS' + Date.now(),
             orderId: 'O' + Date.now(),
+            merchantId: process.env.IYZICO_MERCHANT_ID || '0000000000000000',
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
@@ -425,7 +426,9 @@ app.post('/api/payment/process-card', async (req, res) => {
         
         // Direkt API kullan
         console.log('🔧 Iyzico direkt API kullanılıyor');
+        console.log('🔧 Endpoint:', '/payment/3dsecure/initialize');
         try {
+            // Iyzico'nun doğru endpoint'ini kullan
             const response = await makeIyzicoRequest('/payment/3dsecure/initialize', request);
             console.log('✅ Direkt API response:', response.data);
             handleIyzicoResponse(null, response.data, res);
