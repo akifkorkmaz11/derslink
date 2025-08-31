@@ -334,7 +334,7 @@ app.post('/api/payment/process-card', async (req, res) => {
         
         const request = {
             locale: 'tr',
-            conversationId: 'conv_' + Date.now(),
+            conversationId: 'order_' + Date.now() + '_' + crypto.randomBytes(8).toString('hex'),
             price: amount.toString(),
             paidPrice: amount.toString(),
             currency: 'TRY',
@@ -349,6 +349,7 @@ app.post('/api/payment/process-card', async (req, res) => {
                 enabled: true
             },
             paymentSource: 'API',
+            merchantId: process.env.IYZICO_MERCHANT_ID || '0000000000000000',
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
@@ -400,7 +401,8 @@ app.post('/api/payment/process-card', async (req, res) => {
             conversationId: request.conversationId,
             price: request.price,
             callbackUrl: request.callbackUrl,
-            cardNumber: cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4)
+            cardNumber: cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4),
+            randomString: request.conversationId // Iyzico'nun beklediği random string
         });
         
         // Direkt API kullan
