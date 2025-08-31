@@ -311,7 +311,9 @@ app.post('/api/payment/process-card', async (req, res) => {
             basketId: 'B' + Date.now(),
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
-            callbackUrl: 'https://derslink.vercel.app/api/payment/callback', // 3D Secure callback
+            callbackUrl: process.env.NODE_ENV === 'production' 
+                ? 'https://derslink.vercel.app/api/payment/callback'
+                : 'http://localhost:3000/api/payment/callback', // 3D Secure callback
             threeDSRequest: {
                 enabled: true
             },
@@ -362,40 +364,31 @@ app.post('/api/payment/process-card', async (req, res) => {
             ]
         };
         
-        // Iyzico ödeme işlemi
-        iyzipay.payment.create(request, function (err, result) {
+        // Iyzico 3D Secure ödeme işlemi
+        iyzipay.threeds.initialize(request, function (err, result) {
             if (err) {
-                console.error('❌ Iyzico ödeme hatası:', err);
+                console.error('❌ Iyzico 3D Secure hatası:', err);
                 return res.status(500).json({
                     success: false,
-                    error: 'Ödeme işlemi başarısız: ' + err.message
+                    error: '3D Secure başlatılamadı: ' + err.message
                 });
             }
             
-            console.log('✅ Iyzico ödeme sonucu:', result);
+            console.log('✅ Iyzico 3D Secure sonucu:', result);
             
             if (result.status === 'success') {
+                // 3D Secure sayfasına yönlendir
                 return res.json({
                     success: true,
-                    message: 'Ödeme başarıyla tamamlandı',
+                    message: '3D Secure başlatıldı',
+                    threeDSHtmlContent: result.threeDSHtmlContent,
                     paymentId: result.paymentId,
-                    conversationId: result.conversationId,
-                    amount: amount,
-                    userData: {
-                        firstName,
-                        lastName,
-                        email,
-                        phone,
-                        mainProgram,
-                        subProgram,
-                        programTitle,
-                        yksField
-                    }
+                    conversationId: result.conversationId
                 });
             } else {
                 return res.status(400).json({
                     success: false,
-                    error: 'Ödeme başarısız: ' + (result.errorMessage || 'Bilinmeyen hata')
+                    error: '3D Secure başlatılamadı: ' + (result.errorMessage || 'Bilinmeyen hata')
                 });
             }
         });
@@ -415,6 +408,45 @@ app.post('/api/payment/callback', async (req, res) => {
         console.log('🔄 3D Secure callback alındı:', req.body);
         
         const { conversationId, paymentId, status } = req.body;
+        
+        if (status === 'success') {
+            // 3D Secure başarılı, ödemeyi tamamla
+            const request = {
+                locale: 'tr',
+                conversationId: conversationId,
+                paymentId: paymentId
+            };
+            
+            iyzipay.payment.retrieve(request, function (err, result) {
+                if (err) {
+                    console.error('❌ Ödeme tamamlama hatası:', err);
+                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme tamamlanamadı'));
+                }
+                
+                console.log('✅ Ödeme tamamlandı:', result);
+                
+                if (result.status === 'success') {
+                    return res.redirect('/?payment=success&paymentId=' + paymentId);
+                } else {
+                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme başarısız'));
+                }
+            });
+        } else {
+            return res.redirect('/?payment=error&message=' + encodeURIComponent('3D Secure doğrulaması başarısız'));
+        }
+        
+    } catch (error) {
+        console.error('❌ Callback hatası:', error);
+        res.redirect('/?payment=error&message=' + encodeURIComponent('Sistem hatası'));
+    }
+});
+
+// GET callback endpoint (bazı bankalar GET ile callback yapabilir)
+app.get('/api/payment/callback', async (req, res) => {
+    try {
+        console.log('🔄 3D Secure GET callback alındı:', req.query);
+        
+        const { conversationId, paymentId, status } = req.query;
         
         if (status === 'success') {
             // 3D Secure başarılı, ödemeyi tamamla

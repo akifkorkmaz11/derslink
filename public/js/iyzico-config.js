@@ -578,35 +578,48 @@ window.IyzicoPaymentService = {
             const result = await response.json();
             
             if (result.success) {
-                // Global'e ödeme detaylarını kaydet
-                window.completedPaymentData = {
-                    paymentId: result.paymentId,
-                    conversationId: result.conversationId,
-                    paymentDetails: result.paymentDetails || {},
-                    customerInfo: {
-                        firstName: paymentData.firstName,
-                        lastName: paymentData.lastName,
-                        email: paymentData.email,
-                        phone: paymentData.phone
-                    },
-                    programInfo: {
-                        title: paymentData.selectedProgram.title,
-                        value: paymentData.selectedProgram.value
-                    },
-                    mainProgram: paymentData.mainProgram, // Ana program bilgisi
-                    amount: paymentData.amount,
-                    completedAt: new Date().toISOString()
-                };
-                
-                // Modal'ı kapat
-                this.closeCardForm();
-                
-                // Success event gönder (sadece bir kez)
-                window.postMessage({
-                    type: 'IYZICO_PAYMENT_SUCCESS',
-                    paymentId: result.paymentId,
-                    success: true
-                }, '*');
+                // 3D Secure HTML content varsa göster
+                if (result.threeDSHtmlContent) {
+                    console.log('🔄 3D Secure doğrulaması başlatılıyor...');
+                    
+                    // Modal'ı kapat
+                    this.closeCardForm();
+                    
+                    // 3D Secure sayfasını göster
+                    this.show3DSecurePage(result.threeDSHtmlContent, result.paymentId, result.conversationId, paymentData);
+                    
+                } else {
+                    // Direkt başarılı ödeme
+                    // Global'e ödeme detaylarını kaydet
+                    window.completedPaymentData = {
+                        paymentId: result.paymentId,
+                        conversationId: result.conversationId,
+                        paymentDetails: result.paymentDetails || {},
+                        customerInfo: {
+                            firstName: paymentData.firstName,
+                            lastName: paymentData.lastName,
+                            email: paymentData.email,
+                            phone: paymentData.phone
+                        },
+                        programInfo: {
+                            title: paymentData.selectedProgram.title,
+                            value: paymentData.selectedProgram.value
+                        },
+                        mainProgram: paymentData.mainProgram, // Ana program bilgisi
+                        amount: paymentData.amount,
+                        completedAt: new Date().toISOString()
+                    };
+                    
+                    // Modal'ı kapat
+                    this.closeCardForm();
+                    
+                    // Success event gönder (sadece bir kez)
+                    window.postMessage({
+                        type: 'IYZICO_PAYMENT_SUCCESS',
+                        paymentId: result.paymentId,
+                        success: true
+                    }, '*');
+                }
                 
             } else {
                 throw new Error(result.error || 'Ödeme işlemi başarısız');
@@ -643,8 +656,273 @@ window.IyzicoPaymentService = {
             submitBtn.classList.remove('btn-loading');
             submitBtn.disabled = false;
         }
+    },
+    
+    // 3D Secure sayfasını göster
+    show3DSecurePage(htmlContent, paymentId, conversationId, paymentData) {
+        console.log('🔄 3D Secure sayfası oluşturuluyor...');
         
-
+        // Mevcut 3D Secure modal'ı varsa kaldır
+        const existingModal = document.getElementById('threeDSecureModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // 3D Secure modal oluştur
+        const modal = document.createElement('div');
+        modal.id = 'threeDSecureModal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        `;
+        
+        // Modal içeriği
+        modal.innerHTML = `
+            <div style="
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                max-width: 90%;
+                max-height: 90%;
+                overflow: auto;
+                position: relative;
+                transform: scale(0.9);
+                transition: transform 0.3s ease;
+            ">
+                <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                    padding-bottom: 15px;
+                    border-bottom: 1px solid #eee;
+                ">
+                    <h3 style="margin: 0; color: #333; font-size: 18px;">
+                        🔒 3D Secure Doğrulaması
+                    </h3>
+                    <button id="close3DSecureModal" style="
+                        background: none;
+                        border: none;
+                        font-size: 24px;
+                        cursor: pointer;
+                        color: #666;
+                        padding: 0;
+                        width: 30px;
+                        height: 30px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    ">×</button>
+                </div>
+                
+                <div id="threeDSecureContent" style="min-height: 400px;">
+                    <!-- 3D Secure HTML content buraya gelecek -->
+                </div>
+                
+                <div style="
+                    margin-top: 20px;
+                    padding-top: 15px;
+                    border-top: 1px solid #eee;
+                    text-align: center;
+                    color: #666;
+                    font-size: 14px;
+                ">
+                    <p>🔐 Güvenli ödeme işlemi devam ediyor...</p>
+                    <p>Lütfen bankanızın doğrulama sayfasında işlemi tamamlayın.</p>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Modal'ı göster
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            modal.querySelector('div').style.transform = 'scale(1)';
+        }, 10);
+        
+        // 3D Secure HTML content'i ekle
+        const contentDiv = modal.querySelector('#threeDSecureContent');
+        contentDiv.innerHTML = htmlContent;
+        
+        // Kapatma butonu
+        const closeBtn = modal.querySelector('#close3DSecureModal');
+        closeBtn.addEventListener('click', () => {
+            this.close3DSecureModal();
+        });
+        
+        // Modal dışına tıklama ile kapatma
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.close3DSecureModal();
+            }
+        });
+        
+        // 3D Secure form submit'ini dinle
+        const forms = contentDiv.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', (e) => {
+                console.log('🔄 3D Secure form submit edildi');
+                // Form submit işlemini engelleme, Iyzico kendi handle edecek
+            });
+        });
+        
+        // 3D Secure sonucunu dinle (callback URL'den)
+        this.listenFor3DSecureResult(paymentId, conversationId, paymentData);
+    },
+    
+    // 3D Secure modal'ını kapat
+    close3DSecureModal() {
+        const modal = document.getElementById('threeDSecureModal');
+        if (modal) {
+            modal.style.opacity = '0';
+            modal.querySelector('div').style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
+        }
+    },
+    
+    // 3D Secure sonucunu dinle
+    listenFor3DSecureResult(paymentId, conversationId, paymentData) {
+        console.log('🔄 3D Secure sonucu dinleniyor...');
+        
+        // URL'deki payment parametrelerini kontrol et
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentStatus = urlParams.get('payment');
+        const paymentIdParam = urlParams.get('paymentId');
+        
+        if (paymentStatus && paymentIdParam === paymentId) {
+            if (paymentStatus === 'success') {
+                console.log('✅ 3D Secure başarılı!');
+                
+                // Global'e ödeme detaylarını kaydet
+                window.completedPaymentData = {
+                    paymentId: paymentId,
+                    conversationId: conversationId,
+                    paymentDetails: { status: 'success' },
+                    customerInfo: {
+                        firstName: paymentData.firstName,
+                        lastName: paymentData.lastName,
+                        email: paymentData.email,
+                        phone: paymentData.phone
+                    },
+                    programInfo: {
+                        title: paymentData.selectedProgram.title,
+                        value: paymentData.selectedProgram.value
+                    },
+                    mainProgram: paymentData.mainProgram,
+                    amount: paymentData.amount,
+                    completedAt: new Date().toISOString()
+                };
+                
+                // 3D Secure modal'ını kapat
+                this.close3DSecureModal();
+                
+                // Success event gönder
+                window.postMessage({
+                    type: 'IYZICO_PAYMENT_SUCCESS',
+                    paymentId: paymentId,
+                    success: true
+                }, '*');
+                
+                // URL'den parametreleri temizle
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+                
+            } else if (paymentStatus === 'error') {
+                console.log('❌ 3D Secure başarısız!');
+                const errorMessage = urlParams.get('message') || 'Ödeme başarısız';
+                
+                // 3D Secure modal'ını kapat
+                this.close3DSecureModal();
+                
+                // Hata mesajını göster
+                alert('Ödeme başarısız: ' + decodeURIComponent(errorMessage));
+                
+                // URL'den parametreleri temizle
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+        }
+        
+        // Periyodik kontrol (5 saniyede bir)
+        const checkInterval = setInterval(() => {
+            const currentUrlParams = new URLSearchParams(window.location.search);
+            const currentPaymentStatus = currentUrlParams.get('payment');
+            const currentPaymentId = currentUrlParams.get('paymentId');
+            
+            if (currentPaymentStatus && currentPaymentId === paymentId) {
+                clearInterval(checkInterval);
+                
+                if (currentPaymentStatus === 'success') {
+                    console.log('✅ 3D Secure başarılı (periyodik kontrol)!');
+                    
+                    // Global'e ödeme detaylarını kaydet
+                    window.completedPaymentData = {
+                        paymentId: paymentId,
+                        conversationId: conversationId,
+                        paymentDetails: { status: 'success' },
+                        customerInfo: {
+                            firstName: paymentData.firstName,
+                            lastName: paymentData.lastName,
+                            email: paymentData.email,
+                            phone: paymentData.phone
+                        },
+                        programInfo: {
+                            title: paymentData.selectedProgram.title,
+                            value: paymentData.selectedProgram.value
+                        },
+                        mainProgram: paymentData.mainProgram,
+                        amount: paymentData.amount,
+                        completedAt: new Date().toISOString()
+                    };
+                    
+                    // 3D Secure modal'ını kapat
+                    this.close3DSecureModal();
+                    
+                    // Success event gönder
+                    window.postMessage({
+                        type: 'IYZICO_PAYMENT_SUCCESS',
+                        paymentId: paymentId,
+                        success: true
+                    }, '*');
+                    
+                    // URL'den parametreleri temizle
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, newUrl);
+                    
+                } else if (currentPaymentStatus === 'error') {
+                    console.log('❌ 3D Secure başarısız (periyodik kontrol)!');
+                    const errorMessage = currentUrlParams.get('message') || 'Ödeme başarısız';
+                    
+                    // 3D Secure modal'ını kapat
+                    this.close3DSecureModal();
+                    
+                    // Hata mesajını göster
+                    alert('Ödeme başarısız: ' + decodeURIComponent(errorMessage));
+                    
+                    // URL'den parametreleri temizle
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, newUrl);
+                }
+            }
+        }, 5000);
+        
+        // 2 dakika sonra interval'i temizle
+        setTimeout(() => {
+            clearInterval(checkInterval);
+        }, 120000);
     }
 };
 

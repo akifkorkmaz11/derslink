@@ -220,8 +220,41 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Instagram link tracking
+// Payment URL kontrolü
 document.addEventListener('DOMContentLoaded', function() {
+    // URL'deki payment parametrelerini kontrol et
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const paymentId = urlParams.get('paymentId');
+    const errorMessage = urlParams.get('message');
+    
+    if (paymentStatus && paymentId) {
+        console.log('🔄 Payment URL parametreleri tespit edildi:', { paymentStatus, paymentId, errorMessage });
+        
+        if (paymentStatus === 'success') {
+            console.log('✅ Ödeme başarılı!');
+            
+            // Başarı mesajını göster
+            showNotification('Ödeme başarıyla tamamlandı!', 'success');
+            
+            // URL'den parametreleri temizle
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+            
+        } else if (paymentStatus === 'error') {
+            console.log('❌ Ödeme başarısız!');
+            
+            // Hata mesajını göster
+            const message = errorMessage ? decodeURIComponent(errorMessage) : 'Ödeme işlemi başarısız';
+            showNotification(message, 'error');
+            
+            // URL'den parametreleri temizle
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+    }
+    
+    // Instagram link tracking
     const instagramLink = document.querySelector('a[href*="instagram"]');
     if (instagramLink) {
         instagramLink.addEventListener('click', function(e) {
