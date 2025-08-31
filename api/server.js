@@ -44,6 +44,12 @@ function makeIyzicoRequest(endpoint, data) {
     const requestBody = JSON.stringify(data);
     const authHeader = generateAuthHeader(iyzicoConfig.apiKey, iyzicoConfig.secretKey, requestBody);
     
+    console.log('🔧 Iyzico request detayları:');
+    console.log('🔧 Endpoint:', `${iyzicoConfig.uri}${endpoint}`);
+    console.log('🔧 API Key:', iyzicoConfig.apiKey.substring(0, 8) + '...');
+    console.log('🔧 Auth Header:', authHeader.substring(0, 50) + '...');
+    console.log('🔧 Request Body length:', requestBody.length);
+    
     return axios.post(`${iyzicoConfig.uri}${endpoint}`, requestBody, {
         headers: {
             'Content-Type': 'application/json',
@@ -449,10 +455,17 @@ app.post('/api/payment/process-card', async (req, res) => {
         try {
             // Iyzico'nun doğru endpoint'ini kullan
             const response = await makeIyzicoRequest('/payment/3dsecure/initialize', request);
-            console.log('✅ Direkt API response:', response.data);
+            console.log('✅ Direkt API response status:', response.status);
+            console.log('✅ Direkt API response headers:', response.headers);
+            console.log('✅ Direkt API response data:', JSON.stringify(response.data, null, 2));
             handleIyzicoResponse(null, response.data, res);
         } catch (error) {
-            console.error('❌ Direkt API hatası:', error.response?.data || error.message);
+            console.error('❌ Direkt API hatası:');
+            console.error('❌ Error message:', error.message);
+            console.error('❌ Error status:', error.response?.status);
+            console.error('❌ Error statusText:', error.response?.statusText);
+            console.error('❌ Error data:', JSON.stringify(error.response?.data, null, 2));
+            console.error('❌ Error headers:', error.response?.headers);
             handleIyzicoResponse(error, null, res);
         }
         
@@ -469,26 +482,28 @@ app.post('/api/payment/process-card', async (req, res) => {
 // Iyzico response handler fonksiyonu
 function handleIyzicoResponse(err, result, res) {
     if (err) {
-        console.error('❌ Iyzico 3D Secure hatası:', err);
-        console.error('❌ Hata detayları:', {
-            message: err.message,
-            code: err.code,
-            status: err.status
-        });
+        console.error('❌ Iyzico 3D Secure hatası:');
+        console.error('❌ Error object:', err);
+        console.error('❌ Error message:', err.message);
+        console.error('❌ Error code:', err.code);
+        console.error('❌ Error status:', err.status);
+        console.error('❌ Error response data:', err.response?.data);
         return res.status(500).json({
             success: false,
             error: '3D Secure başlatılamadı: ' + err.message
         });
     }
     
-    console.log('✅ Iyzico 3D Secure sonucu:', result);
+    console.log('✅ Iyzico 3D Secure sonucu:');
+    console.log('✅ Full result object:', JSON.stringify(result, null, 2));
     console.log('📋 Result detayları:', {
         status: result.status,
         errorCode: result.errorCode,
         errorMessage: result.errorMessage,
         paymentId: result.paymentId,
         conversationId: result.conversationId,
-        hasThreeDSHtmlContent: !!result.threeDSHtmlContent
+        hasThreeDSHtmlContent: !!result.threeDSHtmlContent,
+        threeDSHtmlContentLength: result.threeDSHtmlContent?.length || 0
     });
     
     if (result.status === 'success') {
