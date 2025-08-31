@@ -1,23 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
-// Iyzico import - alternatif yöntemler
-let Iyzipay;
-try {
-    Iyzipay = require('iyzipay');
-    console.log('🔧 Iyzico kütüphanesi yükleniyor...');
-    console.log('🔧 Iyzipay object:', typeof Iyzipay);
-    console.log('🔧 Iyzipay methods:', Object.keys(Iyzipay));
-} catch (error) {
-    console.error('❌ Iyzico kütüphanesi yüklenemedi:', error);
-    // Alternatif import deneyelim
-    try {
-        Iyzipay = require('iyzipay').default;
-        console.log('✅ Iyzico kütüphanesi default export ile yüklendi');
-    } catch (error2) {
-        console.error('❌ Iyzico kütüphanesi hiçbir yöntemle yüklenemedi:', error2);
-    }
-}
+const axios = require('axios');
+const crypto = require('crypto');
 
 const app = express();
 
@@ -39,27 +24,32 @@ console.log('🔧 Supabase Key length:', supabaseKey?.length || 0);
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Iyzico konfigürasyonu - PRODUCTION
-let iyzipay;
-if (Iyzipay) {
-    try {
-        iyzipay = new Iyzipay({
-            apiKey: process.env.IYZICO_API_KEY || 'your_production_api_key_here',
-            secretKey: process.env.IYZICO_SECRET_KEY || 'your_production_secret_key_here',
-            uri: process.env.IYZICO_URI || 'https://api.iyzipay.com'
-        });
-        
-        console.log('🔧 Iyzico client oluşturuldu');
-        console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length || 0);
-        console.log('🔧 Iyzipay client methods:', Object.keys(iyzipay));
-        console.log('🔧 Iyzipay threeds methods:', Object.keys(iyzipay.threeds || {}));
-    } catch (error) {
-        console.error('❌ Iyzico client oluşturulamadı:', error);
-        iyzipay = null;
-    }
-} else {
-    console.error('❌ Iyzico kütüphanesi yüklenmediği için client oluşturulamadı');
-    iyzipay = null;
+// Iyzico konfigürasyonu
+const iyzicoConfig = {
+    apiKey: process.env.IYZICO_API_KEY || 'your_production_api_key_here',
+    secretKey: process.env.IYZICO_SECRET_KEY || 'your_production_secret_key_here',
+    uri: process.env.IYZICO_URI || 'https://api.iyzipay.com'
+};
+
+console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length || 0);
+
+// Iyzico direkt API helper fonksiyonları
+function generateAuthHeader(apiKey, secretKey, requestBody) {
+    const hash = crypto.createHmac('sha1', secretKey).update(requestBody).digest('base64');
+    return `IYZWS ${apiKey}:${hash}`;
+}
+
+function makeIyzicoRequest(endpoint, data) {
+    const requestBody = JSON.stringify(data);
+    const authHeader = generateAuthHeader(iyzicoConfig.apiKey, iyzicoConfig.secretKey, requestBody);
+    
+    return axios.post(`${iyzicoConfig.uri}${endpoint}`, requestBody, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authHeader,
+            'Accept': 'application/json'
+        }
+    });
 }
 
 // Test endpoint
@@ -136,14 +126,14 @@ app.get('/api/admin/users', async (req, res) => {
         if (error) {
             console.error('❌ Kullanıcı listesi alınamadı:', error);
             return res.status(500).json({
-                    success: false,
+                success: false,
                 error: error.message
-                });
-            }
-            
+            });
+        }
+        
         console.log(`✅ ${users?.length || 0} kullanıcı alındı`);
-                res.json({
-                    success: true,
+        res.json({
+            success: true,
             users: users || []
         });
     } catch (error) {
@@ -185,14 +175,14 @@ app.get('/api/admin/classes', async (req, res) => {
         if (error) {
             console.error('❌ Sınıf listesi alınamadı:', error);
             return res.status(500).json({
-                    success: false,
+                success: false,
                 error: error.message
-                });
-            }
-            
+            });
+        }
+        
         console.log(`✅ ${classes?.length || 0} sınıf alındı`);
-                res.json({
-                    success: true,
+        res.json({
+            success: true,
             classes: classes || []
         });
     } catch (error) {
@@ -289,8 +279,8 @@ app.get('/api/admin/teacher-schedules', async (req, res) => {
         }));
 
         console.log(`✅ ${schedules.length} öğretmen programı alındı`);
-                res.json({
-                    success: true,
+        res.json({
+            success: true,
             schedules: schedules
         });
     } catch (error) {
@@ -327,15 +317,6 @@ app.post('/api/payment/process-card', async (req, res) => {
             yksField
         } = req.body;
         
-        // Iyzico client kontrolü
-        if (!iyzipay) {
-            console.error('❌ Iyzico client bulunamadı');
-            return res.status(500).json({
-                success: false,
-                error: 'Ödeme sistemi şu anda kullanılamıyor'
-            });
-        }
-        
         // Validasyon
         if (!cardNumber || !cardHolder || !cardExpiry || !cardCvv || !amount) {
             console.log('❌ Validasyon hatası: Eksik kart bilgileri');
@@ -363,7 +344,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             paymentGroup: 'PRODUCT',
             callbackUrl: process.env.NODE_ENV === 'production' 
                 ? 'https://www.derslink.net.tr/api/payment/callback'
-                : 'http://localhost:3000/api/payment/callback', // 3D Secure callback
+                : 'http://localhost:3000/api/payment/callback',
             threeDSRequest: {
                 enabled: true
             },
@@ -421,59 +402,16 @@ app.post('/api/payment/process-card', async (req, res) => {
             cardNumber: cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4)
         });
         
-        // Iyzico client kontrolü
-        if (!iyzipay || !iyzipay.threeds || !iyzipay.threeds.initialize) {
-            console.error('❌ Iyzico client veya threeds.initialize bulunamadı');
-            console.error('❌ iyzipay:', !!iyzipay);
-            console.error('❌ iyzipay.threeds:', !!iyzipay?.threeds);
-            console.error('❌ iyzipay.threeds.initialize:', !!iyzipay?.threeds?.initialize);
-            return res.status(500).json({
-                success: false,
-                error: 'Iyzico kütüphanesi yüklenemedi'
-            });
+        // Direkt API kullan
+        console.log('🔧 Iyzico direkt API kullanılıyor');
+        try {
+            const response = await makeIyzicoRequest('/payment/3dsecure/initialize', request);
+            console.log('✅ Direkt API response:', response.data);
+            handleIyzicoResponse(null, response.data, res);
+        } catch (error) {
+            console.error('❌ Direkt API hatası:', error.response?.data || error.message);
+            handleIyzicoResponse(error, null, res);
         }
-        
-        // Iyzico 3D Secure ödeme işlemi
-        iyzipay.threeds.initialize(request, function (err, result) {
-            if (err) {
-                console.error('❌ Iyzico 3D Secure hatası:', err);
-                console.error('❌ Hata detayları:', {
-                    message: err.message,
-                    code: err.code,
-                    status: err.status
-                });
-                return res.status(500).json({
-                    success: false,
-                    error: '3D Secure başlatılamadı: ' + err.message
-                });
-            }
-            
-            console.log('✅ Iyzico 3D Secure sonucu:', result);
-            console.log('📋 Result detayları:', {
-                status: result.status,
-                errorCode: result.errorCode,
-                errorMessage: result.errorMessage,
-                paymentId: result.paymentId,
-                conversationId: result.conversationId,
-                hasThreeDSHtmlContent: !!result.threeDSHtmlContent
-            });
-            
-            if (result.status === 'success') {
-                // 3D Secure sayfasına yönlendir
-                return res.json({
-                    success: true,
-                    message: '3D Secure başlatıldı',
-                    threeDSHtmlContent: result.threeDSHtmlContent,
-                    paymentId: result.paymentId,
-                    conversationId: result.conversationId
-                });
-            } else {
-                return res.status(400).json({
-                    success: false,
-                    error: '3D Secure başlatılamadı: ' + (result.errorMessage || 'Bilinmeyen hata')
-                });
-            }
-        });
         
     } catch (error) {
         console.error('❌ Ödeme işlemi hatası:', error);
@@ -484,6 +422,48 @@ app.post('/api/payment/process-card', async (req, res) => {
         });
     }
 });
+
+// Iyzico response handler fonksiyonu
+function handleIyzicoResponse(err, result, res) {
+    if (err) {
+        console.error('❌ Iyzico 3D Secure hatası:', err);
+        console.error('❌ Hata detayları:', {
+            message: err.message,
+            code: err.code,
+            status: err.status
+        });
+        return res.status(500).json({
+            success: false,
+            error: '3D Secure başlatılamadı: ' + err.message
+        });
+    }
+    
+    console.log('✅ Iyzico 3D Secure sonucu:', result);
+    console.log('📋 Result detayları:', {
+        status: result.status,
+        errorCode: result.errorCode,
+        errorMessage: result.errorMessage,
+        paymentId: result.paymentId,
+        conversationId: result.conversationId,
+        hasThreeDSHtmlContent: !!result.threeDSHtmlContent
+    });
+    
+    if (result.status === 'success') {
+        // 3D Secure sayfasına yönlendir
+        return res.json({
+            success: true,
+            message: '3D Secure başlatıldı',
+            threeDSHtmlContent: result.threeDSHtmlContent,
+            paymentId: result.paymentId,
+            conversationId: result.conversationId
+        });
+    } else {
+        return res.status(400).json({
+            success: false,
+            error: '3D Secure başlatılamadı: ' + (result.errorMessage || 'Bilinmeyen hata')
+        });
+    }
+}
 
 // 3D Secure Callback Endpoint
 app.post('/api/payment/callback', async (req, res) => {
@@ -500,20 +480,19 @@ app.post('/api/payment/callback', async (req, res) => {
                 paymentId: paymentId
             };
             
-            iyzipay.payment.retrieve(request, function (err, result) {
-                if (err) {
-                    console.error('❌ Ödeme tamamlama hatası:', err);
-                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme tamamlanamadı'));
-                }
+            try {
+                const response = await makeIyzicoRequest('/payment/retrieve', request);
+                console.log('✅ Ödeme tamamlandı:', response.data);
                 
-                console.log('✅ Ödeme tamamlandı:', result);
-                
-                if (result.status === 'success') {
+                if (response.data.status === 'success') {
                     return res.redirect('/?payment=success&paymentId=' + paymentId);
                 } else {
                     return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme başarısız'));
                 }
-            });
+            } catch (error) {
+                console.error('❌ Ödeme tamamlama hatası:', error);
+                return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme tamamlanamadı'));
+            }
         } else {
             return res.redirect('/?payment=error&message=' + encodeURIComponent('3D Secure doğrulaması başarısız'));
         }
@@ -539,20 +518,19 @@ app.get('/api/payment/callback', async (req, res) => {
                 paymentId: paymentId
             };
             
-            iyzipay.payment.retrieve(request, function (err, result) {
-                if (err) {
-                    console.error('❌ Ödeme tamamlama hatası:', err);
-                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme tamamlanamadı'));
-                }
+            try {
+                const response = await makeIyzicoRequest('/payment/retrieve', request);
+                console.log('✅ Ödeme tamamlandı:', response.data);
                 
-                console.log('✅ Ödeme tamamlandı:', result);
-                
-                if (result.status === 'success') {
+                if (response.data.status === 'success') {
                     return res.redirect('/?payment=success&paymentId=' + paymentId);
                 } else {
                     return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme başarısız'));
                 }
-            });
+            } catch (error) {
+                console.error('❌ Ödeme tamamlama hatası:', error);
+                return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme tamamlanamadı'));
+            }
         } else {
             return res.redirect('/?payment=error&message=' + encodeURIComponent('3D Secure doğrulaması başarısız'));
         }
@@ -562,25 +540,6 @@ app.get('/api/payment/callback', async (req, res) => {
         res.redirect('/?payment=error&message=' + encodeURIComponent('Sistem hatası'));
     }
 });
-
-// Debug endpoint - sadece development'ta
-if (process.env.NODE_ENV !== 'production') {
-    app.get('/api/debug', (req, res) => {
-        res.json({
-            message: 'Debug bilgileri',
-            environment: process.env.NODE_ENV,
-            iyzicoConfig: {
-                apiKey: process.env.IYZICO_API_KEY ? 'SET' : 'NOT SET',
-                secretKey: process.env.IYZICO_SECRET_KEY ? 'SET' : 'NOT SET',
-                uri: process.env.IYZICO_URI || 'NOT SET'
-            },
-            supabaseConfig: {
-                url: process.env.SUPABASE_URL ? 'SET' : 'NOT SET',
-                key: process.env.SUPABASE_KEY ? 'SET' : 'NOT SET'
-            }
-        });
-    });
-}
 
 // Production debug endpoint - sadece environment variable'ları kontrol etmek için
 app.get('/api/production-debug', (req, res) => {
