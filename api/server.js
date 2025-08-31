@@ -342,6 +342,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             basketId: 'B' + Date.now(),
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
+            randomKey: crypto.randomBytes(32).toString('hex'), // Random string eklendi
             callbackUrl: process.env.NODE_ENV === 'production' 
                 ? 'https://www.derslink.net.tr/api/payment/callback'
                 : 'http://localhost:3000/api/payment/callback',
@@ -477,7 +478,8 @@ app.post('/api/payment/callback', async (req, res) => {
             const request = {
                 locale: 'tr',
                 conversationId: conversationId,
-                paymentId: paymentId
+                paymentId: paymentId,
+                randomKey: crypto.randomBytes(32).toString('hex')
             };
             
             try {
@@ -515,7 +517,8 @@ app.get('/api/payment/callback', async (req, res) => {
             const request = {
                 locale: 'tr',
                 conversationId: conversationId,
-                paymentId: paymentId
+                paymentId: paymentId,
+                randomKey: crypto.randomBytes(32).toString('hex')
             };
             
             try {
