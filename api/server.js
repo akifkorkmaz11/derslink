@@ -406,5 +406,44 @@ app.post('/api/payment/process-card', async (req, res) => {
     }
 });
 
+// 3D Secure Callback Endpoint
+app.post('/api/payment/callback', async (req, res) => {
+    try {
+        console.log('🔄 3D Secure callback alındı:', req.body);
+        
+        const { conversationId, paymentId, status } = req.body;
+        
+        if (status === 'success') {
+            // 3D Secure başarılı, ödemeyi tamamla
+            const request = {
+                locale: 'tr',
+                conversationId: conversationId,
+                paymentId: paymentId
+            };
+            
+            iyzipay.payment.retrieve(request, function (err, result) {
+                if (err) {
+                    console.error('❌ Ödeme tamamlama hatası:', err);
+                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme tamamlanamadı'));
+                }
+                
+                console.log('✅ Ödeme tamamlandı:', result);
+                
+                if (result.status === 'success') {
+                    return res.redirect('/?payment=success&paymentId=' + paymentId);
+                } else {
+                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme başarısız'));
+                }
+            });
+        } else {
+            return res.redirect('/?payment=error&message=' + encodeURIComponent('3D Secure doğrulaması başarısız'));
+        }
+        
+    } catch (error) {
+        console.error('❌ Callback hatası:', error);
+        res.redirect('/?payment=error&message=' + encodeURIComponent('Sistem hatası'));
+    }
+});
+
 // Vercel için export
 module.exports = app;
