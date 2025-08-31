@@ -346,7 +346,7 @@ app.post('/api/payment/process-card', async (req, res) => {
         }
         
         // Frontend'den gelen conversationId'yi kullan veya yeni oluştur
-        const finalConversationId = conversationId || `conv_${Date.now()}_${generateRandomAlphaNum(8)}`;
+        const finalConversationId = conversationId || generateRandomAlphaNum(16);
         
         console.log('🔧 ConversationId kullanılıyor:', finalConversationId);
         
@@ -377,9 +377,9 @@ app.post('/api/payment/process-card', async (req, res) => {
                 : 'http://localhost:3000/api/payment/callback',
             threeDS: '1', // ✅ Doğru parametre
             paymentSource: 'API',
-            merchantOrderId: `M${Date.now()}_${generateRandomAlphaNum(6)}`,
-            posOrderId: `POS${Date.now()}_${generateRandomAlphaNum(6)}`,
-            orderId: `O${Date.now()}_${generateRandomAlphaNum(6)}`,
+            merchantOrderId: generateRandomAlphaNum(12),
+            posOrderId: generateRandomAlphaNum(12),
+            orderId: generateRandomAlphaNum(12),
             merchantId: merchantId,
             paymentCard: {
                 cardHolderName: cardHolder,
@@ -390,7 +390,7 @@ app.post('/api/payment/process-card', async (req, res) => {
                 registerCard: '0'
             },
             buyer: {
-                id: `BY${Date.now()}_${generateRandomAlphaNum(6)}`,
+                id: generateRandomAlphaNum(12),
                 name: firstName,
                 surname: lastName,
                 gsmNumber: phone,
@@ -418,7 +418,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             },
             basketItems: [
                 {
-                    id: `BI${Date.now()}_${generateRandomAlphaNum(6)}`,
+                    id: generateRandomAlphaNum(12),
                     name: programTitle,
                     category1: mainProgram,
                     category2: subProgram,

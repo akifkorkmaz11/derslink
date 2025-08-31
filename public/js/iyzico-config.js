@@ -552,18 +552,18 @@ window.IyzicoPaymentService = {
         
         try {
             
-            // Iyzico production için alfanumerik ID üret
-            function generateAlphaNumId(length = 10) {
+            // Iyzico production için saf alfanumerik ID üret
+            function generateAlphaNumId(length = 12) {
                 const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                let result = 'a'; // baş harf mutlaka harf
-                for (let i = 1; i < length; i++) {
+                let result = '';
+                for (let i = 0; i < length; i++) {
                     result += chars.charAt(Math.floor(Math.random() * chars.length));
                 }
                 return result;
             }
             
-            // Benzersiz conversationId oluştur
-            const conversationId = "conv_" + Date.now() + "_" + generateAlphaNumId(8);
+            // Benzersiz conversationId oluştur (sadece alfanumerik)
+            const conversationId = generateAlphaNumId(16);
             console.log('🔧 Frontend conversationId oluşturuldu:', conversationId);
             
             // Backend'e kart bilgileri ile ödeme isteği gönder
