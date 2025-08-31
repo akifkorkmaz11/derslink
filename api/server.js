@@ -353,9 +353,9 @@ app.post('/api/payment/process-card', async (req, res) => {
                 : 'http://localhost:3000/api/payment/callback',
             threeDS: '1', // ✅ Doğru parametre
             paymentSource: 'API',
-            merchantOrderId: finalConversationId,
-            posOrderId: finalConversationId,
-            orderId: finalConversationId,
+            merchantOrderId: 'M' + Date.now(),
+            posOrderId: 'POS' + Date.now(),
+            orderId: 'O' + Date.now(),
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
@@ -411,9 +411,17 @@ app.post('/api/payment/process-card', async (req, res) => {
             posOrderId: request.posOrderId,
             orderId: request.orderId,
             price: request.price,
+            paidPrice: request.paidPrice,
+            currency: request.currency,
+            installment: request.installment,
+            basketId: request.basketId,
+            paymentChannel: request.paymentChannel,
+            paymentGroup: request.paymentGroup,
             callbackUrl: request.callbackUrl,
             cardNumber: cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4)
         });
+        
+        console.log('🔧 Tam Iyzico request gönderiliyor:', JSON.stringify(request, null, 2));
         
         // Direkt API kullan
         console.log('🔧 Iyzico direkt API kullanılıyor');
