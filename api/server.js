@@ -34,11 +34,15 @@ console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length ||
 
 // Test endpoint
 app.get('/api/test', (req, res) => {
-                res.json({
+    res.json({
         message: 'API Server çalışıyor!',
         environment: {
+            nodeEnv: process.env.NODE_ENV || 'NOT SET',
             supabaseUrl: process.env.SUPABASE_URL || 'NOT SET',
-            supabaseKeyLength: process.env.SUPABASE_KEY?.length || 0
+            supabaseKeyLength: process.env.SUPABASE_KEY?.length || 0,
+            iyzicoApiKeyLength: process.env.IYZICO_API_KEY?.length || 0,
+            iyzicoSecretKeyLength: process.env.IYZICO_SECRET_KEY?.length || 0,
+            iyzicoUri: process.env.IYZICO_URI || 'NOT SET'
         }
     });
 });
@@ -273,6 +277,9 @@ app.post('/api/payment/process-card', async (req, res) => {
     try {
         console.log('💳 Ödeme işlemi başlatılıyor...');
         console.log('📝 Ödeme verileri:', req.body);
+        console.log('🔧 Environment:', process.env.NODE_ENV);
+        console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length || 0);
+        console.log('🔧 Iyzico Secret Key length:', process.env.IYZICO_SECRET_KEY?.length || 0);
         
         const { 
             cardNumber, 
@@ -292,6 +299,7 @@ app.post('/api/payment/process-card', async (req, res) => {
         
         // Validasyon
         if (!cardNumber || !cardHolder || !cardExpiry || !cardCvv || !amount) {
+            console.log('❌ Validasyon hatası: Eksik kart bilgileri');
             return res.status(400).json({
                 success: false,
                 error: 'Eksik kart bilgileri'
@@ -300,6 +308,9 @@ app.post('/api/payment/process-card', async (req, res) => {
         
         // Gerçek Iyzico ödeme işlemi
         console.log('✅ Gerçek kart ile ödeme başlatılıyor');
+        console.log('🔧 Callback URL:', process.env.NODE_ENV === 'production' 
+            ? 'https://www.derslink.net.tr/api/payment/callback'
+            : 'http://localhost:3000/api/payment/callback');
         
         const request = {
             locale: 'tr',
@@ -312,7 +323,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
             callbackUrl: process.env.NODE_ENV === 'production' 
-                ? 'https://derslink.vercel.app/api/payment/callback'
+                ? 'https://www.derslink.net.tr/api/payment/callback'
                 : 'http://localhost:3000/api/payment/callback', // 3D Secure callback
             threeDSRequest: {
                 enabled: true
@@ -364,10 +375,22 @@ app.post('/api/payment/process-card', async (req, res) => {
             ]
         };
         
+        console.log('📋 Iyzico request hazırlandı:', {
+            conversationId: request.conversationId,
+            price: request.price,
+            callbackUrl: request.callbackUrl,
+            cardNumber: cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4)
+        });
+        
         // Iyzico 3D Secure ödeme işlemi
         iyzipay.threeds.initialize(request, function (err, result) {
             if (err) {
                 console.error('❌ Iyzico 3D Secure hatası:', err);
+                console.error('❌ Hata detayları:', {
+                    message: err.message,
+                    code: err.code,
+                    status: err.status
+                });
                 return res.status(500).json({
                     success: false,
                     error: '3D Secure başlatılamadı: ' + err.message
@@ -375,6 +398,14 @@ app.post('/api/payment/process-card', async (req, res) => {
             }
             
             console.log('✅ Iyzico 3D Secure sonucu:', result);
+            console.log('📋 Result detayları:', {
+                status: result.status,
+                errorCode: result.errorCode,
+                errorMessage: result.errorMessage,
+                paymentId: result.paymentId,
+                conversationId: result.conversationId,
+                hasThreeDSHtmlContent: !!result.threeDSHtmlContent
+            });
             
             if (result.status === 'success') {
                 // 3D Secure sayfasına yönlendir
@@ -395,9 +426,10 @@ app.post('/api/payment/process-card', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Ödeme işlemi hatası:', error);
+        console.error('❌ Hata stack:', error.stack);
         res.status(500).json({
             success: false,
-            error: 'Ödeme işlemi sırasında hata oluştu'
+            error: 'Ödeme işlemi sırasında hata oluştu: ' + error.message
         });
     }
 });
@@ -478,6 +510,42 @@ app.get('/api/payment/callback', async (req, res) => {
         console.error('❌ Callback hatası:', error);
         res.redirect('/?payment=error&message=' + encodeURIComponent('Sistem hatası'));
     }
+});
+
+// Debug endpoint - sadece development'ta
+if (process.env.NODE_ENV !== 'production') {
+    app.get('/api/debug', (req, res) => {
+        res.json({
+            message: 'Debug bilgileri',
+            environment: process.env.NODE_ENV,
+            iyzicoConfig: {
+                apiKey: process.env.IYZICO_API_KEY ? 'SET' : 'NOT SET',
+                secretKey: process.env.IYZICO_SECRET_KEY ? 'SET' : 'NOT SET',
+                uri: process.env.IYZICO_URI || 'NOT SET'
+            },
+            supabaseConfig: {
+                url: process.env.SUPABASE_URL ? 'SET' : 'NOT SET',
+                key: process.env.SUPABASE_KEY ? 'SET' : 'NOT SET'
+            }
+        });
+    });
+}
+
+// Production debug endpoint - sadece environment variable'ları kontrol etmek için
+app.get('/api/production-debug', (req, res) => {
+    res.json({
+        message: 'Production debug bilgileri',
+        environment: process.env.NODE_ENV,
+        iyzicoConfig: {
+            apiKeySet: !!process.env.IYZICO_API_KEY,
+            secretKeySet: !!process.env.IYZICO_SECRET_KEY,
+            uriSet: !!process.env.IYZICO_URI
+        },
+        supabaseConfig: {
+            urlSet: !!process.env.SUPABASE_URL,
+            keySet: !!process.env.SUPABASE_KEY
+        }
+    });
 });
 
 // Vercel için export
