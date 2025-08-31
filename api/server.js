@@ -351,10 +351,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             callbackUrl: process.env.NODE_ENV === 'production' 
                 ? 'https://www.derslink.net.tr/api/payment/callback'
                 : 'http://localhost:3000/api/payment/callback',
-            threeDSRequest: {
-                enabled: true
-            },
-            merchantId: process.env.IYZICO_MERCHANT_ID || '0000000000000000',
+            threeDS: '1', // ✅ Doğru parametre
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
@@ -404,6 +401,7 @@ app.post('/api/payment/process-card', async (req, res) => {
         
         console.log('📋 Iyzico request hazırlandı:', {
             conversationId: request.conversationId,
+            threeDS: request.threeDS,
             price: request.price,
             callbackUrl: request.callbackUrl,
             cardNumber: cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4)
