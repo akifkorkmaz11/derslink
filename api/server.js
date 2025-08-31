@@ -369,18 +369,12 @@ app.post('/api/payment/process-card', async (req, res) => {
             paidPrice: amount.toString(),
             currency: 'TRY',
             installment: '1',
-            basketId: 'B' + Date.now(),
+            basketId: 'B12345',
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
             callbackUrl: process.env.NODE_ENV === 'production' 
                 ? 'https://www.derslink.net.tr/api/payment/callback'
                 : 'http://localhost:3000/api/payment/callback',
-            threeDS: '1', // ✅ Doğru parametre
-            paymentSource: 'API',
-            merchantOrderId: generateRandomAlphaNum(12),
-            posOrderId: generateRandomAlphaNum(12),
-            orderId: generateRandomAlphaNum(12),
-            merchantId: merchantId,
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
@@ -390,17 +384,16 @@ app.post('/api/payment/process-card', async (req, res) => {
                 registerCard: '0'
             },
             buyer: {
-                id: generateRandomAlphaNum(12),
+                id: 'BY123',
                 name: firstName,
                 surname: lastName,
                 gsmNumber: phone,
                 email: email,
-                identityNumber: '74300864791', // Gerçek kart için geçerli TC kimlik no gerekebilir
+                identityNumber: '11111111111',
                 registrationAddress: 'Test Adres',
                 ip: req.ip || '127.0.0.1',
                 city: 'Istanbul',
-                country: 'Turkey',
-                zipCode: '34732'
+                country: 'Turkey'
             },
             shippingAddress: {
                 contactName: firstName + ' ' + lastName,
@@ -414,14 +407,13 @@ app.post('/api/payment/process-card', async (req, res) => {
                 city: 'Istanbul',
                 country: 'Turkey',
                 address: 'Test Adres',
-                zipCode: '34732'
+                zipCode: '34000'
             },
             basketItems: [
                 {
-                    id: generateRandomAlphaNum(12),
-                    name: programTitle,
-                    category1: mainProgram,
-                    category2: subProgram,
+                    id: 'BI1',
+                    name: 'Program Ödemesi',
+                    category1: 'Eğitim',
                     itemType: 'VIRTUAL',
                     price: amount.toString()
                 }
@@ -454,7 +446,7 @@ app.post('/api/payment/process-card', async (req, res) => {
         console.log('🔧 Endpoint:', '/payment/3dsecure/initialize');
         try {
             // Iyzico'nun doğru endpoint'ini kullan
-            const response = await makeIyzicoRequest('/payment/3dsecure/initialize', request);
+            const response = await makeIyzicoRequest('/payment/create', request);
             console.log('✅ Direkt API response status:', response.status);
             console.log('✅ Direkt API response headers:', response.headers);
             console.log('✅ Direkt API response data:', JSON.stringify(response.data, null, 2));
