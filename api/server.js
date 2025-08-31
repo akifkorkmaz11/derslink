@@ -346,9 +346,13 @@ app.post('/api/payment/process-card', async (req, res) => {
         }
         
         // Frontend'den gelen conversationId'yi kullan veya yeni oluştur
+        console.log('🔧 Frontend\'den gelen conversationId:', conversationId);
+        console.log('🔧 conversationId type:', typeof conversationId);
+        console.log('🔧 conversationId length:', conversationId?.length);
+        
         const finalConversationId = conversationId || generateRandomAlphaNum(16);
         
-        console.log('🔧 ConversationId kullanılıyor:', finalConversationId);
+        console.log('🔧 Final conversationId kullanılıyor:', finalConversationId);
         
         // merchantId kontrolü - gerçek merchant ID gerekli
         if (!process.env.IYZICO_MERCHANT_ID) {
@@ -375,6 +379,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             callbackUrl: process.env.NODE_ENV === 'production' 
                 ? 'https://www.derslink.net.tr/api/payment/callback'
                 : 'http://localhost:3000/api/payment/callback',
+            threeDS: '1',
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
@@ -415,6 +420,9 @@ app.post('/api/payment/process-card', async (req, res) => {
         };
         
         console.log('📋 Iyzico request hazırlandı:');
+        console.log('📋 Request conversationId:', request.conversationId);
+        console.log('📋 Request conversationId type:', typeof request.conversationId);
+        console.log('📋 Request conversationId length:', request.conversationId?.length);
         console.log('📋 Request object:', JSON.stringify(request, null, 2));
         console.log('📋 Card number (masked):', cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4));
         
