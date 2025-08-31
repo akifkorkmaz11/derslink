@@ -332,9 +332,14 @@ app.post('/api/payment/process-card', async (req, res) => {
             ? 'https://www.derslink.net.tr/api/payment/callback'
             : 'http://localhost:3000/api/payment/callback');
         
+        // Benzersiz conversationId oluştur - basit format
+        const conversationId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        console.log('🔧 ConversationId oluşturuldu:', conversationId);
+        
         const request = {
             locale: 'tr',
-            conversationId: 'order_' + Date.now() + '_' + crypto.randomBytes(8).toString('hex'),
+            conversationId: conversationId,
             price: amount.toString(),
             paidPrice: amount.toString(),
             currency: 'TRY',
@@ -348,7 +353,6 @@ app.post('/api/payment/process-card', async (req, res) => {
             threeDSRequest: {
                 enabled: true
             },
-            paymentSource: 'API',
             merchantId: process.env.IYZICO_MERCHANT_ID || '0000000000000000',
             paymentCard: {
                 cardHolderName: cardHolder,
@@ -401,8 +405,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             conversationId: request.conversationId,
             price: request.price,
             callbackUrl: request.callbackUrl,
-            cardNumber: cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4),
-            randomString: request.conversationId // Iyzico'nun beklediği random string
+            cardNumber: cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4)
         });
         
         // Direkt API kullan

@@ -590,35 +590,35 @@ window.IyzicoPaymentService = {
                     
                 } else {
                     // Direkt başarılı ödeme
-                    // Global'e ödeme detaylarını kaydet
-                    window.completedPaymentData = {
-                        paymentId: result.paymentId,
-                        conversationId: result.conversationId,
-                        paymentDetails: result.paymentDetails || {},
-                        customerInfo: {
-                            firstName: paymentData.firstName,
-                            lastName: paymentData.lastName,
-                            email: paymentData.email,
-                            phone: paymentData.phone
-                        },
-                        programInfo: {
-                            title: paymentData.selectedProgram.title,
-                            value: paymentData.selectedProgram.value
-                        },
-                        mainProgram: paymentData.mainProgram, // Ana program bilgisi
-                        amount: paymentData.amount,
-                        completedAt: new Date().toISOString()
-                    };
-                    
-                    // Modal'ı kapat
-                    this.closeCardForm();
-                    
-                    // Success event gönder (sadece bir kez)
-                    window.postMessage({
-                        type: 'IYZICO_PAYMENT_SUCCESS',
-                        paymentId: result.paymentId,
-                        success: true
-                    }, '*');
+                // Global'e ödeme detaylarını kaydet
+                window.completedPaymentData = {
+                    paymentId: result.paymentId,
+                    conversationId: result.conversationId,
+                    paymentDetails: result.paymentDetails || {},
+                    customerInfo: {
+                        firstName: paymentData.firstName,
+                        lastName: paymentData.lastName,
+                        email: paymentData.email,
+                        phone: paymentData.phone
+                    },
+                    programInfo: {
+                        title: paymentData.selectedProgram.title,
+                        value: paymentData.selectedProgram.value
+                    },
+                    mainProgram: paymentData.mainProgram, // Ana program bilgisi
+                    amount: paymentData.amount,
+                    completedAt: new Date().toISOString()
+                };
+                
+                // Modal'ı kapat
+                this.closeCardForm();
+                
+                // Success event gönder (sadece bir kez)
+                window.postMessage({
+                    type: 'IYZICO_PAYMENT_SUCCESS',
+                    paymentId: result.paymentId,
+                    success: true
+                }, '*');
                 }
                 
             } else {
