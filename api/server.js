@@ -395,13 +395,7 @@ app.post('/api/payment/process-card', async (req, res) => {
                 city: 'Istanbul',
                 country: 'Turkey'
             },
-            shippingAddress: {
-                contactName: firstName + ' ' + lastName,
-                city: 'Istanbul',
-                country: 'Turkey',
-                address: 'Test Adres',
-                zipCode: '34732'
-            },
+
             billingAddress: {
                 contactName: firstName + ' ' + lastName,
                 city: 'Istanbul',
@@ -420,24 +414,9 @@ app.post('/api/payment/process-card', async (req, res) => {
             ]
         };
         
-        console.log('📋 Iyzico request hazırlandı:', {
-            conversationId: request.conversationId,
-            threeDS: request.threeDS,
-            paymentSource: request.paymentSource,
-            merchantOrderId: request.merchantOrderId,
-            posOrderId: request.posOrderId,
-            orderId: request.orderId,
-            merchantId: request.merchantId,
-            price: request.price,
-            paidPrice: request.paidPrice,
-            currency: request.currency,
-            installment: request.installment,
-            basketId: request.basketId,
-            paymentChannel: request.paymentChannel,
-            paymentGroup: request.paymentGroup,
-            callbackUrl: request.callbackUrl,
-            cardNumber: cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4)
-        });
+        console.log('📋 Iyzico request hazırlandı:');
+        console.log('📋 Request object:', JSON.stringify(request, null, 2));
+        console.log('📋 Card number (masked):', cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4));
         
         console.log('🔧 Tam Iyzico request gönderiliyor:', JSON.stringify(request, null, 2));
         
@@ -446,7 +425,7 @@ app.post('/api/payment/process-card', async (req, res) => {
         console.log('🔧 Endpoint:', '/payment/3dsecure/initialize');
         try {
             // Iyzico'nun doğru endpoint'ini kullan
-            const response = await makeIyzicoRequest('/payment/create', request);
+            const response = await makeIyzicoRequest('/payment/3dsecure/initialize', request);
             console.log('✅ Direkt API response status:', response.status);
             console.log('✅ Direkt API response headers:', response.headers);
             console.log('✅ Direkt API response data:', JSON.stringify(response.data, null, 2));
