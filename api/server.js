@@ -308,10 +308,13 @@ app.post('/api/payment/process-card', async (req, res) => {
             paidPrice: amount.toString(),
             currency: 'TRY',
             installment: '1',
-            enabledInstallments: '1', // 3D Secure'ü devre dışı bırak
             basketId: 'B' + Date.now(),
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
+            callbackUrl: 'https://derslink.vercel.app/api/payment/callback', // 3D Secure callback
+            threeDSRequest: {
+                enabled: true
+            },
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
