@@ -333,10 +333,24 @@ app.post('/api/payment/process-card', async (req, res) => {
             ? 'https://www.derslink.net.tr/api/payment/callback'
             : 'http://localhost:3000/api/payment/callback');
         
+        // Iyzico formatına uygun benzersiz string üret
+        function generateRandomString(length = 12) {
+            return crypto.randomBytes(length).toString('hex');
+        }
+        
         // Frontend'den gelen conversationId'yi kullan veya yeni oluştur
-        const finalConversationId = conversationId || `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const finalConversationId = conversationId || `conv_${generateRandomString(12)}`;
         
         console.log('🔧 ConversationId kullanılıyor:', finalConversationId);
+        
+        // merchantId kontrolü
+        if (!process.env.IYZICO_MERCHANT_ID) {
+            console.error('❌ Iyzico merchantId ayarlanmadı');
+            return res.status(500).json({
+                success: false,
+                error: 'Ödeme sistemi yapılandırması eksik'
+            });
+        }
         
         const request = {
             locale: 'tr',
@@ -353,10 +367,10 @@ app.post('/api/payment/process-card', async (req, res) => {
                 : 'http://localhost:3000/api/payment/callback',
             threeDS: '1', // ✅ Doğru parametre
             paymentSource: 'API',
-            merchantOrderId: 'M' + Date.now(),
-            posOrderId: 'POS' + Date.now(),
-            orderId: 'O' + Date.now(),
-            merchantId: process.env.IYZICO_MERCHANT_ID || '0000000000000000',
+            merchantOrderId: 'M' + generateRandomString(8),
+            posOrderId: 'POS' + generateRandomString(8),
+            orderId: 'O' + generateRandomString(8),
+            merchantId: process.env.IYZICO_MERCHANT_ID,
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
@@ -366,12 +380,12 @@ app.post('/api/payment/process-card', async (req, res) => {
                 registerCard: '0'
             },
             buyer: {
-                id: 'BY' + Date.now(),
+                id: 'BY' + generateRandomString(8),
                 name: firstName,
                 surname: lastName,
                 gsmNumber: phone,
                 email: email,
-                identityNumber: '74300864791',
+                identityNumber: '74300864791', // Gerçek kart için geçerli TC kimlik no gerekebilir
                 registrationAddress: 'Test Adres',
                 ip: req.ip || '127.0.0.1',
                 city: 'Istanbul',
@@ -394,7 +408,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             },
             basketItems: [
                 {
-                    id: 'BI' + Date.now(),
+                    id: 'BI' + generateRandomString(8),
                     name: programTitle,
                     category1: mainProgram,
                     category2: subProgram,
@@ -411,6 +425,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             merchantOrderId: request.merchantOrderId,
             posOrderId: request.posOrderId,
             orderId: request.orderId,
+            merchantId: request.merchantId,
             price: request.price,
             paidPrice: request.paidPrice,
             currency: request.currency,
