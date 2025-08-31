@@ -31,8 +31,9 @@ const iyzicoConfig = {
     uri: 'https://api.iyzipay.com'
 };
 
-console.log('🔧 Iyzico API Key length:', process.env.IYZICO_API_KEY?.length || 0);
-console.log('🔧 Iyzico Merchant ID:', process.env.IYZICO_MERCHANT_ID || 'NOT SET');
+console.log('🔧 Iyzico API Key length:', iyzicoConfig.apiKey.length);
+console.log('🔧 Iyzico Secret Key length:', iyzicoConfig.secretKey.length);
+console.log('🔧 Iyzico URI:', iyzicoConfig.uri);
 
 // Iyzico direkt API helper fonksiyonları
 function generateAuthHeader(apiKey, secretKey, requestBody) {
