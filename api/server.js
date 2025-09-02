@@ -365,10 +365,15 @@ app.post('/api/payment/process-card', async (req, res) => {
             paidPrice: amount.toString(),
             currency: 'TRY',
             installment: '1',
-            basketId: 'B12345',
+            basketId: generateRandomAlphaNum(12),
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
             callbackUrl: 'https://derslink-dc4fxrsx0-akif-korkmazs-projects.vercel.app/api/payment/callback',
+            threeDS: '1',
+            paymentSource: 'API',
+            merchantOrderId: generateRandomAlphaNum(12),
+            posOrderId: generateRandomAlphaNum(12),
+            orderId: generateRandomAlphaNum(12),
             paymentCard: {
                 cardHolderName: cardHolder,
                 cardNumber: cardNumber.replace(/\s/g, ''),
@@ -378,7 +383,7 @@ app.post('/api/payment/process-card', async (req, res) => {
                 registerCard: '0'
             },
             buyer: {
-                id: 'BY123',
+                id: generateRandomAlphaNum(12),
                 name: firstName,
                 surname: lastName,
                 gsmNumber: phone,
@@ -399,7 +404,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             },
             basketItems: [
                 {
-                    id: 'BI1',
+                    id: generateRandomAlphaNum(12),
                     name: 'Program Ödemesi',
                     category1: 'Eğitim',
                     itemType: 'VIRTUAL',
