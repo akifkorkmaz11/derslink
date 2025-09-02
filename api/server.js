@@ -68,12 +68,13 @@ function makeIyzicoRequest(endpoint, data) {
         console.log('🔧 Auth Header:', authHeader.substring(0, 50) + '...');
         console.log('🔧 Request Body length:', requestBody.length);
         console.log('🔧 Raw request body gönderiliyor:', requestBody);
-        console.log('🔧 x-iyzi-rnd header kaldırıldı');
+        console.log('🔧 x-iyzi-rnd header eklendi:', random);
     
             return axios.post(`${iyzicoConfig.uri}${endpoint}`, requestBody, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': authHeader,
+                'x-iyzi-rnd': random, // Iyzico'nun zorunlu beklediği header
                 'Accept': 'application/json'
             }
         });
