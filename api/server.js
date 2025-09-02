@@ -50,6 +50,9 @@ function makeIyzicoRequest(endpoint, data) {
     console.log('🔧 API Key:', iyzicoConfig.apiKey.substring(0, 8) + '...');
     console.log('🔧 Auth Header:', authHeader.substring(0, 50) + '...');
     console.log('🔧 Request Body length:', requestBody.length);
+    console.log('🔧 Raw request body gönderiliyor:', requestBody);
+    console.log('🔧 randomString in raw body:', requestBody.includes('randomString'));
+    console.log('🔧 randomString value in raw body:', requestBody.includes('"randomString"'));
     
     return axios.post(`${iyzicoConfig.uri}${endpoint}`, requestBody, {
         headers: {
@@ -361,7 +364,7 @@ app.post('/api/payment/process-card', async (req, res) => {
         const request = {
             locale: 'tr',
             conversationId: finalConversationId,
-            randomString: Math.random().toString(36).substring(2, 15), // 🔑 Iyzico 3D Secure için zorunlu
+            randomString: Date.now().toString(36) + Math.random().toString(36).substring(2, 10), // 🔑 Iyzico 3D Secure için zorunlu (timestamp + random)
             price: amount.toString(),
             paidPrice: amount.toString(),
             currency: 'TRY',
@@ -369,7 +372,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             basketId: generateRandomAlphaNum(12),
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
-            callbackUrl: 'https://derslink-dc4fxrsx0-akif-korkmazs-projects.vercel.app/api/payment/callback',
+            callbackUrl: 'https://derslink-dc4fxrsx0-akif-korkmazs-projects.vercel.app/api/payment/callback', // 🔑 Production callback URL
             threeDS: '1',
             paymentSource: 'API',
             merchantOrderId: generateRandomAlphaNum(12),
@@ -422,6 +425,23 @@ app.post('/api/payment/process-card', async (req, res) => {
         console.log('📋 Card number (masked):', cardNumber.substring(0, 4) + '****' + cardNumber.substring(cardNumber.length - 4));
         
         console.log('🔧 Tam Iyzico request gönderiliyor:', JSON.stringify(request, null, 2));
+        console.log('🔧 Raw request body (JSON.stringify):', JSON.stringify(request));
+        console.log('🔧 randomString değeri:', request.randomString);
+        console.log('🔧 randomString type:', typeof request.randomString);
+        console.log('🔧 randomString length:', request.randomString?.length);
+        
+        // Zorunlu alanları kontrol et
+        console.log('🔧 Zorunlu alan kontrolü:');
+        console.log('🔧 - locale:', request.locale);
+        console.log('🔧 - currency:', request.currency);
+        console.log('🔧 - price:', request.price);
+        console.log('🔧 - paidPrice:', request.paidPrice);
+        console.log('🔧 - installment:', request.installment);
+        console.log('🔧 - paymentChannel:', request.paymentChannel);
+        console.log('🔧 - paymentGroup:', request.paymentGroup);
+        console.log('🔧 - callbackUrl:', request.callbackUrl);
+        console.log('🔧 - randomString:', request.randomString);
+        console.log('🔧 - conversationId:', request.conversationId);
         
         // Direkt API kullan
         console.log('🔧 Iyzico direkt API kullanılıyor');
