@@ -36,18 +36,14 @@ console.log('🔧 Iyzico Secret Key length:', iyzicoConfig.secretKey.length);
 console.log('🔧 Iyzico URI:', iyzicoConfig.uri);
 
 // Iyzico direkt API helper fonksiyonları
-function generateAuthHeader(apiKey, secretKey, requestBody) {
-    // Iyzico'nun beklediği hash formatı: base64( HmacSHA1( apiKey + randomString + secretKey ) )
-    const requestData = JSON.parse(requestBody);
-    const randomString = requestData.randomString || '';
-    
-    // Hash hesaplama: apiKey + randomString + secretKey
-    const dataToHash = apiKey + randomString + secretKey;
+function generateAuthHeader(apiKey, secretKey, random) {
+    // Iyzico'nun beklediği hash formatı: base64( HmacSHA1( apiKey + random + secretKey ) )
+    const dataToHash = apiKey + random + secretKey;
     const hash = crypto.createHmac('sha1', secretKey).update(dataToHash).digest('base64');
     
     console.log('🔧 Hash hesaplama detayları:');
     console.log('🔧 - apiKey:', apiKey.substring(0, 8) + '...');
-    console.log('🔧 - randomString:', randomString);
+    console.log('🔧 - random:', random);
     console.log('🔧 - secretKey:', secretKey.substring(0, 8) + '...');
     console.log('🔧 - dataToHash:', dataToHash.substring(0, 20) + '...');
     console.log('🔧 - hash:', hash.substring(0, 20) + '...');
@@ -57,24 +53,25 @@ function generateAuthHeader(apiKey, secretKey, requestBody) {
 
 function makeIyzicoRequest(endpoint, data) {
     const requestBody = JSON.stringify(data);
-    const authHeader = generateAuthHeader(iyzicoConfig.apiKey, iyzicoConfig.secretKey, requestBody);
+    
+    // Random string üret (Iyzico header'da bekliyor)
+    const random = 'RS' + Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
+    
+    const authHeader = generateAuthHeader(iyzicoConfig.apiKey, iyzicoConfig.secretKey, random);
     
     console.log('🔧 Iyzico request detayları:');
     console.log('🔧 Endpoint:', `${iyzicoConfig.uri}${endpoint}`);
     console.log('🔧 API Key:', iyzicoConfig.apiKey.substring(0, 8) + '...');
+    console.log('🔧 Random:', random);
     console.log('🔧 Auth Header:', authHeader.substring(0, 50) + '...');
     console.log('🔧 Request Body length:', requestBody.length);
     console.log('🔧 Raw request body gönderiliyor:', requestBody);
-    console.log('🔧 randomString in raw body:', requestBody.includes('randomString'));
-    console.log('🔧 randomString value in raw body:', requestBody.includes('"randomString"'));
-    console.log('🔧 randomString exact value:', JSON.parse(requestBody).randomString);
-    console.log('🔧 randomString type in body:', typeof JSON.parse(requestBody).randomString);
-    console.log('🔧 randomString length in body:', JSON.parse(requestBody).randomString?.length);
     
     return axios.post(`${iyzicoConfig.uri}${endpoint}`, requestBody, {
         headers: {
             'Content-Type': 'application/json',
             'Authorization': authHeader,
+            'x-iyzi-rnd': random, // Iyzico'nun beklediği header
             'Accept': 'application/json'
         }
     });
@@ -381,7 +378,6 @@ app.post('/api/payment/process-card', async (req, res) => {
         const request = {
             locale: 'tr',
             conversationId: finalConversationId,
-            randomString: 'RS' + Date.now().toString(36) + Math.random().toString(36).substring(2, 8), // 🔑 Iyzico 3D Secure için zorunlu (prefix + timestamp + random) - field name randomString olarak düzeltildi
             price: amount.toString(),
             paidPrice: amount.toString(),
             currency: 'TRY',
@@ -450,10 +446,6 @@ app.post('/api/payment/process-card', async (req, res) => {
         
         console.log('🔧 Tam Iyzico request gönderiliyor:', JSON.stringify(request, null, 2));
         console.log('🔧 Raw request body (JSON.stringify):', JSON.stringify(request));
-        console.log('🔧 randomString değeri:', request.randomString);
-        console.log('🔧 randomString type:', typeof request.randomString);
-        console.log('🔧 randomString length:', request.randomString?.length);
-        
         // Zorunlu alanları kontrol et
         console.log('🔧 Zorunlu alan kontrolü:');
         console.log('🔧 - locale:', request.locale);
@@ -464,8 +456,8 @@ app.post('/api/payment/process-card', async (req, res) => {
         console.log('🔧 - paymentChannel:', request.paymentChannel);
         console.log('🔧 - paymentGroup:', request.paymentGroup);
         console.log('🔧 - callbackUrl:', request.callbackUrl);
-        console.log('🔧 - randomString:', request.randomString);
         console.log('🔧 - conversationId:', request.conversationId);
+        console.log('🔧 - randomString: Header\'da x-iyzi-rnd olarak gönderiliyor');
         
         // Direkt API kullan
         console.log('🔧 Iyzico direkt API kullanılıyor');
