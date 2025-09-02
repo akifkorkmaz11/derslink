@@ -53,6 +53,9 @@ function makeIyzicoRequest(endpoint, data) {
     console.log('🔧 Raw request body gönderiliyor:', requestBody);
     console.log('🔧 randomString in raw body:', requestBody.includes('randomString'));
     console.log('🔧 randomString value in raw body:', requestBody.includes('"randomString"'));
+    console.log('🔧 randomString exact value:', JSON.parse(requestBody).randomString);
+    console.log('🔧 randomString type in body:', typeof JSON.parse(requestBody).randomString);
+    console.log('🔧 randomString length in body:', JSON.parse(requestBody).randomString?.length);
     
     return axios.post(`${iyzicoConfig.uri}${endpoint}`, requestBody, {
         headers: {
@@ -364,7 +367,7 @@ app.post('/api/payment/process-card', async (req, res) => {
         const request = {
             locale: 'tr',
             conversationId: finalConversationId,
-            randomString: Date.now().toString(36) + Math.random().toString(36).substring(2, 10), // 🔑 Iyzico 3D Secure için zorunlu (timestamp + random)
+            randomString: 'RS' + Date.now().toString(36) + Math.random().toString(36).substring(2, 8), // 🔑 Iyzico 3D Secure için zorunlu (prefix + timestamp + random)
             price: amount.toString(),
             paidPrice: amount.toString(),
             currency: 'TRY',
@@ -372,7 +375,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             basketId: generateRandomAlphaNum(12),
             paymentChannel: 'WEB',
             paymentGroup: 'PRODUCT',
-            callbackUrl: 'https://derslink-dc4fxrsx0-akif-korkmazs-projects.vercel.app/api/payment/callback', // 🔑 Production callback URL
+            callbackUrl: 'https://www.derslink.net.tr/api/payment/callback', // 🔑 Production callback URL - ana domain ile uyumlu
             threeDS: '1',
             paymentSource: 'API',
             merchantOrderId: generateRandomAlphaNum(12),
@@ -400,6 +403,13 @@ app.post('/api/payment/process-card', async (req, res) => {
             },
 
             billingAddress: {
+                contactName: firstName + ' ' + lastName,
+                city: 'Istanbul',
+                country: 'Turkey',
+                address: 'Test Adres',
+                zipCode: '34000'
+            },
+            shippingAddress: {
                 contactName: firstName + ' ' + lastName,
                 city: 'Istanbul',
                 country: 'Turkey',
