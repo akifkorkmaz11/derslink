@@ -361,6 +361,7 @@ app.post('/api/payment/process-card', async (req, res) => {
         const request = {
             locale: 'tr',
             conversationId: finalConversationId,
+            randomString: Math.random().toString(36).substring(2, 15), // 🔑 Iyzico 3D Secure için zorunlu
             price: amount.toString(),
             paidPrice: amount.toString(),
             currency: 'TRY',
