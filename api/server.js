@@ -37,9 +37,9 @@ console.log('🔧 Iyzico URI:', iyzicoConfig.uri);
 
 // Iyzico direkt API helper fonksiyonları
 function generateAuthHeader(apiKey, secretKey, random, requestBody) {
-    // Iyzico'nun beklediği hash formatı: base64( HmacSHA256( apiKey + random + requestBody + secretKey ) )
-    const dataToHash = apiKey + random + requestBody + secretKey;
-    const hash = crypto.createHmac('sha256', secretKey).update(dataToHash).digest('base64');
+    // Iyzico'nun beklediği hash formatı: base64( HmacSHA1( apiKey + random + secretKey ) )
+    const dataToHash = apiKey + random + secretKey;
+    const hash = crypto.createHmac('sha1', secretKey).update(dataToHash).digest('base64');
     
     console.log('🔧 Hash hesaplama detayları:');
     console.log('🔧 - apiKey:', apiKey.substring(0, 8) + '...');
@@ -48,6 +48,7 @@ function generateAuthHeader(apiKey, secretKey, random, requestBody) {
     console.log('🔧 - secretKey:', secretKey.substring(0, 8) + '...');
     console.log('🔧 - dataToHash length:', dataToHash.length);
     console.log('🔧 - hash:', hash.substring(0, 20) + '...');
+    console.log('🔧 - hash format: HmacSHA1(apiKey + random + secretKey)');
     
     return `IYZWS ${apiKey}:${hash}`;
 }
@@ -60,22 +61,22 @@ function makeIyzicoRequest(endpoint, data) {
     
     const authHeader = generateAuthHeader(iyzicoConfig.apiKey, iyzicoConfig.secretKey, random, requestBody);
     
-    console.log('🔧 Iyzico request detayları:');
-    console.log('🔧 Endpoint:', `${iyzicoConfig.uri}${endpoint}`);
-    console.log('🔧 API Key:', iyzicoConfig.apiKey.substring(0, 8) + '...');
-    console.log('🔧 Random:', random);
-    console.log('🔧 Auth Header:', authHeader.substring(0, 50) + '...');
-    console.log('🔧 Request Body length:', requestBody.length);
-    console.log('🔧 Raw request body gönderiliyor:', requestBody);
+            console.log('🔧 Iyzico request detayları:');
+        console.log('🔧 Endpoint:', `${iyzicoConfig.uri}${endpoint}`);
+        console.log('🔧 API Key:', iyzicoConfig.apiKey.substring(0, 8) + '...');
+        console.log('🔧 Random:', random);
+        console.log('🔧 Auth Header:', authHeader.substring(0, 50) + '...');
+        console.log('🔧 Request Body length:', requestBody.length);
+        console.log('🔧 Raw request body gönderiliyor:', requestBody);
+        console.log('🔧 x-iyzi-rnd header kaldırıldı');
     
-    return axios.post(`${iyzicoConfig.uri}${endpoint}`, requestBody, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': authHeader,
-            'x-iyzi-rnd': random, // Iyzico'nun beklediği header
-            'Accept': 'application/json'
-        }
-    });
+            return axios.post(`${iyzicoConfig.uri}${endpoint}`, requestBody, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authHeader,
+                'Accept': 'application/json'
+            }
+        });
 }
 
 // Test endpoint
