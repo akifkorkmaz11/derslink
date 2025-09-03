@@ -867,6 +867,51 @@ app.get('/api/payment/callback', async (req, res) => {
                                     } else {
                                         console.log('✅ Payment user_id güncellendi');
                                     }
+                                    
+                                    // 🚀 OTOMATİK SINIF ATAMASI YAP
+                                    console.log('🏫 Otomatik sınıf ataması yapılıyor...');
+                                    
+                                    try {
+                                        // 1. Uygun sınıf bul (program ve schedule'a göre)
+                                        const { data: availableClasses, error: classError } = await supabase
+                                            .from('classes')
+                                            .select('*')
+                                            .eq('program', paymentData.mainProgram)
+                                            .eq('schedule', paymentData.subProgram)
+                                            .eq('status', 'active')
+                                            .order('created_at', { ascending: true })
+                                            .limit(1);
+                                        
+                                        if (classError) {
+                                            console.error('❌ Sınıf arama hatası:', classError);
+                                        } else if (availableClasses && availableClasses.length > 0) {
+                                            const selectedClass = availableClasses[0];
+                                            console.log('✅ Uygun sınıf bulundu:', selectedClass);
+                                            
+                                            // 2. User_class_assignments tablosuna ekle
+                                            const { data: assignmentData, error: assignmentError } = await supabase
+                                                .from('user_class_assignments')
+                                                .insert([{
+                                                    user_id: userInsertData[0].id,
+                                                    class_id: selectedClass.id,
+                                                    status: 'active',
+                                                    assigned_at: new Date().toISOString(),
+                                                    created_at: new Date().toISOString(),
+                                                    updated_at: new Date().toISOString()
+                                                }]);
+                                            
+                                            if (assignmentError) {
+                                                console.error('❌ Sınıf atama hatası:', assignmentError);
+                                            } else {
+                                                console.log('✅ Kullanıcı sınıfa atandı:', assignmentData);
+                                            }
+                                        } else {
+                                            console.log('⚠️ Uygun sınıf bulunamadı, program:', paymentData.mainProgram, 'schedule:', paymentData.subProgram);
+                                        }
+                                    } catch (assignmentError) {
+                                        console.error('❌ Otomatik sınıf atama hatası:', assignmentError);
+                                    }
+                                    
                                 } catch (updateError) {
                                     console.error('❌ Payment güncelleme hatası:', updateError);
                                 }
