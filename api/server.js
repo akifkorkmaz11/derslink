@@ -37,10 +37,10 @@ console.log('🔧 Iyzico URI:', iyzicoConfig.uri);
 
 // Iyzico direkt API helper fonksiyonları
 function generateAuthHeader(apiKey, secretKey, random, requestBody) {
-    // Iyzico'nun beklediği hash formatı: base64( HmacSHA1( requestBody, apiKey + random + secretKey ) )
+    // Iyzico'nun beklediği hash formatı: base64( HmacSHA1( apiKey + random + secretKey, requestBody ) )
     const hashKey = apiKey + random + secretKey; // HMAC için key
     
-    // Doğru hash → HmacSHA1(requestBody, hashKey)
+    // Doğru hash → HmacSHA1(hashKey, requestBody)
     const hash = crypto
         .createHmac('sha1', hashKey)             // ✅ hashKey = HMAC key
         .update(requestBody, 'utf-8')            // ✅ requestBody = HMAC data
@@ -53,7 +53,7 @@ function generateAuthHeader(apiKey, secretKey, random, requestBody) {
     console.log('🔧 - secretKey:', secretKey.substring(0, 8) + '...');
     console.log('🔧 - hashKey length:', hashKey.length);
     console.log('🔧 - hash:', hash.substring(0, 20) + '...');
-    console.log('🔧 - hash format: HmacSHA1(requestBody, apiKey + random + secretKey)');
+    console.log('🔧 - hash format: HmacSHA1(apiKey + random + secretKey, requestBody)');
     
     return `IYZWS ${apiKey}:${hash}`;
 }
