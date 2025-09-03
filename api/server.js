@@ -36,27 +36,40 @@ console.log('🔧 Iyzico Secret Key length:', iyzicoConfig.secretKey.length);
 console.log('🔧 Iyzico URI:', iyzicoConfig.uri);
 
 // Iyzico direkt API helper fonksiyonları
-function generateAuthHeader(apiKey, secretKey, random, requestBody) {
-    // Iyzico'nun beklediği hash formatı: base64( HmacSHA1( secretKey, apiKey + random + requestBody ) )
-    const dataToHash = apiKey + random + requestBody; // HMAC için data
+function generateAuthHeader(apiKey, secretKey, random, requestBody, endpoint) {
+    // Iyzico'nun yeni beklediği hash formatı: HMACSHA256(randomKey + uri.path + request.body, secretKey)
     
-    // Doğru hash → HmacSHA1(secretKey, dataToHash)
-    const hash = crypto
-        .createHmac('sha1', secretKey)           // ✅ secretKey = HMAC key
-        .update(dataToHash, 'utf-8')             // ✅ dataToHash = HMAC data
-        .digest('base64');
+    // 1. Payload oluştur: randomKey + uri_path + requestBody
+    const payload = random + endpoint + requestBody;
     
-    console.log('🔧 Hash hesaplama detayları:');
-    console.log('🔧 - apiKey:', apiKey.substring(0, 8) + '...');
+    // 2. HMACSHA256 hash hesapla: HMACSHA256(payload, secretKey)
+    const encryptedData = crypto
+        .createHmac('sha256', secretKey)         // ✅ SHA256 kullan
+        .update(payload, 'utf-8')                // ✅ payload = random + endpoint + requestBody
+        .digest('hex');                          // ✅ hex formatında
+    
+    // 3. Authorization string oluştur: apiKey:apiKey&randomKey:randomKey&signature:encryptedData
+    const authorizationString = `apiKey:${apiKey}&randomKey:${random}&signature:${encryptedData}`;
+    
+    // 4. Base64 encode: base64(authorizationString)
+    const base64EncodedAuthorization = Buffer.from(authorizationString, 'utf-8').toString('base64');
+    
+    // 5. Final Authorization header: IYZWSv2 base64EncodedAuthorization
+    const authorization = `IYZWSv2 ${base64EncodedAuthorization}`;
+    
+    console.log('🔧 Yeni Iyzico hash formatı detayları:');
     console.log('🔧 - random:', random);
+    console.log('🔧 - endpoint:', endpoint);
     console.log('🔧 - requestBody length:', requestBody.length);
-    console.log('🔧 - secretKey:', secretKey.substring(0, 8) + '...');
-    console.log('🔧 - dataToHash length:', dataToHash.length);
-    console.log('🔧 - dataToHash (ilk 100):', dataToHash.slice(0, 100));
-    console.log('🔧 - hash:', hash.substring(0, 20) + '...');
-    console.log('🔧 - hash format: HmacSHA1(secretKey, apiKey + random + requestBody)');
+    console.log('🔧 - payload length:', payload.length);
+    console.log('🔧 - payload (ilk 100):', payload.slice(0, 100));
+    console.log('🔧 - encryptedData (hash):', encryptedData.substring(0, 20) + '...');
+    console.log('🔧 - authorizationString:', authorizationString.substring(0, 100) + '...');
+    console.log('🔧 - base64EncodedAuthorization:', base64EncodedAuthorization.substring(0, 50) + '...');
+    console.log('🔧 - final authorization:', authorization.substring(0, 50) + '...');
+    console.log('🔧 - hash format: HMACSHA256(randomKey + uri.path + request.body, secretKey)');
     
-    return `IYZWS ${apiKey}:${hash}`;
+    return authorization;
 }
 
     function makeIyzicoRequest(endpoint, data) {
@@ -66,7 +79,7 @@ function generateAuthHeader(apiKey, secretKey, random, requestBody) {
         // Random string üret (Iyzico header'da bekliyor)
         const random = 'RS' + Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
 
-        const authHeader = generateAuthHeader(iyzicoConfig.apiKey, iyzicoConfig.secretKey, random, requestBody);
+        const authHeader = generateAuthHeader(iyzicoConfig.apiKey, iyzicoConfig.secretKey, random, requestBody, endpoint);
     
             console.log('🔧 Iyzico request detayları:');
         console.log('🔧 Endpoint:', `${iyzicoConfig.uri}${endpoint}`);
