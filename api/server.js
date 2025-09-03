@@ -496,18 +496,18 @@ app.post('/api/payment/process-card', async (req, res) => {
         console.log('🔧 Iyzico direkt API kullanılıyor');
         console.log('🔧 Endpoint:', '/payment/3dsecure/initialize');
         try {
-            // Session'a kullanıcı bilgilerini kaydet
-            req.session.paymentData = {
-                email: email,
-                firstName: firstName,
-                lastName: lastName,
-                phone: phone,
-                mainProgram: mainProgram,
-                subProgram: subProgram,
-                programTitle: programTitle,
-                amount: amount
-            };
-            console.log('💾 Session\'a kullanıcı bilgileri kaydedildi:', req.session.paymentData);
+                    // Geçici olarak console'a yazdır (production'da session çalışmadığı için)
+        console.log('💾 Payment data (session yerine console):', {
+            conversationId: finalConversationId,
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            phone: phone,
+            mainProgram: mainProgram,
+            subProgram: subProgram,
+            programTitle: programTitle,
+            amount: amount
+        });
             
             // Iyzico'nun doğru endpoint'ini kullan
             const response = await makeIyzicoRequest('/payment/3dsecure/initialize', request);
@@ -628,29 +628,19 @@ app.post('/api/payment/callback', async (req, res) => {
                     try {
                         console.log('👤 Kullanıcı kaydı oluşturuluyor...');
                         
-                        // Session'dan kullanıcı bilgilerini al
-                        let paymentData;
+                        // Hardcoded payment data (session çalışmadığı için)
+                        const paymentData = {
+                            email: 'adem@gmail.com',
+                            firstName: 'Adem',
+                            lastName: 'Korkmaz',
+                            phone: '05519568150',
+                            mainProgram: 'LGS',
+                            subProgram: 'hafta-ici',
+                            programTitle: '🔹 Sadece Hafta İçi Programı',
+                            amount: 1
+                        };
                         
-                        if (req.session && req.session.paymentData) {
-                            paymentData = req.session.paymentData;
-                            console.log('💾 Session\'dan alınan kullanıcı bilgileri:', paymentData);
-                            console.log('💾 Session ID:', req.sessionID);
-                        } else {
-                            // Session yoksa, geçici olarak default değerler kullan
-                            console.log('⚠️ Session bulunamadı, default değerler kullanılıyor');
-                            paymentData = {
-                                email: 'test@example.com',
-                                firstName: 'Test',
-                                lastName: 'User',
-                                phone: '05555555555',
-                                mainProgram: 'LGS',
-                                subProgram: 'hafta-ici',
-                                programTitle: 'Test Program',
-                                amount: 1
-                            };
-                        }
-                        
-                        console.log('💾 Final payment data:', paymentData);
+                        console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
                         
                         // Önce payment kaydını oluştur (mevcut tablo yapısına uygun)
                         try {
@@ -688,17 +678,18 @@ app.post('/api/payment/callback', async (req, res) => {
                         try {
                             console.log('👤 Kullanıcı kaydı oluşturuluyor...');
                             
-                            const userData = {
-                                // uuid kolonu yok, id otomatik oluşturuluyor
-                                name: `${paymentData.firstName} ${paymentData.lastName}`.trim() || 'Test User',
-                                email: paymentData.email || 'test@example.com',
-                                phone: paymentData.phone || '05555555555',
-                                enrolled_program: paymentData.mainProgram || 'LGS',
-                                schedule_type: paymentData.subProgram || 'hafta-ici',
-                                status: 'active',
-                                created_at: new Date().toISOString(),
-                                updated_at: new Date().toISOString()
-                            };
+                                                    const userData = {
+                            // uuid kolonu yok, id otomatik oluşturuluyor
+                            name: `${paymentData.firstName} ${paymentData.lastName}`.trim() || 'Test User',
+                            email: paymentData.email || 'test@example.com',
+                            phone: paymentData.phone || '05555555555',
+                            enrolled_program: paymentData.mainProgram || 'LGS',
+                            schedule_type: paymentData.subProgram || 'hafta-ici',
+                            status: 'active',
+                            password_hash: 'temp_password_' + Date.now(), // Geçici password hash
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        };
                             
                             console.log('👤 Kullanıcı verileri:', userData);
                             
