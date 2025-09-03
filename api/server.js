@@ -821,6 +821,10 @@ app.get('/api/payment/callback', async (req, res) => {
                             console.error('❌ Payment kayıt hatası:', paymentInsertError);
                         } else {
                             console.log('✅ Payment kaydı oluşturuldu:', paymentInsertData);
+                            
+                            // 🚀 DEBUG: Payment insert sonucunu logla
+                            console.log('🔍 DEBUG - Payment insert data:', paymentInsertData);
+                            console.log('🔍 DEBUG - Payment insert error:', paymentInsertError);
                         }
                         
                     } catch (paymentError) {
@@ -854,9 +858,13 @@ app.get('/api/payment/callback', async (req, res) => {
                         } else {
                             console.log('✅ Kullanıcı kaydı oluşturuldu:', userInsertData);
                             
-                            // Payment kaydında user_id'yi güncelle
+                                                        // Payment kaydında user_id'yi güncelle
                             if (userInsertData && userInsertData[0]) {
                                 try {
+                                    console.log('🔧 Payment user_id güncelleniyor...');
+                                    console.log('🔧 Güncellenecek user_id:', userInsertData[0].id);
+                                    console.log('🔧 Aranan transaction_id:', paymentConversationId);
+                                    
                                     const { error: updateError } = await supabase
                                         .from('payments')
                                         .update({ user_id: userInsertData[0].id }) // uuid yerine id kullan
@@ -866,6 +874,18 @@ app.get('/api/payment/callback', async (req, res) => {
                                         console.error('❌ Payment user_id güncelleme hatası:', updateError);
                                     } else {
                                         console.log('✅ Payment user_id güncellendi');
+                                        
+                                        // 🚀 DEBUG: Güncelleme sonrası kontrol
+                                        const { data: updatedPayment, error: checkError } = await supabase
+                                            .from('payments')
+                                            .select('*')
+                                            .eq('transaction_id', paymentConversationId);
+                                        
+                                        if (checkError) {
+                                            console.error('❌ Güncelleme kontrol hatası:', checkError);
+                                        } else {
+                                            console.log('🔍 DEBUG - Güncelleme sonrası payment:', updatedPayment);
+                                        }
                                     }
                                     
                                     // 🚀 OTOMATİK SINIF ATAMASI YAP

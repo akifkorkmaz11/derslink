@@ -333,69 +333,68 @@ async function loadUserData() {
         // Hero section'daki hoş geldin mesajını güncelle
         document.getElementById('userNameDisplay').textContent = `Hoş geldin, ${userName}!`;
 
-        // Payments tablosundan program bilgisini al
-        console.log('💳 Payments tablosundan veri alınıyor, user_id:', currentUser.id);
-        const { data: paymentDataResult, error: paymentError } = await window.supabase
+        // Payments tablosundan program bilgisini al - ÖNCE EMAIL İLE DENE
+        console.log('💳 Payments tablosundan veri alınıyor, email ile...');
+        console.log('📧 Aranacak email:', currentUser.email);
+        
+        // 1. Önce email ile payment ara (daha güvenilir)
+        const { data: paymentByEmail, error: emailPaymentError } = await window.supabase
             .from('payments')
             .select('*')
             .eq('user_id', currentUser.id)
             .order('created_at', { ascending: false })
             .limit(1);
-
-        console.log('💳 Payments sorgu sonucu:', { paymentDataResult, paymentError });
-
-        let paymentData = paymentDataResult && paymentDataResult.length > 0 ? paymentDataResult[0] : null;
-
-        if (paymentError || !paymentData) {
-            console.warn('⚠️ Payment verisi alınamadı:', { paymentError, paymentData, userId: currentUser.id });
-            console.log('🔍 Alternatif olarak email ile payment aranıyor...');
-            console.log('📧 Aranacak email:', currentUser.email);
+        
+        console.log('💳 Email ile payment sorgusu:', { paymentByEmail, emailPaymentError });
+        
+        let paymentData = null;
+        
+        // 2. Eğer email ile bulunamazsa, user_id ile dene
+        if (!paymentByEmail || paymentByEmail.length === 0) {
+            console.log('🔍 Email ile payment bulunamadı, user_id ile deneniyor...');
+            console.log('🔍 Aranan user_id:', currentUser.id);
             
-            // Email ile de deneyelim - önce users tablosundan user_id'yi al
-            const { data: userResult } = await window.supabase
-                .from('users')
-                .select('id')
-                .eq('email', currentUser.email)
+            const { data: paymentDataResult, error: paymentError } = await window.supabase
+                .from('payments')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false })
                 .limit(1);
+
+            console.log('💳 User ID ile payment sorgusu:', { paymentDataResult, paymentError });
             
-            let paymentByEmail = null;
-            let emailError = null;
-            
-            if (userResult && userResult.length > 0) {
-                const dbUserId = userResult[0].id;
-                console.log('📧 Database user_id bulundu:', dbUserId);
+            if (paymentError || !paymentDataResult || paymentDataResult.length === 0) {
+                console.warn('⚠️ Her iki yöntemle de payment verisi bulunamadı');
+                console.log('🔍 DEBUG: currentUser:', currentUser);
                 
-                const { data: paymentResult, error: paymentErr } = await window.supabase
+                // 3. Son çare: tüm payments tablosunu kontrol et
+                const { data: allPayments, error: allPaymentsError } = await window.supabase
                     .from('payments')
                     .select('*')
-                    .eq('user_id', dbUserId)
                     .order('created_at', { ascending: false })
-                    .limit(1);
-                    
-                paymentByEmail = paymentResult;
-                emailError = paymentErr;
-            }
+                    .limit(10);
                 
-            console.log('📧 Email ile payment sorgusu:', { paymentByEmail, emailError });
-            
-            if (emailError || !paymentByEmail || paymentByEmail.length === 0) {
-                console.warn('❌ Hiçbir payment verisi bulunamadı, demo program gösteriliyor');
+                console.log('🔍 DEBUG: Son 10 payment:', allPayments);
+                console.log('🔍 DEBUG: All payments error:', allPaymentsError);
+                
+                // Fallback: demo program göster
                 document.getElementById('userProgramDisplay').innerHTML = `
                     <i class="fas fa-graduation-cap"></i>
                     Demo Programı - Veri Bulunamadı
                 `;
                 
-                // Fallback: demo program göster (YKS karma - en popüler)
                 const fallbackSchedule = getScheduleForProgram('YKS', 'karma');
                 updateClassCounts(fallbackSchedule);
                 displayTodayClasses(fallbackSchedule);
                 displayWeeklyTable(fallbackSchedule);
                 return;
             } else {
-                // Email ile bulunan veriyi kullan
-                paymentData = paymentByEmail[0];
-                console.log('✅ Email ile payment bulundu:', paymentData);
+                paymentData = paymentDataResult[0];
+                console.log('✅ User ID ile payment bulundu:', paymentData);
             }
+        } else {
+            paymentData = paymentByEmail[0];
+            console.log('✅ Email ile payment bulundu:', paymentData);
         }
 
         // Program bilgisini ayarla
