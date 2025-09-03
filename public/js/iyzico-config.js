@@ -796,13 +796,23 @@ window.IyzicoPaymentService = {
             }
         });
         
-        // 3D Secure form submit'ini dinle
+        // 3D Secure form'u otomatik submit et
         const forms = contentDiv.querySelectorAll('form');
         forms.forEach(form => {
-            form.addEventListener('submit', (e) => {
-                console.log('🔄 3D Secure form submit edildi');
-                // Form submit işlemini engelleme, Iyzico kendi handle edecek
-            });
+            console.log('🔧 3D Secure form bulundu:', form);
+            console.log('🔧 Form action:', form.action);
+            console.log('🔧 Form method:', form.method);
+            
+            // Form'u otomatik submit et
+            setTimeout(() => {
+                console.log('🚀 3D Secure form otomatik submit ediliyor...');
+                try {
+                    form.submit();
+                    console.log('✅ Form submit edildi');
+                } catch (error) {
+                    console.error('❌ Form submit hatası:', error);
+                }
+            }, 1000); // 1 saniye bekle
         });
         
         // 3D Secure sonucunu dinle (callback URL'den)
@@ -824,11 +834,16 @@ window.IyzicoPaymentService = {
     // 3D Secure sonucunu dinle
     listenFor3DSecureResult(paymentId, conversationId, paymentData) {
         console.log('🔄 3D Secure sonucu dinleniyor...');
+        console.log('🔧 Payment ID:', paymentId);
+        console.log('🔧 Conversation ID:', conversationId);
         
         // URL'deki payment parametrelerini kontrol et
         const urlParams = new URLSearchParams(window.location.search);
         const paymentStatus = urlParams.get('payment');
         const paymentIdParam = urlParams.get('paymentId');
+        
+        console.log('🔧 URL payment status:', paymentStatus);
+        console.log('🔧 URL payment ID:', paymentIdParam);
         
         if (paymentStatus && paymentIdParam === paymentId) {
             if (paymentStatus === 'success') {
@@ -846,8 +861,8 @@ window.IyzicoPaymentService = {
                         phone: paymentData.phone
                     },
                     programInfo: {
-                        title: paymentData.selectedProgram.title,
-                        value: paymentData.selectedProgram.value
+                        title: paymentData.selectedProgram?.title || paymentData.programTitle,
+                        value: paymentData.selectedProgram?.value || paymentData.amount
                     },
                     mainProgram: paymentData.mainProgram,
                     amount: paymentData.amount,
