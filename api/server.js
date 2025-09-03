@@ -112,7 +112,7 @@ function generateAuthHeader(apiKey, secretKey, random, requestBody, endpoint) {
 
 // Test endpoint
 app.get('/api/test', (req, res) => {
-    res.json({
+                res.json({
         message: 'API Server çalışıyor!',
         environment: {
             nodeEnv: process.env.NODE_ENV || 'NOT SET',
@@ -184,14 +184,14 @@ app.get('/api/admin/users', async (req, res) => {
         if (error) {
             console.error('❌ Kullanıcı listesi alınamadı:', error);
             return res.status(500).json({
-                success: false,
+                    success: false,
                 error: error.message
-            });
-        }
-        
+                });
+            }
+            
         console.log(`✅ ${users?.length || 0} kullanıcı alındı`);
-        res.json({
-            success: true,
+                res.json({
+                    success: true,
             users: users || []
         });
     } catch (error) {
@@ -233,14 +233,14 @@ app.get('/api/admin/classes', async (req, res) => {
         if (error) {
             console.error('❌ Sınıf listesi alınamadı:', error);
             return res.status(500).json({
-                success: false,
+                    success: false,
                 error: error.message
-            });
-        }
-        
+                });
+            }
+            
         console.log(`✅ ${classes?.length || 0} sınıf alındı`);
-        res.json({
-            success: true,
+                res.json({
+                    success: true,
             classes: classes || []
         });
     } catch (error) {
@@ -337,8 +337,8 @@ app.get('/api/admin/teacher-schedules', async (req, res) => {
         }));
 
         console.log(`✅ ${schedules.length} öğretmen programı alındı`);
-        res.json({
-            success: true,
+                res.json({
+                    success: true,
             schedules: schedules
         });
     } catch (error) {
@@ -537,19 +537,19 @@ app.post('/api/payment/process-card', async (req, res) => {
 
 // Iyzico response handler fonksiyonu
 function handleIyzicoResponse(err, result, res) {
-    if (err) {
+            if (err) {
         console.error('❌ Iyzico 3D Secure hatası:');
         console.error('❌ Error object:', err);
         console.error('❌ Error message:', err.message);
         console.error('❌ Error code:', err.code);
         console.error('❌ Error status:', err.status);
         console.error('❌ Error response data:', err.response?.data);
-        return res.status(500).json({
-            success: false,
-            error: '3D Secure başlatılamadı: ' + err.message
-        });
-    }
-    
+                return res.status(500).json({
+                    success: false,
+                    error: '3D Secure başlatılamadı: ' + err.message
+                });
+            }
+            
     console.log('✅ Iyzico 3D Secure sonucu:');
     console.log('✅ Full result object:', JSON.stringify(result, null, 2));
     console.log('📋 Result detayları:', {
@@ -561,22 +561,22 @@ function handleIyzicoResponse(err, result, res) {
         hasThreeDSHtmlContent: !!result.threeDSHtmlContent,
         threeDSHtmlContentLength: result.threeDSHtmlContent?.length || 0
     });
-    
-    if (result.status === 'success') {
-        // 3D Secure sayfasına yönlendir
-        return res.json({
-            success: true,
-            message: '3D Secure başlatıldı',
-            threeDSHtmlContent: result.threeDSHtmlContent,
-            paymentId: result.paymentId,
-            conversationId: result.conversationId
-        });
-    } else {
-        return res.status(400).json({
-            success: false,
-            error: '3D Secure başlatılamadı: ' + (result.errorMessage || 'Bilinmeyen hata')
-        });
-    }
+            
+            if (result.status === 'success') {
+                // 3D Secure sayfasına yönlendir
+                return res.json({
+                    success: true,
+                    message: '3D Secure başlatıldı',
+                    threeDSHtmlContent: result.threeDSHtmlContent,
+                    paymentId: result.paymentId,
+                    conversationId: result.conversationId
+                });
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    error: '3D Secure başlatılamadı: ' + (result.errorMessage || 'Bilinmeyen hata')
+                });
+            }
 }
 
 // 3D Secure Callback Endpoint
@@ -606,26 +606,17 @@ app.post('/api/payment/callback', async (req, res) => {
         console.log('🔧 - iyziEventType:', iyziEventType);
         
         // CALLBACK_THREEDS = 3D Secure callback geldi, ödeme tamamlanabilir
-        if (status === 'CALLBACK_THREEDS') {
+        // SUCCESS = Ödeme zaten tamamlanmış, kullanıcı kaydı yapılabilir
+        if (status === 'CALLBACK_THREEDS' || status === 'SUCCESS') {
             console.log('✅ 3D Secure başarılı, ödeme tamamlanıyor...');
+            console.log('🔧 Status:', status);
             
-            // 3D Secure callback'ten sonra payment complete yap
-            const completeRequest = {
-                locale: 'tr',
-                conversationId: paymentConversationId,
-                paymentId: paymentId
-            };
-            
-            try {
-                console.log('🚀 Payment complete request gönderiliyor...');
-                const completeResponse = await makeIyzicoRequest('/payment/3dsecure/auth', completeRequest);
-                console.log('✅ Payment complete response:', completeResponse.data);
+            // SUCCESS status geldiğinde payment complete yapmaya gerek yok
+            if (status === 'SUCCESS') {
+                console.log('🎉 Ödeme zaten tamamlanmış, kullanıcı kaydı yapılıyor...');
                 
-                if (completeResponse.data.status === 'success') {
-                    console.log('🎉 Ödeme başarıyla tamamlandı!');
-                    
-                    // Kullanıcı kaydını oluştur
-                    try {
+                // Kullanıcı kaydını oluştur
+                try {
                         console.log('👤 Kullanıcı kaydı oluşturuluyor...');
                         
                         // Hardcoded payment data (session çalışmadığı için)
@@ -741,7 +732,7 @@ app.post('/api/payment/callback', async (req, res) => {
         } else {
             console.log('❌ 3D Secure başarısız:', { status });
             console.log('🔧 Status değeri:', status);
-            console.log('🔧 Beklenen değer: CALLBACK_THREEDS');
+            console.log('🔧 Beklenen değer: CALLBACK_THREEDS veya SUCCESS');
             console.log('🔧 Gelen tüm parametreler:', req.body);
             console.log('🔧 Callback URL:', req.url);
             console.log('🔧 Callback method:', req.method);
@@ -777,8 +768,10 @@ app.get('/api/payment/callback', async (req, res) => {
         console.log('🔧 - status:', status);
         
         // CALLBACK_THREEDS = 3D Secure callback geldi, ödeme tamamlanabilir
-        if (status === 'CALLBACK_THREEDS') {
+        // SUCCESS = Ödeme zaten tamamlanmış, kullanıcı kaydı yapılabilir
+        if (status === 'CALLBACK_THREEDS' || status === 'SUCCESS') {
             console.log('✅ 3D Secure başarılı, ödeme tamamlanıyor...');
+            console.log('🔧 Status:', status);
             
             // 3D Secure callback'ten sonra payment complete yap
             const completeRequest = {
