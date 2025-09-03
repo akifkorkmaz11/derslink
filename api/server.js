@@ -561,31 +561,71 @@ function handleIyzicoResponse(err, result, res) {
 app.post('/api/payment/callback', async (req, res) => {
     try {
         console.log('🔄 3D Secure callback alındı:', req.body);
+        console.log('🔧 Callback body:', JSON.stringify(req.body, null, 2));
         
-        const { conversationId, paymentId, status } = req.body;
+        // Iyzico'dan gelen callback parametrelerini al
+        const { conversationId, paymentId, status, mdStatus, authCode, binNumber, lastFourDigits } = req.body;
+        
+        console.log('🔧 Callback parametreleri:');
+        console.log('🔧 - conversationId:', conversationId);
+        console.log('🔧 - paymentId:', paymentId);
+        console.log('🔧 - status:', status);
+        console.log('🔧 - mdStatus:', mdStatus);
+        console.log('🔧 - authCode:', authCode);
         
         if (status === 'success') {
-            // 3D Secure başarılı, ödemeyi tamamla
-            const request = {
+            console.log('✅ 3D Secure başarılı, ödeme tamamlanıyor...');
+            
+            // 3D Secure callback'ten sonra payment complete yap
+            const completeRequest = {
                 locale: 'tr',
                 conversationId: conversationId,
                 paymentId: paymentId
             };
             
             try {
-                const response = await makeIyzicoRequest('/payment/retrieve', request);
-                console.log('✅ Ödeme tamamlandı:', response.data);
+                console.log('🚀 Payment complete request gönderiliyor...');
+                const completeResponse = await makeIyzicoRequest('/payment/3dsecure/auth', completeRequest);
+                console.log('✅ Payment complete response:', completeResponse.data);
                 
-                if (response.data.status === 'success') {
+                if (completeResponse.data.status === 'success') {
+                    console.log('🎉 Ödeme başarıyla tamamlandı!');
+                    
+                    // Supabase'e kayıt oluştur
+                    try {
+                        const { data: supabaseData, error: supabaseError } = await supabase
+                            .from('payments')
+                            .insert([{
+                                payment_id: paymentId,
+                                conversation_id: conversationId,
+                                status: 'completed',
+                                amount: 1, // TODO: Gerçek amount'u al
+                                auth_code: authCode || null,
+                                bin_number: binNumber || null,
+                                last_four_digits: lastFourDigits || null,
+                                created_at: new Date().toISOString()
+                            }]);
+                        
+                        if (supabaseError) {
+                            console.error('❌ Supabase kayıt hatası:', supabaseError);
+                        } else {
+                            console.log('✅ Supabase kayıt oluşturuldu:', supabaseData);
+                        }
+                    } catch (dbError) {
+                        console.error('❌ Database hatası:', dbError);
+                    }
+                    
                     return res.redirect('/?payment=success&paymentId=' + paymentId);
                 } else {
-                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme başarısız'));
+                    console.error('❌ Payment complete başarısız:', completeResponse.data);
+                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme tamamlanamadı'));
                 }
             } catch (error) {
-                console.error('❌ Ödeme tamamlama hatası:', error);
+                console.error('❌ Payment complete hatası:', error);
                 return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme tamamlanamadı'));
             }
         } else {
+            console.log('❌ 3D Secure başarısız:', { status, mdStatus });
             return res.redirect('/?payment=error&message=' + encodeURIComponent('3D Secure doğrulaması başarısız'));
         }
         
@@ -603,24 +643,54 @@ app.get('/api/payment/callback', async (req, res) => {
         const { conversationId, paymentId, status } = req.query;
         
         if (status === 'success') {
-            // 3D Secure başarılı, ödemeyi tamamla
-            const request = {
+            console.log('✅ 3D Secure başarılı, ödeme tamamlanıyor...');
+            
+            // 3D Secure callback'ten sonra payment complete yap
+            const completeRequest = {
                 locale: 'tr',
                 conversationId: conversationId,
                 paymentId: paymentId
             };
             
             try {
-                const response = await makeIyzicoRequest('/payment/retrieve', request);
-                console.log('✅ Ödeme tamamlandı:', response.data);
+                console.log('🚀 Payment complete request gönderiliyor...');
+                const completeResponse = await makeIyzicoRequest('/payment/3dsecure/auth', completeRequest);
+                console.log('✅ Payment complete response:', completeResponse.data);
                 
-                if (response.data.status === 'success') {
+                if (completeResponse.data.status === 'success') {
+                    console.log('🎉 Ödeme başarıyla tamamlandı!');
+                    
+                    // Supabase'e kayıt oluştur
+                    try {
+                        const { data: supabaseData, error: supabaseError } = await supabase
+                            .from('payments')
+                            .insert([{
+                                payment_id: paymentId,
+                                conversation_id: conversationId,
+                                status: 'completed',
+                                amount: 1, // TODO: Gerçek amount'u al
+                                auth_code: req.query.authCode || null,
+                                bin_number: req.query.binNumber || null,
+                                last_four_digits: req.query.lastFourDigits || null,
+                                created_at: new Date().toISOString()
+                            }]);
+                        
+                        if (supabaseError) {
+                            console.error('❌ Supabase kayıt hatası:', supabaseError);
+                        } else {
+                            console.log('✅ Supabase kayıt oluşturuldu:', supabaseData);
+                        }
+                    } catch (dbError) {
+                        console.error('❌ Database hatası:', dbError);
+                    }
+                    
                     return res.redirect('/?payment=success&paymentId=' + paymentId);
                 } else {
-                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme başarısız'));
+                    console.error('❌ Payment complete başarısız:', completeResponse.data);
+                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme tamamlanamadı'));
                 }
             } catch (error) {
-                console.error('❌ Ödeme tamamlama hatası:', error);
+                console.error('❌ Payment complete hatası:', error);
                 return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme tamamlanamadı'));
             }
         } else {
