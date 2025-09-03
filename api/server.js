@@ -37,13 +37,13 @@ console.log('🔧 Iyzico URI:', iyzicoConfig.uri);
 
 // Iyzico direkt API helper fonksiyonları
 function generateAuthHeader(apiKey, secretKey, random, requestBody) {
-    // Iyzico'nun beklediği hash formatı: base64( HmacSHA1( apiKey + random + secretKey, requestBody ) )
-    const hashKey = apiKey + random + secretKey; // HMAC için key
+    // Iyzico'nun beklediği hash formatı: base64( HmacSHA1( secretKey, apiKey + random + secretKey + requestBody ) )
+    const dataToHash = apiKey + random + secretKey + requestBody; // HMAC için data
     
-    // Doğru hash → HmacSHA1(hashKey, requestBody)
+    // Doğru hash → HmacSHA1(secretKey, dataToHash)
     const hash = crypto
-        .createHmac('sha1', hashKey)             // ✅ hashKey = HMAC key
-        .update(requestBody, 'utf-8')            // ✅ requestBody = HMAC data
+        .createHmac('sha1', secretKey)           // ✅ secretKey = HMAC key
+        .update(dataToHash, 'utf-8')             // ✅ dataToHash = HMAC data
         .digest('base64');
     
     console.log('🔧 Hash hesaplama detayları:');
@@ -51,20 +51,17 @@ function generateAuthHeader(apiKey, secretKey, random, requestBody) {
     console.log('🔧 - random:', random);
     console.log('🔧 - requestBody length:', requestBody.length);
     console.log('🔧 - secretKey:', secretKey.substring(0, 8) + '...');
-    console.log('🔧 - hashKey length:', hashKey.length);
+    console.log('🔧 - dataToHash length:', dataToHash.length);
+    console.log('🔧 - dataToHash (ilk 100):', dataToHash.slice(0, 100));
     console.log('🔧 - hash:', hash.substring(0, 20) + '...');
-    console.log('🔧 - hash format: HmacSHA1(apiKey + random + secretKey, requestBody)');
+    console.log('🔧 - hash format: HmacSHA1(secretKey, apiKey + random + secretKey + requestBody)');
     
     return `IYZWS ${apiKey}:${hash}`;
 }
 
     function makeIyzicoRequest(endpoint, data) {
-        // Field sırasını sabitle (Iyzico hash hesaplama için kritik)
-        const sortedData = {};
-        Object.keys(data).sort().forEach(key => {
-            sortedData[key] = data[key];
-        });
-        const requestBody = JSON.stringify(sortedData);
+        // ⚠️ Sıralamayı bozma! Iyzico hash doğrulaması birebir JSON'a göre çalışıyor
+        const requestBody = JSON.stringify(data);
 
         // Random string üret (Iyzico header'da bekliyor)
         const random = 'RS' + Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
@@ -78,8 +75,7 @@ function generateAuthHeader(apiKey, secretKey, random, requestBody) {
         console.log('🔧 Auth Header:', authHeader.substring(0, 50) + '...');
         console.log('🔧 Request Body length:', requestBody.length);
         console.log('🔧 Raw request body gönderiliyor:', requestBody);
-        console.log('🔧 Field sırası sabitlendi (sorted):', Object.keys(sortedData));
-        console.log('🔧 JSON stringify sırası:', Object.keys(JSON.parse(requestBody)));
+        console.log('🔧 JSON field sırası korundu (orijinal):', Object.keys(data));
         console.log('🔧 x-iyzi-rnd header eklendi:', random);
     
             return axios.post(`${iyzicoConfig.uri}${endpoint}`, requestBody, {
