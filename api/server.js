@@ -641,17 +641,19 @@ app.post('/api/payment/callback', async (req, res) => {
                         };
                         
                         console.log('💾 Session\'dan alınan kullanıcı bilgileri:', paymentData);
+                        console.log('💾 Session ID:', req.sessionID);
+                        console.log('💾 Session data:', req.session);
                         
                         // Önce payment kaydını oluştur (mevcut tablo yapısına uygun)
                         try {
                             console.log('💳 Payment kaydı oluşturuluyor...');
                             
                             const paymentRecord = {
-                                uuid: crypto.randomUUID(), // Yeni UUID oluştur
+                                // uuid kolonu yok, id otomatik oluşturuluyor
                                 user_id: null, // Kullanıcı oluşturulduktan sonra güncellenecek
                                 program: paymentData.mainProgram || 'LGS',
                                 schedule: paymentData.subProgram || 'hafta-ici',
-                                price: 1.00, // Tabloda görünen price kolonu
+                                price: paymentData.amount || 1.00, // Tabloda görünen price kolonu
                                 payment_status: 'completed',
                                 iyzico_payment_id: paymentId.toString(),
                                 transaction_id: paymentConversationId,
@@ -679,17 +681,15 @@ app.post('/api/payment/callback', async (req, res) => {
                             console.log('👤 Kullanıcı kaydı oluşturuluyor...');
                             
                             const userData = {
-                                uuid: crypto.randomUUID(),
-                                name: paymentData.firstName || 'Test',
+                                // uuid kolonu yok, id otomatik oluşturuluyor
+                                name: `${paymentData.firstName} ${paymentData.lastName}`.trim() || 'Test User',
                                 email: paymentData.email || 'test@example.com',
                                 phone: paymentData.phone || '05555555555',
-                                main_program: paymentData.mainProgram || 'LGS',
-                                sub_program: paymentData.subProgram || 'hafta-ici',
-                                program_title: paymentData.programTitle || 'Test Program',
-                                payment_id: paymentId,
-                                conversation_id: paymentConversationId,
-                                payment_status: 'completed',
-                                created_at: new Date().toISOString()
+                                enrolled_program: paymentData.mainProgram || 'LGS',
+                                schedule_type: paymentData.subProgram || 'hafta-ici',
+                                status: 'active',
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
                             };
                             
                             console.log('👤 Kullanıcı verileri:', userData);
@@ -708,7 +708,7 @@ app.post('/api/payment/callback', async (req, res) => {
                                     try {
                                         const { error: updateError } = await supabase
                                             .from('payments')
-                                            .update({ user_id: userInsertData[0].uuid })
+                                            .update({ user_id: userInsertData[0].id }) // uuid yerine id kullan
                                             .eq('transaction_id', paymentConversationId);
                                         
                                         if (updateError) {
@@ -795,7 +795,7 @@ app.get('/api/payment/callback', async (req, res) => {
                         console.log('💳 Payment kaydı oluşturuluyor...');
                         
                         const paymentRecord = {
-                            uuid: crypto.randomUUID(), // Yeni UUID oluştur
+                            // uuid kolonu yok, id otomatik oluşturuluyor
                             user_id: null, // Kullanıcı oluşturulduktan sonra güncellenecek
                             program: 'LGS', // Default program
                             schedule: 'hafta-ici', // Default schedule
@@ -827,17 +827,15 @@ app.get('/api/payment/callback', async (req, res) => {
                         console.log('👤 Kullanıcı kaydı oluşturuluyor...');
                         
                         const userData = {
-                            uuid: crypto.randomUUID(),
+                            // uuid kolonu yok, id otomatik oluşturuluyor
                             name: 'Test User',
                             email: 'test@example.com',
                             phone: '05555555555',
-                            main_program: 'LGS',
-                            sub_program: 'hafta-ici',
-                            program_title: 'Test Program',
-                            payment_id: paymentId,
-                            conversation_id: paymentConversationId,
-                            payment_status: 'completed',
-                            created_at: new Date().toISOString()
+                            enrolled_program: 'LGS',
+                            schedule_type: 'hafta-ici',
+                            status: 'active',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
                         };
                         
                         console.log('👤 Kullanıcı verileri:', userData);
@@ -856,7 +854,7 @@ app.get('/api/payment/callback', async (req, res) => {
                                 try {
                                     const { error: updateError } = await supabase
                                         .from('payments')
-                                        .update({ user_id: userInsertData[0].uuid })
+                                        .update({ user_id: userInsertData[0].id }) // uuid yerine id kullan
                                         .eq('transaction_id', paymentConversationId);
                                     
                                     if (updateError) {
