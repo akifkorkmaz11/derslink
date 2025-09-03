@@ -629,20 +629,28 @@ app.post('/api/payment/callback', async (req, res) => {
                         console.log('👤 Kullanıcı kaydı oluşturuluyor...');
                         
                         // Session'dan kullanıcı bilgilerini al
-                        const paymentData = req.session.paymentData || {
-                            email: 'test@example.com',
-                            firstName: 'Test',
-                            lastName: 'User',
-                            phone: '05555555555',
-                            mainProgram: 'LGS',
-                            subProgram: 'hafta-ici',
-                            programTitle: 'Test Program',
-                            amount: 1
-                        };
+                        let paymentData;
                         
-                        console.log('💾 Session\'dan alınan kullanıcı bilgileri:', paymentData);
-                        console.log('💾 Session ID:', req.sessionID);
-                        console.log('💾 Session data:', req.session);
+                        if (req.session && req.session.paymentData) {
+                            paymentData = req.session.paymentData;
+                            console.log('💾 Session\'dan alınan kullanıcı bilgileri:', paymentData);
+                            console.log('💾 Session ID:', req.sessionID);
+                        } else {
+                            // Session yoksa, geçici olarak default değerler kullan
+                            console.log('⚠️ Session bulunamadı, default değerler kullanılıyor');
+                            paymentData = {
+                                email: 'test@example.com',
+                                firstName: 'Test',
+                                lastName: 'User',
+                                phone: '05555555555',
+                                mainProgram: 'LGS',
+                                subProgram: 'hafta-ici',
+                                programTitle: 'Test Program',
+                                amount: 1
+                            };
+                        }
+                        
+                        console.log('💾 Final payment data:', paymentData);
                         
                         // Önce payment kaydını oluştur (mevcut tablo yapısına uygun)
                         try {
@@ -741,7 +749,13 @@ app.post('/api/payment/callback', async (req, res) => {
             }
         } else {
             console.log('❌ 3D Secure başarısız:', { status });
-            return res.redirect('/?payment=error&message=' + encodeURIComponent('3D Secure doğrulaması başarısız'));
+            console.log('🔧 Status değeri:', status);
+            console.log('🔧 Beklenen değer: CALLBACK_THREEDS');
+            console.log('🔧 Gelen tüm parametreler:', req.body);
+            console.log('🔧 Callback URL:', req.url);
+            console.log('🔧 Callback method:', req.method);
+            console.log('🔧 Callback headers:', req.headers);
+            return res.redirect('/?payment=error&message=' + encodeURIComponent('3D Secure doğrulaması başarısız - Status: ' + status));
         }
         
     } catch (error) {
