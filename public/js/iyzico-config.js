@@ -766,9 +766,22 @@ window.IyzicoPaymentService = {
             modal.querySelector('div').style.transform = 'scale(1)';
         }, 10);
         
-        // 3D Secure HTML content'i ekle
+        // 3D Secure HTML content'i decode et ve ekle
         const contentDiv = modal.querySelector('#threeDSecureContent');
-        contentDiv.innerHTML = htmlContent;
+        
+        // Base64 decode HTML content
+        let decodedHtml;
+        try {
+            decodedHtml = atob(htmlContent);
+            console.log('✅ HTML content decode edildi');
+            console.log('🔧 Decoded HTML length:', decodedHtml.length);
+            console.log('🔧 Decoded HTML (ilk 200):', decodedHtml.substring(0, 200));
+        } catch (error) {
+            console.error('❌ HTML content decode hatası:', error);
+            decodedHtml = htmlContent; // Fallback olarak raw content kullan
+        }
+        
+        contentDiv.innerHTML = decodedHtml;
         
         // Kapatma butonu
         const closeBtn = modal.querySelector('#close3DSecureModal');
