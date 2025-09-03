@@ -865,10 +865,15 @@ app.get('/api/payment/callback', async (req, res) => {
                                     console.log('🔧 Güncellenecek user_id:', userInsertData[0].id);
                                     console.log('🔧 Aranan transaction_id:', paymentConversationId);
                                     
+                                    // 🚀 ÖNCE PAYMENT ID İLE GÜNCELLE (daha güvenilir)
+                                    console.log('🔧 Payment ID ile güncelleme deneniyor...');
+                                    console.log('🔧 Payment ID:', paymentInsertData[0].id);
+                                    console.log('🔧 User ID:', userInsertData[0].id);
+                                    
                                     const { error: updateError } = await supabase
                                         .from('payments')
-                                        .update({ user_id: userInsertData[0].id }) // uuid yerine id kullan
-                                        .eq('transaction_id', paymentConversationId);
+                                        .update({ user_id: userInsertData[0].id })
+                                        .eq('id', paymentInsertData[0].id); // transaction_id yerine id kullan
                                     
                                     if (updateError) {
                                         console.error('❌ Payment user_id güncelleme hatası:', updateError);
@@ -879,7 +884,7 @@ app.get('/api/payment/callback', async (req, res) => {
                                         const { data: updatedPayment, error: checkError } = await supabase
                                             .from('payments')
                                             .select('*')
-                                            .eq('transaction_id', paymentConversationId);
+                                            .eq('id', paymentInsertData[0].id); // transaction_id yerine id kullan
                                         
                                         if (checkError) {
                                             console.error('❌ Güncelleme kontrol hatası:', checkError);
