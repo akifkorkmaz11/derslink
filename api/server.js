@@ -564,22 +564,33 @@ app.post('/api/payment/callback', async (req, res) => {
         console.log('🔧 Callback body:', JSON.stringify(req.body, null, 2));
         
         // Iyzico'dan gelen callback parametrelerini al
-        const { conversationId, paymentId, status, mdStatus, authCode, binNumber, lastFourDigits } = req.body;
+        const { 
+            paymentConversationId, 
+            paymentId, 
+            status, 
+            merchantId,
+            iyziReferenceCode,
+            iyziEventType,
+            iyziEventTime,
+            iyziPaymentId
+        } = req.body;
         
         console.log('🔧 Callback parametreleri:');
-        console.log('🔧 - conversationId:', conversationId);
+        console.log('🔧 - paymentConversationId:', paymentConversationId);
         console.log('🔧 - paymentId:', paymentId);
         console.log('🔧 - status:', status);
-        console.log('🔧 - mdStatus:', mdStatus);
-        console.log('🔧 - authCode:', authCode);
+        console.log('🔧 - merchantId:', merchantId);
+        console.log('🔧 - iyziReferenceCode:', iyziReferenceCode);
+        console.log('🔧 - iyziEventType:', iyziEventType);
         
-        if (status === 'success') {
+        // CALLBACK_THREEDS = 3D Secure callback geldi, ödeme tamamlanabilir
+        if (status === 'CALLBACK_THREEDS') {
             console.log('✅ 3D Secure başarılı, ödeme tamamlanıyor...');
             
             // 3D Secure callback'ten sonra payment complete yap
             const completeRequest = {
                 locale: 'tr',
-                conversationId: conversationId,
+                conversationId: paymentConversationId, // Doğru parametre adı
                 paymentId: paymentId
             };
             
@@ -597,12 +608,14 @@ app.post('/api/payment/callback', async (req, res) => {
                             .from('payments')
                             .insert([{
                                 payment_id: paymentId,
-                                conversation_id: conversationId,
+                                conversation_id: paymentConversationId, // Doğru parametre adı
                                 status: 'completed',
                                 amount: 1, // TODO: Gerçek amount'u al
-                                auth_code: authCode || null,
-                                bin_number: binNumber || null,
-                                last_four_digits: lastFourDigits || null,
+                                auth_code: null, // Bu callback'te yok
+                                bin_number: null, // Bu callback'te yok
+                                last_four_digits: null, // Bu callback'te yok
+                                merchant_id: merchantId,
+                                iyzi_reference_code: iyziReferenceCode,
                                 created_at: new Date().toISOString()
                             }]);
                         
@@ -640,15 +653,30 @@ app.get('/api/payment/callback', async (req, res) => {
     try {
         console.log('🔄 3D Secure GET callback alındı:', req.query);
         
-        const { conversationId, paymentId, status } = req.query;
+        const { 
+            paymentConversationId, 
+            paymentId, 
+            status,
+            merchantId,
+            iyziReferenceCode,
+            iyziEventType,
+            iyziEventTime,
+            iyziPaymentId
+        } = req.query;
         
-        if (status === 'success') {
+        console.log('🔧 GET Callback parametreleri:');
+        console.log('🔧 - paymentConversationId:', paymentConversationId);
+        console.log('🔧 - paymentId:', paymentId);
+        console.log('🔧 - status:', status);
+        
+        // CALLBACK_THREEDS = 3D Secure callback geldi, ödeme tamamlanabilir
+        if (status === 'CALLBACK_THREEDS') {
             console.log('✅ 3D Secure başarılı, ödeme tamamlanıyor...');
             
             // 3D Secure callback'ten sonra payment complete yap
             const completeRequest = {
                 locale: 'tr',
-                conversationId: conversationId,
+                conversationId: paymentConversationId, // Doğru parametre adı
                 paymentId: paymentId
             };
             
@@ -666,12 +694,14 @@ app.get('/api/payment/callback', async (req, res) => {
                             .from('payments')
                             .insert([{
                                 payment_id: paymentId,
-                                conversation_id: conversationId,
+                                conversation_id: paymentConversationId, // Doğru parametre adı
                                 status: 'completed',
                                 amount: 1, // TODO: Gerçek amount'u al
-                                auth_code: req.query.authCode || null,
-                                bin_number: req.query.binNumber || null,
-                                last_four_digits: req.query.lastFourDigits || null,
+                                auth_code: null, // Bu callback'te yok
+                                bin_number: null, // Bu callback'te yok
+                                last_four_digits: null, // Bu callback'te yok
+                                merchant_id: merchantId,
+                                iyzi_reference_code: iyziReferenceCode,
                                 created_at: new Date().toISOString()
                             }]);
                         
