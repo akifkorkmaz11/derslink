@@ -587,7 +587,7 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
         const { data: existingPayment, error: checkError } = await supabase
             .from('payments')
             .select('*')
-            .eq('iyzico_payment_id', paymentId.toString())
+            .eq('transaction_id', paymentConversationId)
             .single();
         
         if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found
@@ -605,13 +605,14 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
             
             const paymentRecord = {
                 user_id: null, // Kullanıcı oluşturulduktan sonra güncellenecek
-                program: paymentData.mainProgram || 'LGS',
-                schedule: paymentData.subProgram || 'hafta-ici',
-                price: paymentData.amount || 1.00,
-                payment_status: 'completed',
-                iyzico_payment_id: paymentId.toString(),
+                amount: paymentData.amount || 1.00,
+                currency: 'TRY',
+                payment_method: 'iyzico',
                 transaction_id: paymentConversationId,
-                created_at: new Date().toISOString()
+                status: 'completed',
+                payment_date: new Date().toISOString(),
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
             };
             
             console.log('💳 Payment kaydı:', paymentRecord);
@@ -651,13 +652,11 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
             console.log('👤 Yeni kullanıcı kaydı oluşturuluyor...');
             
             const userData = {
-                name: `${paymentData.firstName} ${paymentData.lastName}`.trim() || 'Test User',
+                full_name: `${paymentData.firstName} ${paymentData.lastName}`.trim() || 'Test User',
                 email: paymentData.email || 'test@example.com',
                 phone: paymentData.phone || '05555555555',
                 enrolled_program: paymentData.mainProgram || 'LGS',
-                schedule_type: paymentData.subProgram || 'hafta-ici',
                 status: 'active',
-                password_hash: 'temp_password_' + Date.now(),
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
@@ -713,7 +712,7 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
             try {
                 // Mevcut sınıf atamasını kontrol et
                 const { data: existingAssignment, error: assignmentCheckError } = await supabase
-                    .from('user_class_assignments')
+                    .from('class_enrollments')
                     .select('*')
                     .eq('user_id', userInsertData[0].id)
                     .single();
@@ -724,8 +723,8 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                     const { data: availableClasses, error: classError } = await supabase
                         .from('classes')
                         .select('*')
-                        .eq('program', paymentData.mainProgram)
-                        .eq('schedule', paymentData.subProgram)
+                        .eq('program_type', paymentData.mainProgram)
+                        .eq('schedule_type', paymentData.subProgram)
                         .eq('status', 'active')
                         .order('created_at', { ascending: true })
                         .limit(1);
@@ -737,12 +736,12 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                         console.log('✅ Uygun sınıf bulundu:', selectedClass);
                         
                         const { data: assignmentData, error: assignmentError } = await supabase
-                            .from('user_class_assignments')
+                            .from('class_enrollments')
                             .insert([{
                                 user_id: userInsertData[0].id,
                                 class_id: selectedClass.id,
+                                enrollment_date: new Date().toISOString(),
                                 status: 'active',
-                                assigned_at: new Date().toISOString(),
                                 created_at: new Date().toISOString(),
                                 updated_at: new Date().toISOString()
                             }]);
