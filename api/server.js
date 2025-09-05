@@ -605,6 +605,7 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
             
             const paymentRecord = {
                 user_id: null, // Kullanıcı oluşturulduktan sonra güncellenecek
+                class_id: null, // Sınıf ataması yapıldıktan sonra güncellenecek
                 amount: paymentData.amount || 1.00,
                 currency: 'TRY',
                 payment_method: 'iyzico',
@@ -750,6 +751,21 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                             console.error('❌ Sınıf atama hatası:', assignmentError);
                         } else {
                             console.log('✅ Kullanıcı sınıfa atandı:', assignmentData);
+                            
+                            // Payment kaydında class_id'yi güncelle
+                            if (paymentInsertData && paymentInsertData[0]) {
+                                console.log('🔧 Payment class_id güncelleniyor...');
+                                const { error: classUpdateError } = await supabase
+                                    .from('payments')
+                                    .update({ class_id: selectedClass.id })
+                                    .eq('id', paymentInsertData[0].id);
+                                
+                                if (classUpdateError) {
+                                    console.error('❌ Payment class_id güncelleme hatası:', classUpdateError);
+                                } else {
+                                    console.log('✅ Payment class_id güncellendi');
+                                }
+                            }
                         }
                     } else {
                         console.log('⚠️ Uygun sınıf bulunamadı, program:', paymentData.mainProgram, 'schedule:', paymentData.subProgram);
