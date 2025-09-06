@@ -724,7 +724,7 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
             console.log('👤 Yeni kullanıcı kaydı oluşturuluyor...');
             
             const userData = {
-                full_name: `${paymentData.firstName} ${paymentData.lastName}`.trim() || 'Test User',
+                name: `${paymentData.firstName} ${paymentData.lastName}`.trim() || 'Test User',
                 email: paymentData.email || 'test@example.com',
                 phone: paymentData.phone || '05555555555',
                 enrolled_program: paymentData.mainProgram || 'LGS',
