@@ -727,6 +727,7 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                 name: `${paymentData.firstName} ${paymentData.lastName}`.trim() || 'Test User',
                 email: paymentData.email || 'test@example.com',
                 phone: paymentData.phone || '05555555555',
+                password_hash: 'payment_user_' + Date.now(), // Ödeme ile kayıt olan kullanıcılar için geçici hash
                 enrolled_program: paymentData.mainProgram || 'LGS',
                 status: 'active',
                 created_at: new Date().toISOString(),
