@@ -141,6 +141,79 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Payments tablosu şemasını kontrol et
+app.get('/api/check-payments-schema', async (req, res) => {
+    try {
+        console.log('🔍 Payments tablosu şeması kontrol ediliyor...');
+        
+        // Önce tabloyu kontrol et
+        const { data: tableInfo, error: tableError } = await supabase
+            .from('payments')
+            .select('*')
+            .limit(1);
+        
+        if (tableError) {
+            console.log('❌ Payments tablosu hatası:', tableError);
+            return res.json({ 
+                error: 'Payments tablosu bulunamadı veya erişilemiyor',
+                details: tableError 
+            });
+        }
+        
+        console.log('✅ Payments tablosu mevcut');
+        
+        // Alternatif: Boş bir kayıt eklemeye çalış
+        const testRecord = {
+            user_id: null,
+            class_id: null,
+            amount: 1.00,
+            currency: 'TRY',
+            payment_method: 'test',
+            transaction_id: 'test_' + Date.now(),
+            status: 'test',
+            payment_date: new Date().toISOString(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        
+        const { data: insertData, error: insertError } = await supabase
+            .from('payments')
+            .insert([testRecord])
+            .select();
+        
+        if (insertError) {
+            console.log('❌ Test kayıt ekleme hatası:', insertError);
+            return res.json({ 
+                error: 'Test kayıt eklenemedi',
+                details: insertError,
+                testRecord: testRecord
+            });
+        }
+        
+        console.log('✅ Test kayıt başarıyla eklendi:', insertData);
+        
+        // Test kaydını sil
+        await supabase
+            .from('payments')
+            .delete()
+            .eq('id', insertData[0].id);
+        
+        return res.json({ 
+            success: true,
+            message: 'Payments tablosu çalışıyor',
+            testRecord: testRecord,
+            insertedData: insertData
+        });
+        
+    } catch (error) {
+        console.error('❌ Schema kontrol hatası:', error);
+        return res.status(500).json({ 
+            error: 'Schema kontrol hatası',
+            details: error.message 
+        });
+    }
+});
+
 // Admin API Endpoint'leri
 
 // Tüm kullanıcıları getir (program bazlı filtreleme ile)
@@ -603,17 +676,15 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
             // Yeni payment kaydını oluştur
             console.log('💳 Yeni payment kaydı oluşturuluyor...');
             
+            // Gerçek Supabase şemasına göre payment kaydı
             const paymentRecord = {
                 user_id: null, // Kullanıcı oluşturulduktan sonra güncellenecek
-                class_id: null, // Sınıf ataması yapıldıktan sonra güncellenecek
-                amount: paymentData.amount || 1.00,
-                currency: 'TRY',
-                payment_method: 'iyzico',
-                transaction_id: paymentConversationId,
-                status: 'completed',
-                payment_date: new Date().toISOString(),
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
+                program: paymentData.mainProgram, // LGS veya YKS
+                schedule: paymentData.subProgram, // hafta-ici, hafta-sonu, karma
+                price: paymentData.amount || 1.00, // Ödeme miktarı
+                payment_status: 'completed',
+                iyzico_payment_id: paymentId || null,
+                transaction_id: paymentConversationId
             };
             
             console.log('💳 Payment kaydı:', paymentRecord);
@@ -752,19 +823,10 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                         } else {
                             console.log('✅ Kullanıcı sınıfa atandı:', assignmentData);
                             
-                            // Payment kaydında class_id'yi güncelle
+                            // Payment kaydında program ve schedule bilgileri zaten mevcut
                             if (paymentInsertData && paymentInsertData[0]) {
-                                console.log('🔧 Payment class_id güncelleniyor...');
-                                const { error: classUpdateError } = await supabase
-                                    .from('payments')
-                                    .update({ class_id: selectedClass.id })
-                                    .eq('id', paymentInsertData[0].id);
-                                
-                                if (classUpdateError) {
-                                    console.error('❌ Payment class_id güncelleme hatası:', classUpdateError);
-                                } else {
-                                    console.log('✅ Payment class_id güncellendi');
-                                }
+                                console.log('✅ Payment kaydında program ve schedule bilgileri zaten mevcut');
+                                console.log('🔧 Program:', paymentData.mainProgram, 'Schedule:', paymentData.subProgram);
                             }
                         }
                     } else {
