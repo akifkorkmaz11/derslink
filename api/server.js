@@ -602,11 +602,18 @@ app.post('/api/payment/process-card', async (req, res) => {
                 // Hata olsa bile devam et
             } else {
                 console.log('✅ Geçici payment data kaydedildi:', tempData);
+                console.log('🔍 Kaydedilen temp_data:', tempPaymentRecord.temp_data);
             }
         } catch (tempErr) {
             console.error('❌ Geçici payment data genel hatası:', tempErr);
             // Hata olsa bile devam et
         }
+            
+            // Callback URL'ine payment data parametrelerini ekle
+            const callbackUrl = `https://www.derslink.net.tr/api/payment/callback?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&phone=${encodeURIComponent(phone)}&mainProgram=${encodeURIComponent(mainProgram)}&subProgram=${encodeURIComponent(subProgram)}&amount=${amount}`;
+            request.callbackUrl = callbackUrl;
+            
+            console.log('🔧 Callback URL with params:', callbackUrl);
             
             // Iyzico'nun doğru endpoint'ini kullan
             const response = await makeIyzicoRequest('/payment/3dsecure/initialize', request);
@@ -1077,9 +1084,14 @@ app.post('/api/payment/callback', async (req, res) => {
                     console.error('❌ Payment data okuma hatası:', tempError);
                 } else if (tempData && tempData.length > 0) {
                     const temp = tempData[0];
+                    console.log('🔍 Bulunan payment kaydı:', temp);
+                    console.log('🔍 temp_data değeri:', temp.temp_data);
+                    
                     if (temp.temp_data) {
                         try {
                             const parsedData = JSON.parse(temp.temp_data);
+                            console.log('🔍 Parse edilen data:', parsedData);
+                            
                             paymentData = {
                                 email: parsedData.email,
                                 firstName: parsedData.firstName,
@@ -1096,7 +1108,7 @@ app.post('/api/payment/callback', async (req, res) => {
                             console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
                         }
                     } else {
-                        console.log('⚠️ Temp data bulunamadı, hardcoded kullanılıyor');
+                        console.log('⚠️ Temp data NULL, hardcoded kullanılıyor');
                         console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
                     }
                 } else {
@@ -1230,9 +1242,14 @@ app.get('/api/payment/callback', async (req, res) => {
                     console.error('❌ Payment data okuma hatası:', tempError);
                 } else if (tempData && tempData.length > 0) {
                     const temp = tempData[0];
+                    console.log('🔍 Bulunan payment kaydı:', temp);
+                    console.log('🔍 temp_data değeri:', temp.temp_data);
+                    
                     if (temp.temp_data) {
                         try {
                             const parsedData = JSON.parse(temp.temp_data);
+                            console.log('🔍 Parse edilen data:', parsedData);
+                            
                             paymentData = {
                                 email: parsedData.email,
                                 firstName: parsedData.firstName,
@@ -1249,7 +1266,7 @@ app.get('/api/payment/callback', async (req, res) => {
                             console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
                         }
                     } else {
-                        console.log('⚠️ Temp data bulunamadı, hardcoded kullanılıyor');
+                        console.log('⚠️ Temp data NULL, hardcoded kullanılıyor');
                         console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
                     }
                 } else {
