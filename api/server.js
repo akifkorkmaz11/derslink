@@ -846,7 +846,7 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
         const finalPaymentId = paymentId || (paymentInsertData && paymentInsertData[0] ? paymentInsertData[0].iyzico_payment_id : '');
         const finalUserId = userInsertData && userInsertData[0] ? userInsertData[0].id : '';
         console.log('🔧 Dashboard redirect - paymentId:', finalPaymentId, 'userId:', finalUserId);
-        return res.redirect('/dashboard.html?payment=success&paymentId=' + finalPaymentId + '&userId=' + finalUserId);
+        return res.redirect('/dashboard?payment=success&paymentId=' + finalPaymentId + '&userId=' + finalUserId);
         
     } catch (error) {
         console.error('❌ Payment success handler hatası:', error);

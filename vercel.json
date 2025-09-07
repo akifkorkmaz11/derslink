@@ -43,6 +43,10 @@
       "dest": "/public/dashboard.html"
     },
     {
+      "src": "/dashboard.html",
+      "dest": "/public/dashboard.html"
+    },
+    {
       "src": "/",
       "dest": "/public/index.html"
     },
