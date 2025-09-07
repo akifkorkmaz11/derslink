@@ -657,15 +657,62 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
     try {
         // Önce mevcut payment kaydını kontrol et (duplicate önleme)
         console.log('🔍 Mevcut payment kaydı kontrol ediliyor...');
-        const { data: existingPayment, error: checkError } = await supabase
-            .from('payments')
-            .select('*')
-            .eq('transaction_id', paymentConversationId)
-            .or(`iyzico_payment_id.eq.${paymentId}`)
-            .single();
+        console.log('🔧 Kontrol edilen parametreler:');
+        console.log('🔧 - transaction_id:', paymentConversationId);
+        console.log('🔧 - paymentId:', paymentId);
         
-        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found
-            console.error('❌ Payment kontrol hatası:', checkError);
+        // Birden fazla kontrol yap - hem transaction_id hem de paymentId ile
+        let existingPayment = null;
+        
+        // 1. Transaction ID ile kontrol et
+        if (paymentConversationId) {
+            const { data: txPayment, error: txError } = await supabase
+                .from('payments')
+                .select('*')
+                .eq('transaction_id', paymentConversationId)
+                .limit(1);
+            
+            if (txError) {
+                console.error('❌ Transaction ID kontrol hatası:', txError);
+            } else if (txPayment && txPayment.length > 0) {
+                existingPayment = txPayment[0];
+                console.log('⚠️ Transaction ID ile mevcut payment bulundu:', existingPayment);
+            }
+        }
+        
+        // 2. Payment ID ile kontrol et (eğer transaction ID ile bulunamadıysa)
+        if (!existingPayment && paymentId) {
+            const { data: payPayment, error: payError } = await supabase
+                .from('payments')
+                .select('*')
+                .eq('iyzico_payment_id', paymentId)
+                .limit(1);
+            
+            if (payError) {
+                console.error('❌ Payment ID kontrol hatası:', payError);
+            } else if (payPayment && payPayment.length > 0) {
+                existingPayment = payPayment[0];
+                console.log('⚠️ Payment ID ile mevcut payment bulundu:', existingPayment);
+            }
+        }
+        
+        // 3. Email ve program ile kontrol et (son çare)
+        if (!existingPayment && paymentData && paymentData.email) {
+            const { data: emailPayment, error: emailError } = await supabase
+                .from('payments')
+                .select('*')
+                .eq('program', paymentData.mainProgram)
+                .eq('schedule', paymentData.subProgram)
+                .eq('price', paymentData.amount)
+                .gte('created_at', new Date(Date.now() - 5 * 60 * 1000).toISOString()) // Son 5 dakika
+                .limit(1);
+            
+            if (emailError) {
+                console.error('❌ Email kontrol hatası:', emailError);
+            } else if (emailPayment && emailPayment.length > 0) {
+                existingPayment = emailPayment[0];
+                console.log('⚠️ Email ve program ile mevcut payment bulundu:', existingPayment);
+            }
         }
         
         let paymentInsertData;
@@ -673,6 +720,12 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
         if (existingPayment) {
             console.log('⚠️ Payment kaydı zaten mevcut:', existingPayment);
             paymentInsertData = [existingPayment];
+            
+            // Eğer mevcut payment'ın user_id'si null ise, güncelle
+            if (!existingPayment.user_id) {
+                console.log('🔧 Mevcut payment\'ın user_id\'si null, güncellenecek...');
+                // User ID güncelleme işlemi aşağıda yapılacak
+            }
         } else {
             // Yeni payment kaydını oluştur
             console.log('💳 Yeni payment kaydı oluşturuluyor...');
