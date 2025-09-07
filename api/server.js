@@ -570,17 +570,43 @@ app.post('/api/payment/process-card', async (req, res) => {
         console.log('🔧 Endpoint:', '/payment/3dsecure/initialize');
         try {
                     // Geçici olarak console'a yazdır (production'da session çalışmadığı için)
-        console.log('💾 Payment data (session yerine console):', {
-            conversationId: finalConversationId,
-            email: email,
-            firstName: firstName,
-            lastName: lastName,
-            phone: phone,
-            mainProgram: mainProgram,
-            subProgram: subProgram,
-            programTitle: programTitle,
-            amount: amount
-        });
+        // Payment data'yı geçici olarak payments tablosunda sakla (callback'te kullanmak için)
+        console.log('💾 Payment data geçici olarak payments tablosunda saklanıyor...');
+        const tempPaymentRecord = {
+            user_id: null,
+            program: mainProgram,
+            schedule: subProgram,
+            price: amount,
+            payment_status: 'pending', // Geçici durum
+            iyzico_payment_id: null,
+            transaction_id: finalConversationId,
+            // Geçici veri saklama için ek alanlar (JSON olarak)
+            temp_data: JSON.stringify({
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+                phone: phone,
+                programTitle: programTitle,
+                conversationId: finalConversationId
+            })
+        };
+        
+        try {
+            const { data: tempData, error: tempError } = await supabase
+                .from('payments')
+                .insert([tempPaymentRecord])
+                .select();
+            
+            if (tempError) {
+                console.error('❌ Geçici payment data kayıt hatası:', tempError);
+                // Hata olsa bile devam et
+            } else {
+                console.log('✅ Geçici payment data kaydedildi:', tempData);
+            }
+        } catch (tempErr) {
+            console.error('❌ Geçici payment data genel hatası:', tempErr);
+            // Hata olsa bile devam et
+        }
             
             // Iyzico'nun doğru endpoint'ini kullan
             const response = await makeIyzicoRequest('/payment/3dsecure/initialize', request);
@@ -726,6 +752,35 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                 console.log('🔧 Mevcut payment\'ın user_id\'si null, güncellenecek...');
                 // User ID güncelleme işlemi aşağıda yapılacak
             }
+            
+            // Eğer geçici kayıt ise (pending status), completed olarak güncelle
+            if (existingPayment.payment_status === 'pending') {
+                console.log('🔧 Geçici payment kaydı completed olarak güncelleniyor...');
+                const { error: updateError } = await supabase
+                    .from('payments')
+                    .update({ 
+                        payment_status: 'completed',
+                        iyzico_payment_id: paymentId,
+                        temp_data: null // Geçici veriyi temizle
+                    })
+                    .eq('id', existingPayment.id);
+                
+                if (updateError) {
+                    console.error('❌ Payment status güncelleme hatası:', updateError);
+                } else {
+                    console.log('✅ Payment status güncellendi');
+                    // Güncellenmiş veriyi al
+                    const { data: updatedPayment } = await supabase
+                        .from('payments')
+                        .select('*')
+                        .eq('id', existingPayment.id)
+                        .single();
+                    
+                    if (updatedPayment) {
+                        paymentInsertData = [updatedPayment];
+                    }
+                }
+            }
         } else {
             // Yeni payment kaydını oluştur
             console.log('💳 Yeni payment kaydı oluşturuluyor...');
@@ -741,7 +796,14 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                 transaction_id: paymentConversationId
             };
             
-            console.log('💳 Payment kaydı:', paymentRecord);
+            console.log('💳 Payment kaydı (detaylı):', {
+                program: paymentRecord.program,
+                schedule: paymentRecord.schedule,
+                price: paymentRecord.price,
+                payment_status: paymentRecord.payment_status,
+                iyzico_payment_id: paymentRecord.iyzico_payment_id,
+                transaction_id: paymentRecord.transaction_id
+            });
             
             const { data: newPaymentData, error: paymentInsertError } = await supabase
                 .from('payments')
@@ -788,6 +850,15 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
+            
+            console.log('👤 Kullanıcı verileri (detaylı):', {
+                name: userData.name,
+                email: userData.email,
+                phone: userData.phone,
+                enrolled_program: userData.enrolled_program,
+                schedule_type: userData.schedule_type,
+                status: userData.status
+            });
             
             console.log('👤 Kullanıcı verileri:', userData);
             
@@ -863,21 +934,38 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                         const selectedClass = availableClasses[0];
                         console.log('✅ Uygun sınıf bulundu:', selectedClass);
                         
+                        const enrollmentData = {
+                            user_id: userInsertData[0].id,
+                            class_id: selectedClass.id,
+                            enrollment_date: new Date().toISOString(),
+                            status: 'active',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        };
+                        
+                        console.log('🏫 Sınıf atama verileri:', {
+                            user_id: enrollmentData.user_id,
+                            class_id: enrollmentData.class_id,
+                            class_name: selectedClass.class_name,
+                            program_type: selectedClass.program_type,
+                            schedule_type: selectedClass.schedule_type,
+                            enrollment_date: enrollmentData.enrollment_date
+                        });
+                        
                         const { data: assignmentData, error: assignmentError } = await supabase
                             .from('class_enrollments')
-                            .insert([{
-                                user_id: userInsertData[0].id,
-                                class_id: selectedClass.id,
-                                enrollment_date: new Date().toISOString(),
-                                status: 'active',
-                                created_at: new Date().toISOString(),
-                                updated_at: new Date().toISOString()
-                            }]);
+                            .insert([enrollmentData]);
                         
                         if (assignmentError) {
                             console.error('❌ Sınıf atama hatası:', assignmentError);
                         } else {
-                            console.log('✅ Kullanıcı sınıfa atandı:', assignmentData);
+                            console.log('✅ Kullanıcı sınıfa atandı:', {
+                                user_id: userInsertData[0].id,
+                                class_id: selectedClass.id,
+                                class_name: selectedClass.class_name,
+                                program: selectedClass.program_type,
+                                schedule: selectedClass.schedule_type
+                            });
                             
                             // Payment kaydında program ve schedule bilgileri zaten mevcut
                             if (paymentInsertData && paymentInsertData[0]) {
@@ -898,7 +986,17 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
         console.log('🎉 Ödeme başarıyla tamamlandı! Dashboard\'a yönlendiriliyor...');
         const finalPaymentId = paymentId || (paymentInsertData && paymentInsertData[0] ? paymentInsertData[0].iyzico_payment_id : '');
         const finalUserId = userInsertData && userInsertData[0] ? userInsertData[0].id : '';
-        console.log('🔧 Dashboard redirect - paymentId:', finalPaymentId, 'userId:', finalUserId);
+        
+        console.log('🔧 Dashboard redirect detayları:', {
+            paymentId: finalPaymentId,
+            userId: finalUserId,
+            userName: userInsertData && userInsertData[0] ? userInsertData[0].name : 'Bilinmiyor',
+            userEmail: userInsertData && userInsertData[0] ? userInsertData[0].email : 'Bilinmiyor',
+            program: paymentData.mainProgram,
+            schedule: paymentData.subProgram,
+            redirectUrl: `/dashboard?payment=success&paymentId=${finalPaymentId}&userId=${finalUserId}`
+        });
+        
         return res.redirect('/dashboard?payment=success&paymentId=' + finalPaymentId + '&userId=' + finalUserId);
         
     } catch (error) {
@@ -964,7 +1062,51 @@ app.post('/api/payment/callback', async (req, res) => {
                 amount: 1
             };
             
-            console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+            // Database'den gerçek payment data'yı al (temp_data alanından)
+            console.log('💾 Database\'den payment data alınıyor...');
+            try {
+                const { data: tempData, error: tempError } = await supabase
+                    .from('payments')
+                    .select('*')
+                    .eq('transaction_id', finalConversationId)
+                    .eq('payment_status', 'pending')
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                
+                if (tempError) {
+                    console.error('❌ Payment data okuma hatası:', tempError);
+                } else if (tempData && tempData.length > 0) {
+                    const temp = tempData[0];
+                    if (temp.temp_data) {
+                        try {
+                            const parsedData = JSON.parse(temp.temp_data);
+                            paymentData = {
+                                email: parsedData.email,
+                                firstName: parsedData.firstName,
+                                lastName: parsedData.lastName,
+                                phone: parsedData.phone,
+                                mainProgram: temp.program,
+                                subProgram: temp.schedule,
+                                programTitle: parsedData.programTitle,
+                                amount: temp.price
+                            };
+                            console.log('✅ Database\'den payment data alındı:', paymentData);
+                        } catch (parseErr) {
+                            console.error('❌ Temp data parse hatası:', parseErr);
+                            console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                        }
+                    } else {
+                        console.log('⚠️ Temp data bulunamadı, hardcoded kullanılıyor');
+                        console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                    }
+                } else {
+                    console.log('⚠️ Database\'de payment data bulunamadı, hardcoded kullanılıyor');
+                    console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                }
+            } catch (dbErr) {
+                console.error('❌ Database okuma genel hatası:', dbErr);
+                console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+            }
             
             // SUCCESS status geldiğinde payment complete yapmaya gerek yok
             if (finalStatus === 'SUCCESS') {
@@ -1073,7 +1215,51 @@ app.get('/api/payment/callback', async (req, res) => {
                 amount: 1
             };
             
-            console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+            // Database'den gerçek payment data'yı al (temp_data alanından)
+            console.log('💾 Database\'den payment data alınıyor...');
+            try {
+                const { data: tempData, error: tempError } = await supabase
+                    .from('payments')
+                    .select('*')
+                    .eq('transaction_id', finalConversationId)
+                    .eq('payment_status', 'pending')
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                
+                if (tempError) {
+                    console.error('❌ Payment data okuma hatası:', tempError);
+                } else if (tempData && tempData.length > 0) {
+                    const temp = tempData[0];
+                    if (temp.temp_data) {
+                        try {
+                            const parsedData = JSON.parse(temp.temp_data);
+                            paymentData = {
+                                email: parsedData.email,
+                                firstName: parsedData.firstName,
+                                lastName: parsedData.lastName,
+                                phone: parsedData.phone,
+                                mainProgram: temp.program,
+                                subProgram: temp.schedule,
+                                programTitle: parsedData.programTitle,
+                                amount: temp.price
+                            };
+                            console.log('✅ Database\'den payment data alındı:', paymentData);
+                        } catch (parseErr) {
+                            console.error('❌ Temp data parse hatası:', parseErr);
+                            console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                        }
+                    } else {
+                        console.log('⚠️ Temp data bulunamadı, hardcoded kullanılıyor');
+                        console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                    }
+                } else {
+                    console.log('⚠️ Database\'de payment data bulunamadı, hardcoded kullanılıyor');
+                    console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                }
+            } catch (dbErr) {
+                console.error('❌ Database okuma genel hatası:', dbErr);
+                console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+            }
             
             // SUCCESS status geldiğinde payment complete yapmaya gerek yok
             if (finalStatus === 'SUCCESS') {
