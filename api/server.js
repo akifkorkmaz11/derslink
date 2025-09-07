@@ -661,6 +661,7 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
             .from('payments')
             .select('*')
             .eq('transaction_id', paymentConversationId)
+            .or(`iyzico_payment_id.eq.${paymentId}`)
             .single();
         
         if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found
@@ -729,6 +730,7 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                 phone: paymentData.phone || '05555555555',
                 password_hash: 'payment_user_' + Date.now(), // Ödeme ile kayıt olan kullanıcılar için geçici hash
                 enrolled_program: paymentData.mainProgram || 'LGS',
+                schedule_type: paymentData.subProgram || 'hafta-ici', // Hafta içi, hafta sonu, karma
                 status: 'active',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
@@ -841,7 +843,10 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
         
         // 🚀 Dashboard'a yönlendir (başarılı ödeme sonrası)
         console.log('🎉 Ödeme başarıyla tamamlandı! Dashboard\'a yönlendiriliyor...');
-        return res.redirect('/dashboard.html?payment=success&paymentId=' + paymentId + '&userId=' + (userInsertData && userInsertData[0] ? userInsertData[0].id : ''));
+        const finalPaymentId = paymentId || (paymentInsertData && paymentInsertData[0] ? paymentInsertData[0].iyzico_payment_id : '');
+        const finalUserId = userInsertData && userInsertData[0] ? userInsertData[0].id : '';
+        console.log('🔧 Dashboard redirect - paymentId:', finalPaymentId, 'userId:', finalUserId);
+        return res.redirect('/dashboard.html?payment=success&paymentId=' + finalPaymentId + '&userId=' + finalUserId);
         
     } catch (error) {
         console.error('❌ Payment success handler hatası:', error);
