@@ -1037,6 +1037,11 @@ app.post('/api/payment/callback', async (req, res) => {
         const finalPaymentId = paymentId || iyziPaymentId;
         const finalConversationId = paymentConversationId || conversationId;
         
+        console.log('🔧 Parametre eşleştirmesi:');
+        console.log('🔧 - paymentConversationId:', paymentConversationId);
+        console.log('🔧 - conversationId:', conversationId);
+        console.log('🔧 - Final Conversation ID:', finalConversationId);
+        
         console.log('🔧 Callback parametreleri:');
         console.log('🔧 - paymentConversationId:', paymentConversationId);
         console.log('🔧 - paymentId:', paymentId);
@@ -1071,6 +1076,9 @@ app.post('/api/payment/callback', async (req, res) => {
             
             // Database'den gerçek payment data'yı al (temp_data alanından)
             console.log('💾 Database\'den payment data alınıyor...');
+            console.log('🔍 Aranan transaction_id:', finalConversationId);
+            console.log('🔍 Aranan payment_status: pending');
+            
             try {
                 const { data: tempData, error: tempError } = await supabase
                     .from('payments')
@@ -1079,6 +1087,10 @@ app.post('/api/payment/callback', async (req, res) => {
                     .eq('payment_status', 'pending')
                     .order('created_at', { ascending: false })
                     .limit(1);
+                
+                console.log('🔍 Database sorgu sonucu:');
+                console.log('🔍 - tempData:', tempData);
+                console.log('🔍 - tempError:', tempError);
                 
                 if (tempError) {
                     console.error('❌ Payment data okuma hatası:', tempError);
@@ -1198,6 +1210,11 @@ app.get('/api/payment/callback', async (req, res) => {
         const finalPaymentId = paymentId || iyziPaymentId;
         const finalConversationId = paymentConversationId || conversationId;
         
+        console.log('🔧 Parametre eşleştirmesi:');
+        console.log('🔧 - paymentConversationId:', paymentConversationId);
+        console.log('🔧 - conversationId:', conversationId);
+        console.log('🔧 - Final Conversation ID:', finalConversationId);
+        
         console.log('🔧 GET Callback parametreleri:');
         console.log('🔧 - paymentConversationId:', paymentConversationId);
         console.log('🔧 - paymentId:', paymentId);
@@ -1229,6 +1246,9 @@ app.get('/api/payment/callback', async (req, res) => {
             
             // Database'den gerçek payment data'yı al (temp_data alanından)
             console.log('💾 Database\'den payment data alınıyor...');
+            console.log('🔍 Aranan transaction_id:', finalConversationId);
+            console.log('🔍 Aranan payment_status: pending');
+            
             try {
                 const { data: tempData, error: tempError } = await supabase
                     .from('payments')
@@ -1237,6 +1257,10 @@ app.get('/api/payment/callback', async (req, res) => {
                     .eq('payment_status', 'pending')
                     .order('created_at', { ascending: false })
                     .limit(1);
+                
+                console.log('🔍 Database sorgu sonucu:');
+                console.log('🔍 - tempData:', tempData);
+                console.log('🔍 - tempError:', tempError);
                 
                 if (tempError) {
                     console.error('❌ Payment data okuma hatası:', tempError);
