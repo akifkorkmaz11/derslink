@@ -411,7 +411,7 @@ const programData = {
                 days: "Pazartesi, Salı, Çarşamba, Perşembe (her gün 3h)",
                 time: "17:20",
                 hours: "12 saat/hafta",
-                price: "₺7,500/ay",
+                price: "₺1/ay",
                 value: "YKS-WEEKDAY",
                 description: "TYT–AYT hazırlığında hafta içi disiplinli çalışma tercih edenler için yoğun ve planlı bir içerik.",
                 schedule: {
