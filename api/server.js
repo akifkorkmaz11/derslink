@@ -994,6 +994,19 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
         const finalPaymentId = paymentId || (paymentInsertData && paymentInsertData[0] ? paymentInsertData[0].iyzico_payment_id : '');
         const finalUserId = userInsertData && userInsertData[0] ? userInsertData[0].id : '';
         
+        // URL parametrelerini güvenli şekilde oluştur
+        const redirectParams = new URLSearchParams({
+            payment: 'success',
+            paymentId: finalPaymentId || '',
+            userId: finalUserId || '',
+            program: paymentData.mainProgram || '',
+            schedule: paymentData.subProgram || '',
+            userName: (userInsertData && userInsertData[0] ? userInsertData[0].name : '') || '',
+            userEmail: (userInsertData && userInsertData[0] ? userInsertData[0].email : '') || ''
+        });
+        
+        const redirectUrl = `/dashboard?${redirectParams.toString()}`;
+        
         console.log('🔧 Dashboard redirect detayları:', {
             paymentId: finalPaymentId,
             userId: finalUserId,
@@ -1001,10 +1014,13 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
             userEmail: userInsertData && userInsertData[0] ? userInsertData[0].email : 'Bilinmiyor',
             program: paymentData.mainProgram,
             schedule: paymentData.subProgram,
-            redirectUrl: `/dashboard?payment=success&paymentId=${finalPaymentId}&userId=${finalUserId}`
+            redirectUrl: redirectUrl,
+            redirectParams: redirectParams.toString()
         });
         
-        return res.redirect('/dashboard?payment=success&paymentId=' + finalPaymentId + '&userId=' + finalUserId);
+        // Dashboard'a yönlendir
+        console.log('🚀 Dashboard\'a yönlendiriliyor:', redirectUrl);
+        return res.redirect(redirectUrl);
         
     } catch (error) {
         console.error('❌ Payment success handler hatası:', error);
@@ -1077,10 +1093,10 @@ app.post('/api/payment/callback', async (req, res) => {
             // Database'den gerçek payment data'yı al (temp_data alanından)
             console.log('💾 Database\'den payment data alınıyor...');
             console.log('🔍 Aranan transaction_id:', finalConversationId);
-            console.log('🔍 Aranan payment_status: pending');
             
             try {
-                const { data: tempData, error: tempError } = await supabase
+                // Önce pending status ile ara
+                let { data: tempData, error: tempError } = await supabase
                     .from('payments')
                     .select('*')
                     .eq('transaction_id', finalConversationId)
@@ -1088,9 +1104,46 @@ app.post('/api/payment/callback', async (req, res) => {
                     .order('created_at', { ascending: false })
                     .limit(1);
                 
-                console.log('🔍 Database sorgu sonucu:');
+                console.log('🔍 Pending status ile sorgu sonucu:');
                 console.log('🔍 - tempData:', tempData);
                 console.log('🔍 - tempError:', tempError);
+                
+                // Eğer pending bulunamazsa, completed status ile ara
+                if (!tempData || tempData.length === 0) {
+                    console.log('🔍 Pending bulunamadı, completed status ile aranıyor...');
+                    const { data: completedData, error: completedError } = await supabase
+                        .from('payments')
+                        .select('*')
+                        .eq('transaction_id', finalConversationId)
+                        .eq('payment_status', 'completed')
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                    
+                    console.log('🔍 Completed status ile sorgu sonucu:');
+                    console.log('🔍 - completedData:', completedData);
+                    console.log('🔍 - completedError:', completedError);
+                    
+                    tempData = completedData;
+                    tempError = completedError;
+                }
+                
+                // Eğer hâlâ bulunamazsa, sadece transaction_id ile ara
+                if (!tempData || tempData.length === 0) {
+                    console.log('🔍 Status ile bulunamadı, sadece transaction_id ile aranıyor...');
+                    const { data: anyData, error: anyError } = await supabase
+                        .from('payments')
+                        .select('*')
+                        .eq('transaction_id', finalConversationId)
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                    
+                    console.log('🔍 Transaction ID ile sorgu sonucu:');
+                    console.log('🔍 - anyData:', anyData);
+                    console.log('🔍 - anyError:', anyError);
+                    
+                    tempData = anyData;
+                    tempError = anyError;
+                }
                 
                 if (tempError) {
                     console.error('❌ Payment data okuma hatası:', tempError);
@@ -1247,10 +1300,10 @@ app.get('/api/payment/callback', async (req, res) => {
             // Database'den gerçek payment data'yı al (temp_data alanından)
             console.log('💾 Database\'den payment data alınıyor...');
             console.log('🔍 Aranan transaction_id:', finalConversationId);
-            console.log('🔍 Aranan payment_status: pending');
             
             try {
-                const { data: tempData, error: tempError } = await supabase
+                // Önce pending status ile ara
+                let { data: tempData, error: tempError } = await supabase
                     .from('payments')
                     .select('*')
                     .eq('transaction_id', finalConversationId)
@@ -1258,9 +1311,46 @@ app.get('/api/payment/callback', async (req, res) => {
                     .order('created_at', { ascending: false })
                     .limit(1);
                 
-                console.log('🔍 Database sorgu sonucu:');
+                console.log('🔍 Pending status ile sorgu sonucu:');
                 console.log('🔍 - tempData:', tempData);
                 console.log('🔍 - tempError:', tempError);
+                
+                // Eğer pending bulunamazsa, completed status ile ara
+                if (!tempData || tempData.length === 0) {
+                    console.log('🔍 Pending bulunamadı, completed status ile aranıyor...');
+                    const { data: completedData, error: completedError } = await supabase
+                        .from('payments')
+                        .select('*')
+                        .eq('transaction_id', finalConversationId)
+                        .eq('payment_status', 'completed')
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                    
+                    console.log('🔍 Completed status ile sorgu sonucu:');
+                    console.log('🔍 - completedData:', completedData);
+                    console.log('🔍 - completedError:', completedError);
+                    
+                    tempData = completedData;
+                    tempError = completedError;
+                }
+                
+                // Eğer hâlâ bulunamazsa, sadece transaction_id ile ara
+                if (!tempData || tempData.length === 0) {
+                    console.log('🔍 Status ile bulunamadı, sadece transaction_id ile aranıyor...');
+                    const { data: anyData, error: anyError } = await supabase
+                        .from('payments')
+                        .select('*')
+                        .eq('transaction_id', finalConversationId)
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                    
+                    console.log('🔍 Transaction ID ile sorgu sonucu:');
+                    console.log('🔍 - anyData:', anyData);
+                    console.log('🔍 - anyError:', anyError);
+                    
+                    tempData = anyData;
+                    tempError = anyError;
+                }
                 
                 if (tempError) {
                     console.error('❌ Payment data okuma hatası:', tempError);

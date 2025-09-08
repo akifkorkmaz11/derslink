@@ -5,6 +5,111 @@ console.log('📱 Dashboard.js yüklendi');
 let currentUser = null;
 let userProgram = null;
 
+// URL parametrelerini işle
+function handleURLParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const payment = urlParams.get('payment');
+    const paymentId = urlParams.get('paymentId');
+    const userId = urlParams.get('userId');
+    const program = urlParams.get('program');
+    const schedule = urlParams.get('schedule');
+    const userName = urlParams.get('userName');
+    const userEmail = urlParams.get('userEmail');
+    
+    console.log('🔍 URL parametreleri:', {
+        payment,
+        paymentId,
+        userId,
+        program,
+        schedule,
+        userName,
+        userEmail
+    });
+    
+    if (payment === 'success') {
+        console.log('✅ Ödeme başarılı! Dashboard\'a yönlendirildi');
+        
+        // Başarı mesajı göster
+        if (userName && userEmail) {
+            showSuccessMessage(`Hoş geldiniz ${userName}! Ödeme başarıyla tamamlandı.`);
+        } else {
+            showSuccessMessage('Ödeme başarıyla tamamlandı! Dashboard\'a hoş geldiniz.');
+        }
+        
+        // URL'den parametreleri temizle (tarayıcı geçmişini temizlemek için)
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    }
+}
+
+// Başarı mesajı göster
+function showSuccessMessage(message) {
+    // Mevcut başarı mesajını kaldır
+    const existingMessage = document.querySelector('.success-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    // Yeni başarı mesajı oluştur
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message';
+    successDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 10000;
+        font-size: 14px;
+        max-width: 300px;
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    successDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 18px;">✅</span>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // CSS animasyonu ekle
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(successDiv);
+    
+    // 5 saniye sonra mesajı kaldır
+    setTimeout(() => {
+        if (successDiv.parentNode) {
+            successDiv.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.remove();
+                }
+            }, 300);
+        }
+    }, 5000);
+    
+    // SlideOut animasyonu ekle
+    const slideOutStyle = document.createElement('style');
+    slideOutStyle.textContent = `
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(slideOutStyle);
+}
+
 // Saat formatlaması - saniye kısmını kaldır
 function formatTime(timeStr) {
     if (!timeStr) return '00:00';
@@ -46,6 +151,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('🔍 window.supabase mevcut mu?', !!window.supabase);
     console.log('🔍 window.UserService mevcut mu?', !!window.UserService);
     console.log('🔍 window.ClassService mevcut mu?', !!window.ClassService);
+    
+    // URL parametrelerini işle (ödeme sonrası yönlendirme için)
+    handleURLParams();
     
     // Loading indicator göster
     showLoadingIndicator();
