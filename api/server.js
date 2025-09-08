@@ -767,8 +767,8 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
                     .from('payments')
                     .update({ 
                         payment_status: 'completed',
-                        iyzico_payment_id: paymentId,
-                        temp_data: null // Geçici veriyi temizle
+                        iyzico_payment_id: paymentId
+                        // temp_data'yı koruyoruz - sonraki callback'lerde kullanılacak
                     })
                     .eq('id', existingPayment.id);
                 
@@ -1078,17 +1078,8 @@ app.post('/api/payment/callback', async (req, res) => {
             console.log('✅ 3D Secure başarılı, ödeme tamamlanıyor...');
             console.log('🔧 Final Status:', finalStatus);
             
-            // Hardcoded payment data (session çalışmadığı için)
-            const paymentData = {
-                email: 'adem@gmail.com',
-                firstName: 'Adem',
-                lastName: 'Korkmaz',
-                phone: '05519568150',
-                mainProgram: 'LGS',
-                subProgram: 'hafta-ici',
-                programTitle: '🔹 Sadece Hafta İçi Programı',
-                amount: 1
-            };
+            // Payment data database'den alınacak
+            let paymentData = null;
             
             // Database'den gerçek payment data'yı al (temp_data alanından)
             console.log('💾 Database\'den payment data alınıyor...');
@@ -1170,19 +1161,19 @@ app.post('/api/payment/callback', async (req, res) => {
                             console.log('✅ Database\'den payment data alındı:', paymentData);
                         } catch (parseErr) {
                             console.error('❌ Temp data parse hatası:', parseErr);
-                            console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                            return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme verileri okunamadı'));
                         }
                     } else {
-                        console.log('⚠️ Temp data NULL, hardcoded kullanılıyor');
-                        console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                        console.log('⚠️ Temp data NULL, ödeme verileri bulunamadı');
+                        return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme verileri bulunamadı'));
                     }
                 } else {
-                    console.log('⚠️ Database\'de payment data bulunamadı, hardcoded kullanılıyor');
-                    console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                    console.log('⚠️ Database\'de payment data bulunamadı');
+                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme kaydı bulunamadı'));
                 }
             } catch (dbErr) {
                 console.error('❌ Database okuma genel hatası:', dbErr);
-                console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                return res.redirect('/?payment=error&message=' + encodeURIComponent('Veritabanı hatası'));
             }
             
             // SUCCESS status geldiğinde payment complete yapmaya gerek yok
@@ -1285,17 +1276,8 @@ app.get('/api/payment/callback', async (req, res) => {
             console.log('✅ 3D Secure başarılı, ödeme tamamlanıyor...');
             console.log('🔧 Final Status:', finalStatus);
             
-            // Hardcoded payment data (session çalışmadığı için)
-            const paymentData = {
-                email: 'adem@gmail.com',
-                firstName: 'Adem',
-                lastName: 'Korkmaz',
-                phone: '05519568150',
-                mainProgram: 'LGS',
-                subProgram: 'hafta-ici',
-                programTitle: '🔹 Sadece Hafta İçi Programı',
-                amount: 1
-            };
+            // Payment data database'den alınacak
+            let paymentData = null;
             
             // Database'den gerçek payment data'yı al (temp_data alanından)
             console.log('💾 Database\'den payment data alınıyor...');
@@ -1377,19 +1359,19 @@ app.get('/api/payment/callback', async (req, res) => {
                             console.log('✅ Database\'den payment data alındı:', paymentData);
                         } catch (parseErr) {
                             console.error('❌ Temp data parse hatası:', parseErr);
-                            console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                            return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme verileri okunamadı'));
                         }
                     } else {
-                        console.log('⚠️ Temp data NULL, hardcoded kullanılıyor');
-                        console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                        console.log('⚠️ Temp data NULL, ödeme verileri bulunamadı');
+                        return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme verileri bulunamadı'));
                     }
                 } else {
-                    console.log('⚠️ Database\'de payment data bulunamadı, hardcoded kullanılıyor');
-                    console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                    console.log('⚠️ Database\'de payment data bulunamadı');
+                    return res.redirect('/?payment=error&message=' + encodeURIComponent('Ödeme kaydı bulunamadı'));
                 }
             } catch (dbErr) {
                 console.error('❌ Database okuma genel hatası:', dbErr);
-                console.log('💾 Hardcoded payment data kullanılıyor:', paymentData);
+                return res.redirect('/?payment=error&message=' + encodeURIComponent('Veritabanı hatası'));
             }
             
             // SUCCESS status geldiğinde payment complete yapmaya gerek yok
