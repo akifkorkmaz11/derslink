@@ -1127,7 +1127,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // URL parametrelerini kontrol et (ödeme sonucu)
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('payment') === 'success') {
-        showNotification('🎉 Ödeme başarıyla tamamlandı! Kayıt işleminiz gerçekleştirildi.', 'success');
+        const userName = urlParams.get('userName') || 'Kullanıcı';
+        const userEmail = urlParams.get('userEmail') || '';
+        const program = urlParams.get('program') || '';
+        const schedule = urlParams.get('schedule') || '';
+        const paymentId = urlParams.get('paymentId') || '';
+        
+        // Detaylı başarı mesajı
+        let successMessage = `🎉 Hoş geldiniz ${userName}! Ödeme başarıyla tamamlandı.`;
+        if (program) {
+            successMessage += ` ${program} programına kaydınız yapıldı.`;
+        }
+        if (schedule) {
+            successMessage += ` (${schedule === 'hafta-ici' ? 'Hafta İçi' : schedule === 'hafta-sonu' ? 'Hafta Sonu' : schedule} programı)`;
+        }
+        if (paymentId) {
+            successMessage += ` Ödeme ID: ${paymentId}`;
+        }
+        
+        showNotification(successMessage, 'success');
+        
         // URL'yi temizle
         window.history.replaceState({}, document.title, '/');
     }

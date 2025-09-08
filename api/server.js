@@ -1018,9 +1018,10 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
             redirectParams: redirectParams.toString()
         });
         
-        // Dashboard'a yönlendir
-        console.log('🚀 Dashboard\'a yönlendiriliyor:', redirectUrl);
-        return res.redirect(redirectUrl);
+        // Ana sayfaya yönlendir (başarı mesajı ile)
+        const successUrl = `/?payment=success&paymentId=${finalPaymentId}&userId=${finalUserId}&userName=${encodeURIComponent(userInsertData && userInsertData[0] ? userInsertData[0].name : '')}&userEmail=${encodeURIComponent(userInsertData && userInsertData[0] ? userInsertData[0].email : '')}&program=${paymentData.mainProgram}&schedule=${paymentData.subProgram}`;
+        console.log('🚀 Ana sayfaya yönlendiriliyor (başarı mesajı ile):', successUrl);
+        return res.redirect(successUrl);
         
     } catch (error) {
         console.error('❌ Payment success handler hatası:', error);
