@@ -1133,8 +1133,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const schedule = urlParams.get('schedule') || '';
         const paymentId = urlParams.get('paymentId') || '';
         
-        // Detaylı başarı mesajı
-        let successMessage = `🎉 Hoş geldiniz ${userName}! Ödeme başarıyla tamamlandı.`;
+        // Başarı mesajı - giriş yapabilirsiniz
+        let successMessage = `🎉 Ödeme başarıyla tamamlandı! Giriş yapabilirsiniz.`;
         if (program) {
             successMessage += ` ${program} programına kaydınız yapıldı.`;
         }
