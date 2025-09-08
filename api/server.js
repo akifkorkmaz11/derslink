@@ -498,7 +498,7 @@ app.post('/api/payment/process-card', async (req, res) => {
             posOrderId: generateRandomAlphaNum(12),
             orderId: generateRandomAlphaNum(12),
             paymentCard: {
-                cardHolderName: cardHolder,
+                cardHolderName: firstName + ' ' + lastName, // Form'dan gelen ad soyad
                 cardNumber: cardNumber.replace(/\s/g, ''),
                 expireMonth: cardExpiry.split('/')[0],
                 expireYear: '20' + cardExpiry.split('/')[1],
@@ -1018,10 +1018,9 @@ async function handlePaymentSuccess(paymentConversationId, paymentId, paymentDat
             redirectParams: redirectParams.toString()
         });
         
-        // Ana sayfaya yönlendir (başarı mesajı ile)
-        const successUrl = `/?payment=success&paymentId=${finalPaymentId}&userId=${finalUserId}&userName=${encodeURIComponent(userInsertData && userInsertData[0] ? userInsertData[0].name : '')}&userEmail=${encodeURIComponent(userInsertData && userInsertData[0] ? userInsertData[0].email : '')}&program=${paymentData.mainProgram}&schedule=${paymentData.subProgram}`;
-        console.log('🚀 Ana sayfaya yönlendiriliyor (başarı mesajı ile):', successUrl);
-        return res.redirect(successUrl);
+        // Dashboard'a yönlendir
+        console.log('🚀 Dashboard\'a yönlendiriliyor:', redirectUrl);
+        return res.redirect(redirectUrl);
         
     } catch (error) {
         console.error('❌ Payment success handler hatası:', error);
