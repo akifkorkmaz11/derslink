@@ -363,7 +363,7 @@ const programData = {
                 days: "Pazartesi (3h), Salı (3h), Çarşamba (3h), Perşembe (3h)",
                 time: "17:20",
                 hours: "12 saat/hafta",
-                price: "₺1/ay",
+                price: "₺7,500/ay",
                 value: "LGS-WEEKDAY",
                 description: "Öğrencilerimiz ders çıkışı vakitlerinde kaliteli bir tekrar ve takviye eğitimiyle sınavlara hazırlanır.",
                 schedule: {
@@ -411,7 +411,7 @@ const programData = {
                 days: "Pazartesi, Salı, Çarşamba, Perşembe (her gün 3h)",
                 time: "17:20",
                 hours: "12 saat/hafta",
-                price: "₺1/ay",
+                price: "₺7,500/ay",
                 value: "YKS-WEEKDAY",
                 description: "TYT–AYT hazırlığında hafta içi disiplinli çalışma tercih edenler için yoğun ve planlı bir içerik.",
                 schedule: {
